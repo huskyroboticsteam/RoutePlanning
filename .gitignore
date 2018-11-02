@@ -1,2 +1,5 @@
 TestMap
 *.dSYM
+.vscode
+.DS_STORE
+.vs
