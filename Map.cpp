@@ -6,7 +6,7 @@
 #define R_EARTH 6371.0088 // in km
 #define PI 3.14159265359
 
-void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
+void RoverPathfinding::Map::AddObstacle(point coord1, point coord2)
 {
     obstacle o;
     o.marked = false;
@@ -209,7 +209,6 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 {
     //TODO(sasha): make R a constant - the following few lines are just a hack
     //             to get R to be in lat/lng units
-    //<hack>
 #define R_METERS 0.5f
     auto offset = lat_long_offset(cur.first, cur.second, 0.0f, R_METERS);
     auto diff = std::make_pair(offset.first - cur.first, offset.second - cur.second);
@@ -232,7 +231,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 
     if (obstacles.empty())
     {
-        add_edge(0, 1); // probably start (origin or current?) and target nodes
+        add_edge(0, 1);
         return (nodes);
     }
 
@@ -274,7 +273,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 
                 //TODO(sasha): if this is too slow, use a partitioning scheme to only check against
                 //             nodes in the vicinity
-                for (int safety = 2; safety < nodes.size(); safety++) // possibly to check whether nodes are safe or not
+                for (int safety = 2; safety < nodes.size(); safety++)
                 {
                     node &n = nodes[safety];
                     if (within_radius(n.coord, new_points.first, R))
