@@ -1,4 +1,6 @@
-#pragma once
+#ifndef ROVERPATHFINDING_MAP_H
+#define ROVERPATHFINDING_MAP_H
+
 #include <vector>
 #include <utility>
 
@@ -18,8 +20,8 @@ struct node
 struct obstacle
 {
 	bool marked;
-	std::pair<float, float> coord1;
-	std::pair<float, float> coord2;
+	point coord1;
+	point coord2;
 	std::pair<int, int> side_safety_nodes;
 	int center_safety_node;
 };
@@ -28,10 +30,10 @@ struct obstacle
 class Map
 {
   public:
-	Map() { nodes.resize(2); }														  //Allocates space for initial and target node
-	void AddObstacle(std::pair<float, float> coord1, std::pair<float, float> coord2); //Adds an obstacle to the map. Obstacle is specified with 2 points
-	std::vector<std::pair<float, float>> ShortestPathTo(float cur_lat, float cur_lng,
-														float tar_lat, float tar_lng); //Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination
+	Map() { nodes.resize(2); }														  		//Allocates space for initial and target node
+	void add_obstacle(point coord1, point coord2); 											//Adds an obstacle to the map. Obstacle is specified with 2 points
+	std::vector<point> ShortestPathTo(float cur_lat, float cur_lng,
+														float tar_lat, float tar_lng); 		//Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination
   private:
 	point lat_long_offset(float lat1, float lon1, float brng, float dist);					 //Offsets a point with coordinates lat1, lon1, dist meters with bearing brng (0.0 is N)
 	bool segment_intersects_circle(point start, point end, point circle, float R);			 //Unused. Tells whether a line segment intersects with a circle of radius R with center at point "circle"
@@ -51,3 +53,5 @@ class Map
 	std::vector<obstacle> obstacles; //The obstacles
 };
 } // namespace RoverPathfinding
+
+#endif
