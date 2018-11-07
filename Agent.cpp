@@ -3,7 +3,7 @@
 // generates 100 points in spiral formation around origin and returns in vector 
 std::vector<RoverPathfinding::point> RoverPathFinding::Agent::generate_spiral() 
 {
-	int scaleFactor = 5;
+	int scaleFactor = 10;
 	std::vector<RoverPathFinding::point> spiralPoints;
 
 	for (int i = 0; i < 100; ++i) {
