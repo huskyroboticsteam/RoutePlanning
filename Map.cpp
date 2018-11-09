@@ -55,15 +55,15 @@ bool RoverPathfinding::Map::segment_intersects_circle(point start,
     float b = 2 * (center_to_start.first * direction.first + center_to_start.second * direction.second);
     float c = (center_to_start.first * center_to_start.first + center_to_start.second * center_to_start.second) + R * R;
 
-    float descriminant = b * b - 4 * a * c;
-    if (descriminant < 0)
+    float discriminant = b * b - 4 * a * c;
+    if (discriminant < 0)
     {
         return (false);
     }
 
-    descriminant = sqrt(descriminant);
-    float t1 = (-b + descriminant) / (2 * a);
-    float t2 = (-b - descriminant) / (2 * a);
+    discriminant = sqrt(discriminant);
+    float t1 = (-b + discriminant) / (2 * a);
+    float t2 = (-b - discriminant) / (2 * a);
 
     return ((0 <= t1 && t1 <= 1.0f) || (0 <= t2 && t2 <= 1.0f));
 }
@@ -91,6 +91,7 @@ bool RoverPathfinding::Map::on_segment(point p, point q, point r)
             q.second <= std::max(p.second, r.second) && q.second >= std::min(p.second, r.second));
 }
 
+//Probably returns whether p1q1 and p2q2 intersect
 bool RoverPathfinding::Map::segments_intersect(point p1, point p2, point q1, point q2)
 {
     int o1 = orientation(p1, q1, p2);
@@ -213,7 +214,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 #define R_METERS 0.5f
     auto offset = lat_long_offset(cur.first, cur.second, 0.0f, R_METERS);
     auto diff = std::make_pair(offset.first - cur.first, offset.second - cur.second);
-    float R = sqrt(diff.first * diff.first + diff.second * diff.second);
+    float TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
 #undef R_METERS
     //</hack>
 
@@ -238,7 +239,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 
     std::queue<int> unprocessed_nodes;
     unprocessed_nodes.push(0);
-    // for each current node, find the obstacle closest to it
+    // for each safety node, find the obstacle closest to it
     while (!unprocessed_nodes.empty())
     {
         int curr_node = unprocessed_nodes.front();
@@ -268,7 +269,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
             if (!obst.marked)
             {
                 obst.marked = true;
-                auto new_points = add_length_to_line_segment(obst.coord1, obst.coord2, R);
+                auto new_points = add_length_to_line_segment(obst.coord1, obst.coord2, TOLERANCE);  // Add tolerance 
 
                 bool create_n1 = true;
                 bool create_n2 = true;

@@ -3,10 +3,10 @@
 #include <fstream>
 #include <cctype>
 #include "Simulator.h"
-#include "Agent.h"
+#include "Map.h"
 
-RoverPathfinding::Simulator::Simulator(const std::string &grid_path, const Agent &agt, float init_bearing,
-                                       simulator_config conf) : agent(agt), config(conf), bearing(init_bearing)
+RoverPathfinding::Simulator::Simulator(const std::string &grid_path, const Map &map, float init_bearing,
+                                       simulator_config conf) : map(map), config(conf), bearing(init_bearing)
 {
     load_map(grid_path);
 }
@@ -35,7 +35,7 @@ void RoverPathfinding::Simulator::load_map(const std::string &path)
                 {
                     origin_found = true;
                     grid[rows][col] = false;
-                    agent_pos = std::make_pair(rows, col);
+                    cur_pos = std::make_pair(rows, col);
                 }
                 break;
             case 't':
@@ -71,7 +71,7 @@ std::string RoverPathfinding::Simulator::as_str()
     {
         for (grid_size_type c = 0; c < cols; c++)
         {
-            if (r == agent_pos.first && c == agent_pos.second)
+            if (r == cur_pos.first && c == cur_pos.second)
             {
                 result.append("A");
             }

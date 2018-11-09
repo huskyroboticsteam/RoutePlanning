@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "Agent.h"
+#include "Map.h"
 
 #define MAX_GRID_RESOLUTION 100 // max number of grid cells on each side of the map
 
@@ -20,8 +20,8 @@ class Simulator
   typedef unsigned int grid_size_type;
 
 public:
-  Simulator(const std::string &grid_path, const Agent &agt, float init_bearing, simulator_config conf);
-  Simulator(const Agent &agt) : Simulator("test_map.txt", agt, 0, simulator_config{45, 10}){};
+  Simulator(const std::string &grid_path, const Map &map, float init_bearing, simulator_config conf);
+  Simulator(const Map &map) : Simulator("test_map.txt", agt, 0, simulator_config{45, 10}){};
   void load_map(const std::string &path);
   std::string as_str();
 
@@ -31,8 +31,8 @@ private:
   bool grid[MAX_GRID_RESOLUTION][MAX_GRID_RESOLUTION];
   grid_size_type rows;
   grid_size_type cols;
-  Agent agent;
-  point agent_pos;
+  Map map;
+  point cur_pos;
   point target_pos;
   simulator_config config;
   float bearing;    // Bearing in degrees counterclockwise from the positive x-axis
