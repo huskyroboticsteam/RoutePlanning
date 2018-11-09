@@ -1,4 +1,4 @@
-#include "Agent.h"
+#include "Map.h"
 #include <queue>
 #include <cmath>
 #include <algorithm>
@@ -6,7 +6,7 @@
 #define R_EARTH 6371.0088 // in km
 #define PI 3.14159265359
 
-void RoverPathfinding::Agent::add_obstacle(point coord1, point coord2)
+void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
 {
     obstacle o;
     o.marked = false;
@@ -26,7 +26,7 @@ float rad_to_deg(float rad)
 }
 
 // given lat, long, bearing (in degrees), and distance (in km), returns a new point
-RoverPathfinding::point RoverPathfinding::Agent::lat_long_offset(float lat1, float lon1, float brng, float dist)
+RoverPathfinding::point RoverPathfinding::Map::lat_long_offset(float lat1, float lon1, float brng, float dist)
 {
     dist /= 1000.0f;
 
@@ -41,7 +41,7 @@ RoverPathfinding::point RoverPathfinding::Agent::lat_long_offset(float lat1, flo
 }
 
 //start, end, circle, and R are in lat/long coordinates
-bool RoverPathfinding::Agent::segment_intersects_circle(point start,
+bool RoverPathfinding::Map::segment_intersects_circle(point start,
                                                       point end,
                                                       point circle,
                                                       float R)
@@ -74,7 +74,7 @@ bool RoverPathfinding::Agent::segment_intersects_circle(point start,
 //Returns 0 if p, q, and r are colinear.
 //Returns 1 if pq, qr, and rp are clockwise
 //Returns 2 if pq, qr, and rp are counterclockwise
-int RoverPathfinding::Agent::orientation(point p, point q, point r)
+int RoverPathfinding::Map::orientation(point p, point q, point r)
 {
     float v = (q.second - p.second) * (r.first - q.first) -
               (q.first - p.first) * (r.second - q.second);
@@ -85,13 +85,13 @@ int RoverPathfinding::Agent::orientation(point p, point q, point r)
 }
 
 //Tells if r is on segment pq
-bool RoverPathfinding::Agent::on_segment(point p, point q, point r)
+bool RoverPathfinding::Map::on_segment(point p, point q, point r)
 {
     return (q.first <= std::max(p.first, r.first) && q.first >= std::min(p.first, r.first) &&
             q.second <= std::max(p.second, r.second) && q.second >= std::min(p.second, r.second));
 }
 
-bool RoverPathfinding::Agent::segments_intersect(point p1, point p2, point q1, point q2)
+bool RoverPathfinding::Map::segments_intersect(point p1, point p2, point q1, point q2)
 {
     int o1 = orientation(p1, q1, p2);
     int o2 = orientation(p1, q1, q2);
@@ -116,7 +116,7 @@ bool RoverPathfinding::Agent::segments_intersect(point p1, point p2, point q1, p
     return (false);
 }
 
-RoverPathfinding::point RoverPathfinding::Agent::intersection(RoverPathfinding::point A, RoverPathfinding::point B, RoverPathfinding::point C, RoverPathfinding::point D)
+RoverPathfinding::point RoverPathfinding::Map::intersection(RoverPathfinding::point A, RoverPathfinding::point B, RoverPathfinding::point C, RoverPathfinding::point D)
 {
     // Line AB represented as a1x + b1y = c1
     float a1 = B.second - A.second;
@@ -140,7 +140,7 @@ RoverPathfinding::point RoverPathfinding::Agent::intersection(RoverPathfinding::
     return (std::make_pair(x, y));
 }
 
-std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Agent::add_length_to_line_segment(point p, point q, float length)
+std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
 {
     point pq = std::make_pair(q.first - p.first, q.second - p.second); //vector
     float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second);
@@ -153,7 +153,7 @@ std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Ag
 }
 
 //Returns a point in the center of segment pq and then moves it R towards cur
-RoverPathfinding::point RoverPathfinding::Agent::center_point_with_radius(RoverPathfinding::point cur, RoverPathfinding::point p, RoverPathfinding::point q, float R)
+RoverPathfinding::point RoverPathfinding::Map::center_point_with_radius(RoverPathfinding::point cur, RoverPathfinding::point p, RoverPathfinding::point q, float R)
 {
     point vec = std::make_pair(-p.second + q.second, p.first - q.first);
     float len = sqrt((vec.first * vec.first) + (vec.second * vec.second));
@@ -174,17 +174,17 @@ RoverPathfinding::point RoverPathfinding::Agent::center_point_with_radius(RoverP
     return (result);
 }
 
-float RoverPathfinding::Agent::dist_sq(point p1, point p2)
+float RoverPathfinding::Map::dist_sq(point p1, point p2)
 {
     return ((p1.first - p2.first) * (p1.first - p2.first) + (p1.second - p2.second) * (p1.second - p2.second));
 }
 
-bool RoverPathfinding::Agent::within_radius(point p1, point p2, float R)
+bool RoverPathfinding::Map::within_radius(point p1, point p2, float R)
 {
     return (dist_sq(p1, p2) <= R * R);
 }
 
-void RoverPathfinding::Agent::add_edge(int n1, int n2)
+void RoverPathfinding::Map::add_edge(int n1, int n2)
 {
     float dist = sqrt(dist_sq(nodes[n1].coord, nodes[n2].coord));
 
@@ -195,7 +195,7 @@ void RoverPathfinding::Agent::add_edge(int n1, int n2)
     nodes[n2].connection.push_back(n2_to_n1);
 }
 
-int RoverPathfinding::Agent::create_node(point coord)
+int RoverPathfinding::Map::create_node(point coord)
 {
     node n;
     n.prev = -1;
@@ -205,7 +205,7 @@ int RoverPathfinding::Agent::create_node(point coord)
     return (nodes.size() - 1);
 }
 
-std::vector<RoverPathfinding::node> RoverPathfinding::Agent::build_graph(point cur, point tar)
+std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur, point tar)
 {
     //TODO(sasha): make R a constant - the following few lines are just a hack
     //             to get R to be in lat/lng units
@@ -238,6 +238,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Agent::build_graph(point c
 
     std::queue<int> unprocessed_nodes;
     unprocessed_nodes.push(0);
+    // for each current node, find the obstacle closest to it
     while (!unprocessed_nodes.empty())
     {
         int curr_node = unprocessed_nodes.front();
@@ -324,7 +325,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Agent::build_graph(point c
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
-std::vector<std::pair<float, float>> RoverPathfinding::Agent::shortest_path_to(float cur_lat, float cur_lng,
+std::vector<std::pair<float, float>> RoverPathfinding::Map::shortest_path_to(float cur_lat, float cur_lng,
                                                                            float tar_lat, float tar_lng)
 {
     auto cur = std::make_pair(cur_lat, cur_lng);
