@@ -1,6 +1,6 @@
 
 TestMap:
-	g++ -std=c++11 -ggdb TestMap.cpp -o TestMap
+	g++ -std=c++11 -ggdb src/TestMap.cpp src/utils.cpp -o TestMap
 
 clean:
 	rm TestMap

@@ -11,7 +11,7 @@ namespace RoverPathfinding
 {
 struct simulator_config
 {
-  float vision_angle;     // Total angle of vision in degrees
+  float vision_angle;     // Angle of FOV in degrees
   float vision_depth;     // Distance of vision in meters
 };
 
@@ -21,7 +21,7 @@ class Simulator
 
 public:
   Simulator(const std::string &grid_path, const Map &map, float init_bearing, simulator_config conf);
-  Simulator(const Map &map) : Simulator("test_map.txt", agt, 0, simulator_config{45, 10}){};
+  Simulator(const Map &map) : Simulator("test_map.txt", map, 0.f, simulator_config{45, 10}){};
   void load_map(const std::string &path);
   std::string as_str();
 
@@ -33,9 +33,9 @@ private:
   grid_size_type cols;
   Map map;
   point cur_pos;
+  float cur_brng;    // Bearing in degrees counterclockwise from the positive x-axis
   point target_pos;
   simulator_config config;
-  float bearing;    // Bearing in degrees counterclockwise from the positive x-axis
 };
 } // namespace RoverPathfinding
 
