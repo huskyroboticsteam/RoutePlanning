@@ -4,7 +4,7 @@ Create the program for the robot on the Autonomous Traversal mission.
 ## Current Roles
 * Tadeusz - UI
 * Bryan - Final scanning of tennis ball
-* Gary - Map and robot interface
+* Gary - Simulations
 * Spencer - Robot pathmaking and maneuvering
 
 ## Overall Strategy
