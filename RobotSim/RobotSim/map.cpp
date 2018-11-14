@@ -52,6 +52,8 @@ public:
     }
     
     sf::Vector2f getOrigin() { return sf::Vector2f(pixelsPerMeter, pixelsPerMeter); }
+    int getScale() { return pixelsPerMeter; }
+    
     int getObstacleCount() { return obstacleCount; }
     
     const sf::Color OUTLINE_COLOR = sf::Color::Black;
