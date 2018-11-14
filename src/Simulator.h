@@ -15,6 +15,12 @@ struct simulator_config
   float vision_depth;     // Distance of vision in meters
 };
 
+struct sim_obstacle
+{
+  point p1;
+  point p2;
+};
+
 class Simulator
 {
   typedef unsigned int grid_size_type;
