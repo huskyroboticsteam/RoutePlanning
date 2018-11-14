@@ -4,3 +4,7 @@ TestMap
 .DS_STORE
 .vs
 RoutePlanning.xcworkspace
+RoutePlanning.sln
+RoutePlanning.vcxproj
+RoutePlanning.vcxproj.filters
+RoutePlanning.vcxproj.user
