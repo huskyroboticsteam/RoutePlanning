@@ -12,16 +12,29 @@ void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
     obstacles.push_back(o);
 }
 
+RoverPathfinding::point convertFloatsToPoint(float first, float second)
+{
+	RoverPathfinding::point p = { first, second };
+	return p;
+}
+
+RoverPathfinding::point convertPairToPoint(std::pair<float, float> pair)
+{
+	RoverPathfinding::point p = { pair.first, pair.second };
+	return p;
+}
+
+// Adds extra distance between p and q
 std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
 {
     boom_bam();
-    point pq = std::make_pair(q.first - p.first, q.second - p.second); //vector
-    float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second);
+	RoverPathfinding::point pq = convertFloatsToPoint(q.first - p.first, q.second - p.second); //vector (delta x, delta y)
+    float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second); // Length of vector(pythag)
     pq.first = length * pq.first / pq_len;
     pq.second = length * pq.second / pq_len;
 
-    point p1 = std::make_pair(q.first + pq.first, q.second + pq.second);
-    point p2 = std::make_pair(p.first - pq.first, p.second - pq.second);
+	RoverPathfinding::point p1 = convertFloatsToPoint(q.first + pq.first, q.second + pq.second);
+	RoverPathfinding::point p2 = convertFloatsToPoint(p.first - pq.first, p.second - pq.second);
     return (std::make_pair(p1, p2));
 }
 
