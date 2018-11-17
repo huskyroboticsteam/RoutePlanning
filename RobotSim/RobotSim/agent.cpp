@@ -18,14 +18,14 @@
 class Agent : public sf::Drawable, public sf::Transformable {
     
 public:
-    Agent(sf::Vector2f startPos, int scale) {
+    Agent(sf::Vector2f startPos, int scale, sf::Color color = sf::Color::Green) {
         xPos = 0.f;
         yPos = 0.f;
         rotation = 45.f;
         
         shape = sf::CircleShape(SHAPE_RADIUS, 3); // equilateral triangle
         shape.setOrigin(SHAPE_RADIUS, SHAPE_RADIUS);
-        shape.setFillColor(SHAPE_COLOR);
+        shape.setFillColor(color);
         shape.setPosition(startPos);
         shape.setRotation(135.f);
         
@@ -34,6 +34,8 @@ public:
         pathIndex = 0;
         
         pixelsPerMeter = scale;
+        
+        pathColor = color;
     }
     
     void move(float distance) {
@@ -44,14 +46,14 @@ public:
         yPos += yOffset;
         
         sf::Vertex start = shape.getPosition();
-        start.color = PATH_COLOR;
+        start.color = pathColor;
         
         path.append(start);
         
         shape.move(xOffset * pixelsPerMeter, yOffset * pixelsPerMeter);
         
         sf::Vertex end = shape.getPosition();
-        end.color = PATH_COLOR;
+        end.color = pathColor;
         
         path.append(end);
         
@@ -59,22 +61,30 @@ public:
         std::cout << "Path index: " + std::to_string(pathIndex) << std::endl;
     }
     
-    void move(float distance, Map map) {
-        float xOffset = distance * cos(rotation * PI / 180);
-        float yOffset = distance * sin(rotation * PI / 180);
-    }
-    
     void rotate(float rotate) {
         rotation += rotate;
         shape.rotate(rotate);
     }
     
-    void place(float x, float y, float rot) {
+    void place(float x, float y, float rot, bool drawPath = true) {
         xPos = x;
         yPos = y;
         rotation = rot;
         
         // update shape
+        shape.setRotation(90.f + rot);
+        
+        if (drawPath) {
+            sf::Vertex start = shape.getPosition();
+            start.color = pathColor;
+            path.append(start);
+        }
+        shape.setPosition((x + 1.f) * pixelsPerMeter, (y + 1.f) * pixelsPerMeter);
+        if (drawPath) {
+            sf::Vertex end = shape.getPosition();
+            end.color = pathColor;
+            path.append(end);
+        }
     }
     
     float getX() { return xPos; }
@@ -101,6 +111,6 @@ private:
     int pixelsPerMeter;
     
     const float SHAPE_RADIUS = 20.f;
-    const sf::Color SHAPE_COLOR = sf::Color::Green;
-    const sf::Color PATH_COLOR = sf::Color::Green;
+    //const sf::Color SHAPE_COLOR = sf::Color::Green;
+    sf::Color pathColor;
 };

@@ -34,25 +34,27 @@ public:
         gridOutline[3].color = OUTLINE_COLOR;
         gridOutline[4].color = OUTLINE_COLOR;
         
-        obstacles.setPrimitiveType(sf::LineStrip);
-        obstacles.resize(100); // arbitrary max obstacle count: 100
-        obstacles[0] = sf::Vector2f(scale, scale);
-        obstacles[0].color = OBSTACLE_COLOR;
+        obstacles.setPrimitiveType(sf::Lines);
         
         obstacleCount = 0;
     }
     
-    void placeObstacle(sf::Vector2f nextPoint) {
-        sf::Vertex* line = &obstacles[obstacleCount + 1];
+    void placeObstacle(float startX, float endX, float startY, float endY) {
+        sf::Vertex p1(sf::Vector2f(startX * pixelsPerMeter, startY * pixelsPerMeter));
+        p1.color = OBSTACLE_COLOR;
+        obstacles.append(p1);
         
-        line[0].position = nextPoint;
-        line[0].color = OBSTACLE_COLOR;
+        sf::Vertex p2(sf::Vector2f(endX * pixelsPerMeter, endY * pixelsPerMeter));
+        p2.color = OBSTACLE_COLOR;
+        obstacles.append(p2);
         
         obstacleCount++;
     }
     
     sf::Vector2f getOrigin() { return sf::Vector2f(pixelsPerMeter, pixelsPerMeter); }
     int getScale() { return pixelsPerMeter; }
+    float getWidth() { return widthInMeters; }
+    float getHeight() { return heightInMeters; }
     
     int getObstacleCount() { return obstacleCount; }
     

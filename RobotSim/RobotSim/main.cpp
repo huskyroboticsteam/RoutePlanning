@@ -17,40 +17,48 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 // Here is a small helper for you! Have a look.
 #include "ResourcePath.hpp"
 #include "agent.cpp"
 
 void processKeypresses(sf::Keyboard::Key key, Map &map, Agent &agent) {
+    
     switch (key) {
-        case sf::Keyboard::W :
+        case sf::Keyboard::W : {
             // go forward
-            agent.move(0.5f, map);
+            agent.move(0.5f);
             break;
-        case sf::Keyboard::S :
+        }
+        case sf::Keyboard::S : {
             // go back
-            agent.move(0.5f, map);
+            agent.move(0.5f);
             break;
-        case sf::Keyboard::A :
+        }
+        case sf::Keyboard::A : {
             // turn left
             agent.rotate(-15.f);
             break;
-        case sf::Keyboard::D :
+        }
+        case sf::Keyboard::D : {
             // turn right
             agent.rotate(15.f);
             break;
-        case sf::Keyboard::O :
-            std::cout << "Obstacle count: " + std::to_string(map.getObstacleCount()) << std::endl;
-            break;
-        case sf::Keyboard::P :
+        }
+        case sf::Keyboard::P : {
             std::cout <<
                 "Internal position: (" + std::to_string(agent.getX()) + "," +
                 std::to_string(agent.getY()) + ") and " + std::to_string(agent.getRotation()) + " degrees"
             << std::endl;
             break;
-        default:
+        }
+        default: {
             std::cout << "Invalid input" << std::endl;
             break;
+        }
     }
 }
 
