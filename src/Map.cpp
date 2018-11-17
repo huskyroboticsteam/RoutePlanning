@@ -3,14 +3,7 @@
 #include <algorithm>    
 #include "Map.h"
 
-void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
-{
-    obstacle o;
-    o.marked = false;
-    o.coord1 = coord1;
-    o.coord2 = coord2;
-    obstacles.push_back(o);
-}
+
 
 RoverPathfinding::point convertFloatsToPoint(float first, float second)
 {
@@ -24,17 +17,30 @@ RoverPathfinding::point convertPairToPoint(std::pair<float, float> pair)
 	return p;
 }
 
-// Adds extra distance between p and q
+void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
+{
+	obstacle o;
+	o.marked = false;
+	o.coord1 = coord1;
+	o.coord2 = coord2;
+	obstacles.push_back(o);
+}
+
+void RoverPathfinding::Map::add_obstacle(std::pair<float, float> coord1, std::pair<float, float> coord2) {
+	add_obstacle(convertPairToPoint(coord1), convertPairToPoint(coord2));
+}
+
+// Adds extra distance between p and q, returns a pair of points in the line
 std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
 {
     boom_bam();
-	RoverPathfinding::point pq = convertFloatsToPoint(q.first - p.first, q.second - p.second); //vector (delta x, delta y)
+	point pq = convertFloatsToPoint(q.first - p.first, q.second - p.second); //vector (delta x, delta y)
     float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second); // Length of vector(pythag)
     pq.first = length * pq.first / pq_len;
     pq.second = length * pq.second / pq_len;
 
-	RoverPathfinding::point p1 = convertFloatsToPoint(q.first + pq.first, q.second + pq.second);
-	RoverPathfinding::point p2 = convertFloatsToPoint(p.first - pq.first, p.second - pq.second);
+	point p1 = convertFloatsToPoint(q.first + pq.first, q.second + pq.second);
+	point p2 = convertFloatsToPoint(p.first - pq.first, p.second - pq.second);
     return (std::make_pair(p1, p2));
 }
 
@@ -181,11 +187,11 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
-std::vector<std::pair<float, float>> RoverPathfinding::Map::shortest_path_to(float cur_lat, float cur_lng,
+std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to(float cur_lat, float cur_lng,
                                                                            float tar_lat, float tar_lng)
 {
-    auto cur = std::make_pair(cur_lat, cur_lng);
-    auto tar = std::make_pair(tar_lat, tar_lng);
+    auto cur = convertFloatsToPoint(cur_lat, cur_lng);
+    auto tar = convertFloatsToPoint(tar_lat, tar_lng);
     std::vector<node> nodes = build_graph(cur, tar);
 
 #if 0
@@ -218,7 +224,7 @@ std::vector<std::pair<float, float>> RoverPathfinding::Map::shortest_path_to(flo
         }
     }
 
-    std::vector<std::pair<float, float>> result;
+    std::vector<point> result;
     int i = 1;
     while (i != 0)
     {
