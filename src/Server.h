@@ -15,8 +15,10 @@ class Server
   public:
     Server();
     // TODO add parameters that encapsulate the action
-	void send(unsigned char data, unsigned char id);    // Sends action to client
+	bool send_action(unsigned char data, unsigned char id);    // Sends action to client, returns whether action was successful or not
     // TODO is this event driven? if it is, we need to add event trigger here and event handler in Controller.
+	void stop(); // Stops socket and cleans up
+
   private:
 	std::vector<unsigned char> current_time();	// Stores unix timestamp in 4 bytes
     // RoverPathfinding::Controller controller;
