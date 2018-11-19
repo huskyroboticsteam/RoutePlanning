@@ -19,7 +19,7 @@ class Server
     // TODO is this event driven? if it is, we need to add event trigger here and event handler in Controller.
   private:
 
-    RoverPathfinding::Controller controller;
+    // RoverPathfinding::Controller controller;
 };
 } // namespace RoverPathfinding
 

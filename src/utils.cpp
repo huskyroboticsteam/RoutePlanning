@@ -25,14 +25,14 @@ float RoverPathfinding::normalize_angle(float rad)
 RoverPathfinding::point RoverPathfinding::intersection(point A, point B, point C, point D)
 {
     // Line AB represented as a1x + b1y = c1
-    float a1 = B.y - A.y;
-    float b1 = A.x - B.x;
-    float c1 = a1 * (A.x) + b1 * (A.y);
+    float a1 = B.second - A.second;
+    float b1 = A.first - B.first;
+    float c1 = a1 * (A.first) + b1 * (A.second);
 
     // Line CD represented as a2x + b2y = c2
-    float a2 = D.y - C.y;
-    float b2 = C.x - D.x;
-    float c2 = a2 * (C.x) + b2 * (C.y);
+    float a2 = D.second - C.second;
+    float b2 = C.first - D.first;
+    float c2 = a2 * (C.first) + b2 * (C.second);
 
     float determinant = a1 * b2 - a2 * b1;
 
@@ -41,9 +41,9 @@ RoverPathfinding::point RoverPathfinding::intersection(point A, point B, point C
     if (-1e-7 <= determinant && determinant <= 1e-7)
         return (point{INFINITY, INFINITY});
 
-    float x = (b2 * c1 - b1 * c2) / determinant;
-    float y = (a1 * c2 - a2 * c1) / determinant;
-    return (point{x, y});
+    float first = (b2 * c1 - b1 * c2) / determinant;
+    float second = (a1 * c2 - a2 * c1) / determinant;
+    return (point{first, second});
 }
 
 //start, end, circle, and R are in lat/long coordinates
@@ -53,11 +53,11 @@ bool RoverPathfinding::segment_intersects_circle(point start,
                                                  float R)
 {
 
-    point direction{end.x - start.x, end.y - start.y};
-    point center_to_start{start.x - circle.x, start.y - circle.y};
-    float a = direction.x * direction.x + direction.y * direction.y;
-    float b = 2 * (center_to_start.x * direction.x + center_to_start.y * direction.y);
-    float c = (center_to_start.x * center_to_start.x + center_to_start.y * center_to_start.y) + R * R;
+    point direction{end.first - start.first, end.second - start.second};
+    point center_to_start{start.first - circle.first, start.second - circle.second};
+    float a = direction.first * direction.first + direction.second * direction.second;
+    float b = 2 * (center_to_start.first * direction.first + center_to_start.second * direction.second);
+    float c = (center_to_start.first * center_to_start.first + center_to_start.second * center_to_start.second) + R * R;
 
     float discriminant = b * b - 4 * a * c;
     if (discriminant < 0)
@@ -80,7 +80,7 @@ bool RoverPathfinding::segment_intersects_circle(point start,
 //Returns 2 if pq, qr, and rp are counterclockwise
 int RoverPathfinding::orientation(point p, point q, point r)
 {
-    float v = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+    float v = (q.second - p.second) * (r.first - q.first) - (q.first - p.first) * (r.second - q.second);
     if (-1e-7 <= v && v <= 1e-7)
         return COLINEAR;
 
@@ -90,8 +90,8 @@ int RoverPathfinding::orientation(point p, point q, point r)
 //Tells if r is on segment pq
 bool RoverPathfinding::on_segment(point p, point q, point r)
 {
-    return (q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
-            q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y));
+    return (q.first <= std::max(p.first, r.first) && q.first >= std::min(p.first, r.first) &&
+            q.second <= std::max(p.second, r.second) && q.second >= std::min(p.second, r.second));
 }
 
 //Probably returns whether p1q1 and p2q2 intersect
@@ -123,28 +123,28 @@ bool RoverPathfinding::segments_intersect(point p1, point p2, point q1, point q2
 //Returns a point in the center of segment pq and then moves it R towards cur
 RoverPathfinding::point RoverPathfinding::center_point_with_radius(RoverPathfinding::point cur, RoverPathfinding::point p, RoverPathfinding::point q, float R)
 {
-    point vec{-p.y + q.y, p.x - q.x};
-    float len = sqrt((vec.x * vec.x) + (vec.y * vec.y));
-    vec.x = vec.x * R / len;
-    vec.y = vec.y * R / len;
-    point result = point{(p.x + q.x) / 2.0f, (p.y + q.y) / 2.0f};
+    point vec{-p.second + q.second, p.first - q.first};
+    float len = sqrt((vec.first * vec.first) + (vec.second * vec.second));
+    vec.first = vec.first * R / len;
+    vec.second = vec.second * R / len;
+    point result = point{(p.first + q.first) / 2.0f, (p.second + q.second) / 2.0f};
     int o = orientation(cur, p, q);
     if (o == CLOCKWISE)
     {
-        result.x += vec.x;
-        result.y += vec.y;
+        result.first += vec.first;
+        result.second += vec.second;
     }
     else //o is COUNTERCLOCKWISE
     {
-        result.x -= vec.x;
-        result.y -= vec.y;
+        result.first -= vec.first;
+        result.second -= vec.second;
     }
     return (result);
 }
 
 float RoverPathfinding::dist_sq(point p1, point p2)
 {
-    return ((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+    return ((p1.first - p2.first) * (p1.first - p2.first) + (p1.second - p2.second) * (p1.second - p2.second));
 }
 
 bool RoverPathfinding::within_radius(point p1, point p2, float R)
@@ -182,9 +182,9 @@ std::vector<RoverPathfinding::point> RoverPathfinding::generate_spiral()
 
     for (int i = 0; i < 100; ++i)
     {
-        int x = round(scaleFactor * i * cos(i + (PI)));
-        int y = round(scaleFactor * i * sin(i + (PI)));
-        spiralPoints.push_back(point{(float)x, (float)y});
+        int first = round(scaleFactor * i * cos(i + (PI)));
+        int second = round(scaleFactor * i * sin(i + (PI)));
+        spiralPoints.push_back(point{(float)first, (float)second});
 #if 0
 		std::cout << i << ": (" << px << ", " << py << ")" << '\n';
 #endif
