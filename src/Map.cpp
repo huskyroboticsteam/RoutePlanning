@@ -33,7 +33,7 @@ void RoverPathfinding::Map::add_obstacle(std::pair<float, float> coord1, std::pa
 // Adds extra distance between p and q, returns a pair of points in the line
 std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
 {
-    boom_bam();
+    // boom_bam();
 	point pq = convertFloatsToPoint(q.first - p.first, q.second - p.second); //vector (delta x, delta y)
     float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second); // Length of vector(pythag)
     pq.first = length * pq.first / pq_len;

@@ -44,7 +44,7 @@ bool RoverPathfinding::Simulator::out_of_view(point pt)
     {
         return false;
     }
-    float angle = std::atan((pt.y - cur_pos.y) / (pt.x - cur_pos.x));
+    float angle = std::atan((pt.second - cur_pos.second) / (pt.first - cur_pos.first));
     for (auto it = obstacles.begin(); it != obstacles.end(); it++)
     {
         
