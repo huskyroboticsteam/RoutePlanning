@@ -27,7 +27,10 @@
 
 int main(int, char const**)
 {
+    const unsigned int FRAMERATE = 20;
+    
     sf::RenderWindow window(sf::VideoMode(1024, 1024), "Robot Simulator");
+    window.setFramerateLimit(FRAMERATE);
 
     sf::Image icon;
     if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
@@ -62,6 +65,14 @@ int main(int, char const**)
                         map.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
                         break;
                     }
+                    case sf::Keyboard::O : {
+                        map.printObstacles();
+                        break;
+                    }
+                    case sf::Keyboard::Num0 : {
+                        agent.erasePath();
+                        break;
+                    }
                     default:
                         // do nothing
                         break;
@@ -72,16 +83,16 @@ int main(int, char const**)
         
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            agent.move(0.016f);
+            agent.move(10.f / FRAMERATE);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            agent.move(-0.016f);
+            agent.move(-10.f / FRAMERATE);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-            agent.rotate(-0.5f);
+            agent.rotate(-200.f / FRAMERATE);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-            agent.rotate(0.5f);
+            agent.rotate(200.f / FRAMERATE);
         }
 
         

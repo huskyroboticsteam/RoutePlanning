@@ -63,12 +63,19 @@ public:
                 std::istringstream in(line);
                 
                 float x1 = 0.f, y1 = 0.f, x2 = 0.f, y2 = 0.f;
+                
                 in >> x1 >> y1 >> x2 >> y2;
                 
                 placeObstacle(x1, y1, x2, y2);
             }
         }
         file.close();
+    }
+    
+    void printObstacles() {
+        for (int i = 0; i < obstacles.getVertexCount(); i += 2) {
+            std::cout << "From (" + std::to_string(obstacles[i].position.x) + "," + std::to_string(obstacles[i].position.y) + ") to (" + std::to_string(obstacles[i + 1].position.x) + "," + std::to_string(obstacles[i + 1].position.y) + ")" << std::endl;
+        }
     }
     
     sf::Vector2f getOrigin() { return sf::Vector2f(pixelsPerMeter, pixelsPerMeter); }

@@ -42,10 +42,17 @@ public:
         float xOffset = distance * cos(rotation * PI / 180);
         float yOffset = distance * sin(rotation * PI / 180);
         
-        if (xPos <= 0 && xOffset < 0) xOffset = 0;
-        if (yPos <= 0 && yOffset < 0) yOffset = 0;
-        if (xPos >= (internalMap->getWidth() - 1) && xOffset > 0) xOffset = 0;
-        if (yPos >= (internalMap->getHeight() - 1) && yOffset > 0) yOffset = 0;
+        float newX = xPos + xOffset;
+        float newY = yPos + yOffset;
+        
+        if (newX < 0)
+            xOffset = 0 - xPos;
+        if (newX > (internalMap->getWidth() - 1))
+            xOffset = internalMap->getWidth() - 1 - xPos;
+        if (newY < 0)
+            yOffset = 0 - yPos;
+        if(newY > (internalMap->getHeight() - 1))
+            yOffset = internalMap->getWidth() - 1 - yPos;
         
         xPos += xOffset;
         yPos += yOffset;
@@ -87,6 +94,11 @@ public:
             end.color = pathColor;
             path.append(end);
         }
+    }
+    
+    void erasePath() {
+        path = sf::VertexArray();
+        path.setPrimitiveType(sf::Lines);
     }
     
     float getX() { return xPos; }
