@@ -9,6 +9,8 @@
 #include <SFML/Graphics.hpp>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 class Map : public sf::Drawable, public sf::Transformable {
     
@@ -39,7 +41,7 @@ public:
         obstacleCount = 0;
     }
     
-    void placeObstacle(float startX, float endX, float startY, float endY) {
+    void placeObstacle(float startX, float startY, float endX, float endY) {
         sf::Vertex p1(sf::Vector2f(startX * pixelsPerMeter, startY * pixelsPerMeter));
         p1.color = OBSTACLE_COLOR;
         obstacles.append(p1);
@@ -49,6 +51,24 @@ public:
         obstacles.append(p2);
         
         obstacleCount++;
+    }
+    
+    void readObstaclesFromFile(std::string fileName) {
+        std::ifstream file;
+        file.open(fileName);
+        if (file) {
+            std::string line;
+            
+            while (getline(file, line)) {
+                std::istringstream in(line);
+                
+                float x1 = 0.f, y1 = 0.f, x2 = 0.f, y2 = 0.f;
+                in >> x1 >> y1 >> x2 >> y2;
+                
+                placeObstacle(x1, y1, x2, y2);
+            }
+        }
+        file.close();
     }
     
     sf::Vector2f getOrigin() { return sf::Vector2f(pixelsPerMeter, pixelsPerMeter); }

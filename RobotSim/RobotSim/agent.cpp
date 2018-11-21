@@ -18,29 +18,34 @@
 class Agent : public sf::Drawable, public sf::Transformable {
     
 public:
-    Agent(sf::Vector2f startPos, int scale, sf::Color color = sf::Color::Green) {
-        xPos = 0.f;
-        yPos = 0.f;
-        rotation = 45.f;
+    Agent(sf::Vector2f startPos, Map map, float startX = 0.f, float startY = 0.f, float startR = 45.f, sf::Color color = sf::Color::Green) {
+        xPos = startX;
+        yPos = startY;
+        rotation = startR;
         
         shape = sf::CircleShape(SHAPE_RADIUS, 3); // equilateral triangle
         shape.setOrigin(SHAPE_RADIUS, SHAPE_RADIUS);
         shape.setFillColor(color);
         shape.setPosition(startPos);
-        shape.setRotation(135.f);
+        shape.setRotation(90 + startR);
         
         path.setPrimitiveType(sf::Lines);
         
-        pathIndex = 0;
-        
-        pixelsPerMeter = scale;
+        pixelsPerMeter = map.getScale();
         
         pathColor = color;
+        
+        internalMap = &map;
     }
     
     void move(float distance) {
         float xOffset = distance * cos(rotation * PI / 180);
         float yOffset = distance * sin(rotation * PI / 180);
+        
+        if (xPos <= 0 && xOffset < 0) xOffset = 0;
+        if (yPos <= 0 && yOffset < 0) yOffset = 0;
+        if (xPos >= (internalMap->getWidth() - 1) && xOffset > 0) xOffset = 0;
+        if (yPos >= (internalMap->getHeight() - 1) && yOffset > 0) yOffset = 0;
         
         xPos += xOffset;
         yPos += yOffset;
@@ -56,9 +61,6 @@ public:
         end.color = pathColor;
         
         path.append(end);
-        
-        pathIndex++;
-        std::cout << "Path index: " + std::to_string(pathIndex) << std::endl;
     }
     
     void rotate(float rotate) {
@@ -102,13 +104,13 @@ private:
     sf::CircleShape shape;
     sf::VertexArray path;
     
-    int pathIndex;
-    
     float xPos;
     float yPos;
     float rotation;
     
     int pixelsPerMeter;
+    
+    Map* internalMap;
     
     const float SHAPE_RADIUS = 20.f;
     //const sf::Color SHAPE_COLOR = sf::Color::Green;

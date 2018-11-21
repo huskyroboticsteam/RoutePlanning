@@ -25,43 +25,6 @@
 #include "ResourcePath.hpp"
 #include "agent.cpp"
 
-void processKeypresses(sf::Keyboard::Key key, Map &map, Agent &agent) {
-    
-    switch (key) {
-        case sf::Keyboard::W : {
-            // go forward
-            agent.move(0.5f);
-            break;
-        }
-        case sf::Keyboard::S : {
-            // go back
-            agent.move(0.5f);
-            break;
-        }
-        case sf::Keyboard::A : {
-            // turn left
-            agent.rotate(-15.f);
-            break;
-        }
-        case sf::Keyboard::D : {
-            // turn right
-            agent.rotate(15.f);
-            break;
-        }
-        case sf::Keyboard::P : {
-            std::cout <<
-                "Internal position: (" + std::to_string(agent.getX()) + "," +
-                std::to_string(agent.getY()) + ") and " + std::to_string(agent.getRotation()) + " degrees"
-            << std::endl;
-            break;
-        }
-        default: {
-            std::cout << "Invalid input" << std::endl;
-            break;
-        }
-    }
-}
-
 int main(int, char const**)
 {
     sf::RenderWindow window(sf::VideoMode(1024, 1024), "Robot Simulator");
@@ -74,7 +37,7 @@ int main(int, char const**)
 
     Map map(40.f, 40.f, 24);
     
-    Agent agent(map.getOrigin(), map.getScale());
+    Agent agent(map.getOrigin(), map);
     
     while (window.isOpen())
     {
@@ -87,8 +50,38 @@ int main(int, char const**)
             }
             
             else if (event.type == sf::Event::KeyPressed) {
-                processKeypresses(event.key.code, map, agent);
+                switch (event.key.code) {
+                    case sf::Keyboard::P : {
+                        std::cout <<
+                        "Internal position: (" + std::to_string(agent.getX()) + "," +
+                        std::to_string(agent.getY()) + ") and " + std::to_string(agent.getRotation()) + " degrees"
+                        << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::I : {
+                        map.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
+                        break;
+                    }
+                    default:
+                        // do nothing
+                        break;
+                }
             }
+            
+        }
+        
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            agent.move(0.016f);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+            agent.move(-0.016f);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+            agent.rotate(-0.5f);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+            agent.rotate(0.5f);
         }
 
         
