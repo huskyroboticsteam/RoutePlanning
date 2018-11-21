@@ -9,6 +9,7 @@
 const std::string endpoint = "MainRover"; 
 sockaddr_in server;
 SOCKET out;
+SOCKET in;
 
 RoverPathfinding::Server::Server()
 {
@@ -22,13 +23,52 @@ RoverPathfinding::Server::Server()
 		return;
 	}
 
-	// Create a hint structure for the server
-	server.sin_family = AF_INET;
-	server.sin_port = htons(54000);
-	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr);
-
 	// Socket creation
 	out = socket(AF_INET, SOCK_DGRAM, 0);
+	in = socket(AF_INET, SOCK_DGRAM, 0);
+
+	// Bind socket to ip address and port
+	sockaddr_in serverHint;
+	serverHint.sin_addr.S_un.S_addr = ADDR_ANY;
+	serverHint.sin_family = AF_INET;
+	serverHint.sin_port = htons(54000);
+
+	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
+	{
+		std::cout << "Can't bind socket! " << WSAGetLastError();
+	}
+
+	sockaddr_in client;
+	ZeroMemory(&client, sizeof(client));
+	int clientLength = sizeof(client);
+
+	char buf[1024];
+	ZeroMemory(buf, 1024);
+
+	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr);
+
+
+
+	while (true) 
+	{
+		ZeroMemory(buf, 1024);
+
+		// Wait for message
+		int bytesIn = recvfrom(in, buf, 1024, 0, (sockaddr*)&client, &clientLength);
+		if (bytesIn == SOCKET_ERROR) 
+		{
+			std::cout << "Error receiving from client" << WSAGetLastError();
+			continue;
+		}
+
+		// Display message and client 
+		char clientIp[256];
+		ZeroMemory(clientIp, 256);
+
+		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
+
+		std::cout << "Message recieved from" << clientIp << " : " << buf;
+	}
 }
 
 bool RoverPathfinding::Server::send_action(unsigned char data, unsigned char id)
