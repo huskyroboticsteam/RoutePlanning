@@ -12,6 +12,6 @@ int main(void)
 
     auto path = map.shortest_path_to(0, 0, 0, 10);
     for (auto i : path)
-        std::cout << '(' << i.first << ", " << i.second << ')' << std::endl;
+        std::cout << '(' << i.x << ", " << i.y << ')' << std::endl;
     return (0);
 }
