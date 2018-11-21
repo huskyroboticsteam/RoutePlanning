@@ -34,13 +34,13 @@ void RoverPathfinding::Map::add_obstacle(std::pair<float, float> coord1, std::pa
 std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
 {
     // boom_bam();
-	point pq = convertFloatsToPoint(q.first - p.first, q.second - p.second); //vector (delta x, delta y)
-    float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second); // Length of vector(pythag)
-    pq.first = length * pq.first / pq_len;
-    pq.second = length * pq.second / pq_len;
+	point pq = convertFloatsToPoint(q.x - p.x, q.y - p.y); //vector (delta x, delta y)
+    float pq_len = sqrt(pq.x * pq.x + pq.y * pq.y); // Length of vector(pythag)
+    pq.x = length * pq.x / pq_len;
+    pq.y = length * pq.y / pq_len;
 
-	point p1 = convertFloatsToPoint(q.first + pq.first, q.second + pq.second);
-	point p2 = convertFloatsToPoint(p.first - pq.first, p.second - pq.second);
+	point p1 = convertFloatsToPoint(q.x + pq.x, q.y + pq.y);
+	point p2 = convertFloatsToPoint(p.x - pq.x, p.y - pq.y);
     return (std::make_pair(p1, p2));
 }
 
@@ -71,8 +71,8 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
     //             to get R to be in lat/lng units
     //<hack>
 #define R_METERS 0.5f
-    auto offset = RoverPathfinding::lat_long_offset(cur.first, cur.second, 0.0f, R_METERS);
-    auto diff = std::make_pair(offset.first - cur.first, offset.second - cur.second);
+    auto offset = RoverPathfinding::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
+    auto diff = std::make_pair(offset.x - cur.x, offset.y - cur.y);
     float TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
 #undef R_METERS
     //</hack>

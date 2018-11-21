@@ -8,8 +8,8 @@ namespace RoverPathfinding
 {
 struct point
 {
-    float first;
-    float second;
+    float x;
+    float y;
 };
 
 // normalize angle (in radians) to between 0 and 2PI
