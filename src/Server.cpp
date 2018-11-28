@@ -13,7 +13,8 @@ SOCKET in;
 
 RoverPathfinding::Server::Server()
 {
-	// Startup Winsock
+#if OS_Windows
+	// Windows-Specific - Startup Winsock
 	WSADATA data;
 	WORD version = MAKEWORD(2, 2);
 	int ws0k = WSAStartup(version, &data);
@@ -22,6 +23,9 @@ RoverPathfinding::Server::Server()
 		std::cout << "Can't start Winsock!" << ws0k;
 		return;
 	}
+#else
+	// Todo: Linux Socket
+#endif
 
 	// Socket creation
 	out = socket(AF_INET, SOCK_DGRAM, 0);
