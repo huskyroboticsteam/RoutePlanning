@@ -2,9 +2,15 @@
 #include <vector>
 #include <ctime>
 #include <iostream>
-#include <WS2tcpip.h>
 
-#pragma comment (lib, "ws2_32.lib")
+#ifdef _WIN32
+	#include <WS2tcpip.h>
+	#pragma comment (lib, "ws2_32.lib")
+#else
+	#include <sys/socket.h>
+#endif
+
+
 
 const std::string endpoint = "MainRover"; 
 sockaddr_in server;
@@ -13,7 +19,7 @@ SOCKET in;
 
 RoverPathfinding::Server::Server()
 {
-#if OS_Windows
+#ifdef _WIN32
 	// Windows-Specific - Startup Winsock
 	WSADATA data;
 	WORD version = MAKEWORD(2, 2);
@@ -23,8 +29,6 @@ RoverPathfinding::Server::Server()
 		std::cout << "Can't start Winsock!" << ws0k;
 		return;
 	}
-#else
-	// Todo: Linux Socket
 #endif
 
 	// Socket creation
