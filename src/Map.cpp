@@ -3,20 +3,6 @@
 #include <algorithm>    
 #include "Map.h"
 
-
-
-RoverPathfinding::point convertFloatsToPoint(float first, float second)
-{
-	RoverPathfinding::point p = { first, second };
-	return p;
-}
-
-RoverPathfinding::point convertPairToPoint(std::pair<float, float> pair)
-{
-	RoverPathfinding::point p = { pair.first, pair.second };
-	return p;
-}
-
 void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
 {
 	obstacle o;
@@ -26,21 +12,18 @@ void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
 	obstacles.push_back(o);
 }
 
-void RoverPathfinding::Map::add_obstacle(std::pair<float, float> coord1, std::pair<float, float> coord2) {
-	add_obstacle(convertPairToPoint(coord1), convertPairToPoint(coord2));
-}
-
 // Adds extra distance between p and q, returns a pair of points in the line
 std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
 {
     // boom_bam();
-	point pq = convertFloatsToPoint(q.x - p.x, q.y - p.y); //vector (delta x, delta y)
+	point pq{ q.x - p.x, q.y - p.y };  //vector (delta x, delta y)
     float pq_len = sqrt(pq.x * pq.x + pq.y * pq.y); // Length of vector(pythag)
     pq.x = length * pq.x / pq_len;
     pq.y = length * pq.y / pq_len;
 
-	point p1 = convertFloatsToPoint(q.x + pq.x, q.y + pq.y);
-	point p2 = convertFloatsToPoint(p.x - pq.x, p.y - pq.y);
+	
+	point p1{ q.x + pq.x, q.y + pq.y };
+	point p2{ p.x - pq.x, p.y - pq.y };
     return (std::make_pair(p1, p2));
 }
 
@@ -190,8 +173,8 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to(float cur_lat, float cur_lng,
                                                                            float tar_lat, float tar_lng)
 {
-    auto cur = convertFloatsToPoint(cur_lat, cur_lng);
-    auto tar = convertFloatsToPoint(tar_lat, tar_lng);
+	auto cur = point{ cur_lat, cur_lng };
+	auto tar = point{ tar_lat, tar_lng };
     std::vector<node> nodes = build_graph(cur, tar);
 
 #if 0

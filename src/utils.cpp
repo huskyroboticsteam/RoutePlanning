@@ -172,6 +172,7 @@ RoverPathfinding::point RoverPathfinding::lat_long_offset(float lat1, float lon1
 // TODO and modify header
 RoverPathfinding::point RoverPathfinding::lat_long_to_meters(RoverPathfinding::point pt, RoverPathfinding::point origin)
 {
+	return point();
 }
 
 // generates 100 points in spiral formation around origin and returns in vector
