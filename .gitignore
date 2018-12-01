@@ -3,6 +3,7 @@ TestMap
 .vscode
 .DS_STORE
 .vs
+.Debug
 RoutePlanning.xcworkspace
 RoutePlanning.sln
 RoutePlanning.vcxproj
