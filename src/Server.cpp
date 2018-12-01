@@ -7,7 +7,12 @@
 	#include <WS2tcpip.h>
 	#pragma comment (lib, "ws2_32.lib")
 #else
+	#include <sys/types.h>
 	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <netdb.h> 
+	#include <errno.h>
 #endif
 
 
@@ -50,8 +55,8 @@ RoverPathfinding::Server::Server()
 	ZeroMemory(&client, sizeof(client));
 	int clientLength = sizeof(client);
 
-	char buf[1024];
-	ZeroMemory(buf, 1024);
+	char buf[256];
+	ZeroMemory(buf, 256);
 
 	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr);
 
@@ -59,14 +64,18 @@ RoverPathfinding::Server::Server()
 
 	while (true) 
 	{
-		ZeroMemory(buf, 1024);
+		ZeroMemory(buf, 256);
 
 		// Wait for message
-		int bytesIn = recvfrom(in, buf, 1024, 0, (sockaddr*)&client, &clientLength);
+		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
 		if (bytesIn == SOCKET_ERROR) 
 		{
+#ifdef WIN32
 			std::cout << "Error receiving from client" << WSAGetLastError();
 			continue;
+#else
+			std::cout << "That didn't work! " << strerror(errno);
+#endif
 		}
 
 		// Display message and client 
@@ -79,17 +88,22 @@ RoverPathfinding::Server::Server()
 	}
 }
 
-bool RoverPathfinding::Server::send_action(unsigned char data, unsigned char id)
+bool RoverPathfinding::Server::send_action(unsigned char dataBody, unsigned char id) // same data and id format as in Scarlet
 {
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
 	packet.push_back(id); // represents component to be controlled
-	packet.push_back(data); // represents speed/position to be sent
+	packet.push_back(dataBody); // represents speed/position to be sent
 
+	// packet.data() first four bytes are the time stamp, fifth is the id, and sixth is the data
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
 	if (sendOk == SOCKET_ERROR)
 	{
+#ifdef _WIN32
 		std::cout << "That didn't work! " << WSAGetLastError();
 		return false;
+#else
+		std::cout << "That didn't work! " << strerror(errno);
+#endif
 	}
 	else {
 		return true;
