@@ -75,6 +75,7 @@ RoverPathfinding::Server::Server()
 			continue;
 #else
 			std::cout << "That didn't work! " << strerror(errno);
+			continue;
 #endif
 		}
 
