@@ -1,10 +1,13 @@
 TestMap
-*.dSYM
-.vscode
-.DS_STORE
+.idea
+cmake-build-debug
+CMakeLists.txt
 .vs
 RoutePlanning.xcworkspace
 RoutePlanning.sln
 RoutePlanning.vcxproj
 RoutePlanning.vcxproj.filters
 RoutePlanning.vcxproj.user
+*.dSYM
+.vscode
+.DS_STORE

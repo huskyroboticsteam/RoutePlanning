@@ -4,6 +4,16 @@
 
 #define PI 3.14159265359
 
+bool RoverPathfinding::point::operator==(const point &p) const
+{
+    return x == p.x && y == p.y;
+}
+
+bool RoverPathfinding::point::operator!=(const point &p) const
+{
+    return !(*this == p);
+}
+
 float RoverPathfinding::deg_to_rad(float deg)
 {
     return (deg * PI / 180.0f);
@@ -172,6 +182,7 @@ RoverPathfinding::point RoverPathfinding::lat_long_offset(float lat1, float lon1
 // TODO and modify header
 RoverPathfinding::point RoverPathfinding::lat_long_to_meters(RoverPathfinding::point pt, RoverPathfinding::point origin)
 {
+    return point{};
 }
 
 // generates 100 points in spiral formation around origin and returns in vector
@@ -191,4 +202,29 @@ std::vector<RoverPathfinding::point> RoverPathfinding::generate_spiral()
     }
 
     return spiralPoints;
+}
+
+// All angles should already be normalized and in radians
+bool RoverPathfinding::within_angle(float ang, float lower, float upper)
+{
+    if (upper < lower)
+    {
+        upper += 2 * PI;
+    }
+    return ang >= lower && ang <= upper;
+}
+
+RoverPathfinding::point RoverPathfinding::polar_to_cartesian(point origin, float r, float theta)
+{
+    return RoverPathfinding::point{origin.x + r * std::cos(theta), origin.y + r * std::sin(theta)};
+}
+
+float RoverPathfinding::relative_angle(point o, point p)
+{
+    return std::atan((p.y - o.y) / (p.x - o.x));
+}
+
+bool RoverPathfinding::same_point(const point &p, const point &q, float tol)
+{
+    return std::sqrt(dist_sq(p, q)) <= tol;
 }
