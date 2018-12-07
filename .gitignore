@@ -11,3 +11,5 @@ RoutePlanning.vcxproj.user
 *.dSYM
 .vscode
 .DS_STORE
+.gdb_history
+
