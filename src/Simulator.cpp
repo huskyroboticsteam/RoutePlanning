@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <iostream>
 #include <fstream>
 #include <cctype>
 #include <cmath>
@@ -11,17 +12,24 @@
 #define ASSERT_ON 1
 
 RoverPathfinding::Simulator::Simulator(const std::string &map_path, float init_bearing,
-                                       simulator_config conf) : cur_brng(init_bearing), config(conf)
+                                       simulator_config conf) : bearing(init_bearing), config(conf)
 {
     load_map(map_path);
 }
 
-RoverPathfinding::Simulator::Simulator() : Simulator("test_map.txt", 0.f, simulator_config{45.f, 10.f}) {}
+RoverPathfinding::Simulator::Simulator() : Simulator("C:/Users/garyg/Robotics/RoutePlanning/test_map.txt", 0.f, simulator_config{45.f, 10.f}) {}
 
 void RoverPathfinding::Simulator::load_map(const std::string &path)
 {
     sim_obstacles.clear();
-    std::ifstream infile(path); //TODO error handling
+    std::ifstream infile(path);
+    // if (!infile.good())
+    // {
+    //     std::cerr << "Invalid map file: " << path << std::endl;
+    //     std::cout << " eof()=" << infile.eof();
+    //     std::cout << " fail()=" << infile.fail();
+    //     std::cout << " bad()=" << infile.bad();
+    // }
     float px, py, qx, qy;
     //get target position
     infile >> px >> py;
@@ -30,12 +38,13 @@ void RoverPathfinding::Simulator::load_map(const std::string &path)
     {
         sim_obstacles.push_back(RoverPathfinding::sim_obstacle{point{px, py}, point{qx, qy}});
     }
+    infile.close();
 }
 
 void RoverPathfinding::Simulator::update_agent()
 {
-    upper_vis = normalize_angle(cur_brng + config.vision_angle * 2);
-    lower_vis = normalize_angle(cur_brng - config.vision_angle / 2);
+    upper_vis = normalize_angle(deg_to_rad(bearing + config.vision_angle / 2));
+    lower_vis = normalize_angle(deg_to_rad(bearing - config.vision_angle / 2));
     // compute farthest point at lower and upper fov bounds once
     point fov_lower = polar_to_cartesian(cur_pos, config.vision_dist, lower_vis);
     point fov_upper = polar_to_cartesian(cur_pos, config.vision_dist, upper_vis);
@@ -136,7 +145,7 @@ std::vector<RoverPathfinding::point>
 RoverPathfinding::Simulator::intersection_with_arc(const point &p1, const point &p2,
                                                    const point &lower_point, const point &upper_point)
 {
-    std::list<point> ret;
+    std::vector<point> ret;
     // check the two extreme rays
     point s1 = intersection(p1, p2, cur_pos, lower_point);
     point s2 = intersection(p1, p2, cur_pos, upper_point);
@@ -189,3 +198,8 @@ bool RoverPathfinding::Simulator::out_of_view(const point &pt)
     }
     return true;
 }
+
+//getters
+float RoverPathfinding::Simulator::get_bearing() { return bearing; }
+//setters
+void RoverPathfinding::Simulator::set_bearing(float brng) { bearing = brng; }

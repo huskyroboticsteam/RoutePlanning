@@ -32,6 +32,10 @@ public:
   void load_map(const std::string &path);
   std::list<line> visible_obstacles() { return view_obstacles; };
   void update_agent();
+  //getters
+  float get_bearing();
+  //setters
+  void set_bearing(float brng);
 
 private:
   std::vector<point> intersection_with_arc(const point &p, const point &q, const point &lower_point, const point &upper_point);
@@ -39,7 +43,7 @@ private:
 
   Map map;
   point cur_pos;
-  float cur_brng;  //Bearing in degrees counterclockwise from the positive x-axis
+  float bearing;  //Bearing in degrees counterclockwise from the positive x-axis
   float lower_vis; //Bearing subtracted by half of vision_angle (lower bound of FoV) for caching
   float upper_vis; //Bearing added by half of vision_angle (upper bound of FoV)
   point target_pos;

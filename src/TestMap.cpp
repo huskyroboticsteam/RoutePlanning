@@ -13,12 +13,13 @@ int main(void)
     // for (auto i : path)
         // std::cout << '(' << i.x << ", " << i.y << ')' << std::endl;
     // return (0);
-    std::cout << "Testing started" << std::endl;
+    std::cout << "Testing started..." << std::endl;
     RoverPathfinding::Simulator sim;
     sim.update_agent();
     for (auto vo : sim.visible_obstacles())
     {
         std::cout << "(" << vo.p.x << ", " << vo.p.y << ") - (" << vo.q.x << ", " << vo.q.y << ")" << std::endl;
     }
-    std::cout << "Done" << std::endl;
+    std::cout << "Done. Press any key to exit" << std::endl;
+    getchar();
 }
