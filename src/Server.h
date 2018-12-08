@@ -15,8 +15,8 @@ class Server
   public:
     Server();
     // TODO add parameters that encapsulate the action
-	bool send_action(unsigned char data, unsigned char id);    // Sends action to client, returns whether action was successful or not
-    // TODO is this event driven? if it is, we need to add event trigger here and event handler in Controller.
+	bool send_action(unsigned char data, unsigned char id);    // Sends action to client with data body, returns whether action was successful or not
+	bool send_action(unsigned char id);    // Sends action to client without data body, returns whether action was successful or not
 	void stop(); // Stops socket and cleans up
 
   private:
