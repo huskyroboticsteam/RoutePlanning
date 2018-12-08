@@ -103,7 +103,7 @@ bool RoverPathfinding::Server::send_action(unsigned char dataBody, unsigned char
 		std::cout << "That didn't work! " << WSAGetLastError();
 		return false;
 #else
-		std::cout << "That didn't work! " << strerror(errno); '
+		std::cout << "That didn't work! " << strerror(errno);
 		return false;
 #endif
 	}
