@@ -179,10 +179,10 @@ RoverPathfinding::point RoverPathfinding::lat_long_offset(float lat1, float lon1
     return (point{lat2, lon2});
 }
 
-// TODO and modify header
+// Given two xy coordinates in degrees, returns the distance between them in meters.
 RoverPathfinding::point RoverPathfinding::lat_long_to_meters(RoverPathfinding::point pt, RoverPathfinding::point origin)
 {
-    return point{};
+    return point{(pt.x - origin.x) * 87029, (pt.y - origin.y) * 111111};
 }
 
 // generates 100 points in spiral formation around origin and returns in vector

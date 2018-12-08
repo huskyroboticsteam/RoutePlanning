@@ -12,4 +12,15 @@ RoutePlanning.vcxproj.user
 .vscode
 .DS_STORE
 .gdb_history
-
+Debug/Controller.obj
+Debug/Map.obj
+Debug/RoutePlanning.log
+Debug/RoutePlanning.tlog/CL.command.1.tlog
+Debug/RoutePlanning.tlog/CL.read.1.tlog
+Debug/RoutePlanning.tlog/CL.write.1.tlog
+Debug/RoutePlanning.tlog/RoutePlanning.lastbuildstate
+Debug/RoutePlanning.tlog/unsuccessfulbuild
+Debug/Simulator.obj
+Debug/TestMap.obj
+Debug/utils.obj
+Debug/vc141.pdb
