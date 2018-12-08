@@ -3,9 +3,8 @@
 
 #include <list>
 #include <string>
-#include <map>
-#include "utils.h"
-#include "Map.h"
+#include "../../src/utils.h"
+#include "../../src/Map.h"
 
 #define MAX_GRID_RESOLUTION 100 // max number of grid cells on each side of the map
 
@@ -34,8 +33,10 @@ public:
   void update_agent();
   //getters
   float get_bearing();
+  point get_pos();
   //setters
   void set_bearing(float brng);
+  void set_pos(float x, float y);
 
 private:
   std::vector<point> intersection_with_arc(const point &p, const point &q, const point &lower_point, const point &upper_point);

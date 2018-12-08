@@ -1,13 +1,11 @@
 #include <vector>
-#include <string>
 #include <iostream>
 #include <fstream>
 #include <cctype>
 #include <cmath>
-#include "Simulator.h"
-#include "Map.h"
-#include <list>
 #include <assert.h>
+#include "Simulator.h"
+#include "../../src/Map.h"
 
 #define ASSERT_ON 1
 
@@ -15,9 +13,10 @@ RoverPathfinding::Simulator::Simulator(const std::string &map_path, float init_b
                                        simulator_config conf) : bearing(init_bearing), config(conf)
 {
     load_map(map_path);
+    cur_pos = point{0, 0};
 }
 
-RoverPathfinding::Simulator::Simulator() : Simulator("C:/Users/garyg/Robotics/RoutePlanning/test_map.txt", 0.f, simulator_config{45.f, 10.f}) {}
+RoverPathfinding::Simulator::Simulator() : Simulator("./obstacles.txt", 0.f, simulator_config{45.f, 10.f}) {}
 
 void RoverPathfinding::Simulator::load_map(const std::string &path)
 {
@@ -31,8 +30,6 @@ void RoverPathfinding::Simulator::load_map(const std::string &path)
     //     std::cout << " bad()=" << infile.bad();
     // }
     float px, py, qx, qy;
-    //get target position
-    infile >> px >> py;
     target_pos = point{px, py};
     while (infile >> px >> py >> qx >> qy)
     {
@@ -201,5 +198,10 @@ bool RoverPathfinding::Simulator::out_of_view(const point &pt)
 
 //getters
 float RoverPathfinding::Simulator::get_bearing() { return bearing; }
+RoverPathfinding::point RoverPathfinding::Simulator::get_pos() { return cur_pos; }
 //setters
 void RoverPathfinding::Simulator::set_bearing(float brng) { bearing = brng; }
+void RoverPathfinding::Simulator::set_pos(float x, float y) {
+    cur_pos.x = x;
+    cur_pos.y = y;
+}

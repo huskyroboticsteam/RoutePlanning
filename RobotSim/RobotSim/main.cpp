@@ -20,10 +20,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string>
 
 // Here is a small helper for you! Have a look.
-#include "ResourcePath.hpp"
+// #include "ResourcePath.hpp"
 #include "agent.cpp"
+
+const std::string RESOURCE_DIR = "../Resources/";
 
 int main(int, char const**)
 {
@@ -33,9 +36,10 @@ int main(int, char const**)
     window.setFramerateLimit(FRAMERATE);
 
     sf::Image icon;
-    if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
-        return EXIT_FAILURE;
-    }
+    icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png");
+    // if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
+    //     return EXIT_FAILURE;
+    // }
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     Map map(40.f, 40.f, 24);
