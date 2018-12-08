@@ -18,16 +18,25 @@
 class Agent : public sf::Drawable, public sf::Transformable {
     
 public:
-    Agent(sf::Vector2f startPos, Map map, float startX = 0.f, float startY = 0.f, float startR = 45.f, sf::Color color = sf::Color::Green) {
+    Agent(sf::Vector2f startPos, Map map, float startX = 0.f, float startY = 0.f, float startR = 45.f, sf::Color color = sf::Color(55, 22, 126), sf::Color triColor = sf::Color(233, 213, 163)) {
         xPos = startX;
         yPos = startY;
         rotation = startR;
         
-        shape = sf::CircleShape(SHAPE_RADIUS, 3); // equilateral triangle
-        shape.setOrigin(SHAPE_RADIUS, SHAPE_RADIUS);
+//        shape = sf::CircleShape(SHAPE_RADIUS, 3); // equilateral triangle
+//        shape.setOrigin(SHAPE_RADIUS, SHAPE_RADIUS);
+//        shape.setFillColor(color);
+        shape = sf::RectangleShape(sf::Vector2f(30, 40));
+        shape.setOrigin(15, 20);
         shape.setFillColor(color);
         shape.setPosition(startPos);
         shape.setRotation(90 + startR);
+        
+        shapeTop = sf::CircleShape(15, 3);
+        shapeTop.setOrigin(15.f, 15.f);
+        shapeTop.setFillColor(triColor);
+        shapeTop.setPosition(startPos);
+        shapeTop.setRotation(90 + startR);
         
         path.setPrimitiveType(sf::Lines);
         
@@ -63,6 +72,7 @@ public:
         path.append(start);
         
         shape.move(xOffset * pixelsPerMeter, yOffset * pixelsPerMeter);
+        shapeTop.move(xOffset * pixelsPerMeter, yOffset * pixelsPerMeter);
         
         sf::Vertex end = shape.getPosition();
         end.color = pathColor;
@@ -70,9 +80,16 @@ public:
         path.append(end);
     }
     
+    bool crossObstacle(float startX, float startY, float endX, float endY) {
+        
+        
+        return false;
+    }
+    
     void rotate(float rotate) {
         rotation += rotate;
         shape.rotate(rotate);
+        shapeTop.rotate(rotate);
     }
     
     void place(float x, float y, float rot, bool drawPath = true) {
@@ -89,6 +106,7 @@ public:
             path.append(start);
         }
         shape.setPosition((x + 1.f) * pixelsPerMeter, (y + 1.f) * pixelsPerMeter);
+        shapeTop.setPosition((x + 1.f) * pixelsPerMeter, (y + 1.f) * pixelsPerMeter);
         if (drawPath) {
             sf::Vertex end = shape.getPosition();
             end.color = pathColor;
@@ -111,9 +129,12 @@ private:
         
         target.draw(path, states);
         target.draw(shape, states);
+        target.draw(shapeTop, states);
     }
     
-    sf::CircleShape shape;
+//    sf::CircleShape shape;
+    sf::RectangleShape shape;
+    sf::CircleShape shapeTop;
     sf::VertexArray path;
     
     float xPos;

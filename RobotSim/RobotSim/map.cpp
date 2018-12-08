@@ -88,6 +88,8 @@ public:
     const sf::Color OUTLINE_COLOR = sf::Color::Black;
     const sf::Color OBSTACLE_COLOR = sf::Color::Red;
     
+    sf::VertexArray obstacles;
+    
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const {
         states.transform *= getTransform();
@@ -98,7 +100,6 @@ private:
     
     sf::VertexArray gridOutline;
     
-    sf::VertexArray obstacles;
     int obstacleCount;
     
     float widthInMeters;

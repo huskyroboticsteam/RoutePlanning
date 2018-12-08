@@ -24,7 +24,8 @@
 // Here is a small helper for you! Have a look.
 #include "ResourcePath.hpp"
 #include "agent.cpp"
-
+#include "map2.cpp"
+/*
 int main(int, char const**)
 {
     const unsigned int FRAMERATE = 20;
@@ -102,5 +103,53 @@ int main(int, char const**)
         window.display();
     }
 
+    return EXIT_SUCCESS;
+}
+*/
+int main(int, char const**)
+{
+    const unsigned int FRAMERATE = 60;
+    
+    sf::RenderWindow window(sf::VideoMode(1024, 1024), "Robot Simulator");
+    window.setFramerateLimit(FRAMERATE);
+    
+    sf::Image icon;
+    if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
+        return EXIT_FAILURE;
+    }
+    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+    
+    Map2 map(40.f, 40.f, 24);
+    
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            // Close window on X or Cmd+W
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+            
+            else if (event.type == sf::Event::KeyPressed) {
+                switch (event.key.code) {
+                    case sf::Keyboard::G : {
+                        map.toggleGrid();
+                        break;
+                    }
+                    case sf::Keyboard::O : {
+                        map.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
+                        break;
+                    }
+                }
+            }
+        }
+        
+        
+        window.clear(sf::Color::White);
+        window.draw(map);
+        window.display();
+    }
+    
     return EXIT_SUCCESS;
 }

@@ -7,15 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		933E520C21B76B8700CE6194 /* map2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 933E520B21B76B8700CE6194 /* map2.cpp */; };
+		933E520E21B76D2800CE6194 /* obstacle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 933E520D21B76D2800CE6194 /* obstacle.cpp */; };
 		936B5FC921A0A57900797E10 /* obstacles.txt in Resources */ = {isa = PBXBuildFile; fileRef = 936B5FC821A0A57900797E10 /* obstacles.txt */; };
 		937650532197AA50000897B2 /* ResourcePath.mm in Sources */ = {isa = PBXBuildFile; fileRef = 937650522197AA50000897B2 /* ResourcePath.mm */; };
 		937650562197AA50000897B2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937650552197AA50000897B2 /* main.cpp */; };
 		937650662197AAB6000897B2 /* HuskyRoboticsLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 937650652197AAB6000897B2 /* HuskyRoboticsLogo.png */; };
 		93765069219BBBC5000897B2 /* map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93765068219BBBC5000897B2 /* map.cpp */; };
 		9376506B219BBE9D000897B2 /* agent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9376506A219BBE9D000897B2 /* agent.cpp */; };
+		9386DF2F21BC41F1008C3C07 /* agent2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9386DF2E21BC41F1008C3C07 /* agent2.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		933E520B21B76B8700CE6194 /* map2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = map2.cpp; sourceTree = "<group>"; };
+		933E520D21B76D2800CE6194 /* obstacle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = obstacle.cpp; sourceTree = "<group>"; };
 		936B5FC821A0A57900797E10 /* obstacles.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = obstacles.txt; sourceTree = "<group>"; };
 		9376504D2197AA50000897B2 /* RobotSim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RobotSim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		937650512197AA50000897B2 /* RobotSim-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "RobotSim-Info.plist"; sourceTree = "<group>"; };
@@ -25,6 +30,7 @@
 		937650652197AAB6000897B2 /* HuskyRoboticsLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = HuskyRoboticsLogo.png; sourceTree = "<group>"; };
 		93765068219BBBC5000897B2 /* map.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = map.cpp; sourceTree = "<group>"; };
 		9376506A219BBE9D000897B2 /* agent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = agent.cpp; sourceTree = "<group>"; };
+		9386DF2E21BC41F1008C3C07 /* agent2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = agent2.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,9 +63,12 @@
 		9376504F2197AA50000897B2 /* RobotSim */ = {
 			isa = PBXGroup;
 			children = (
+				933E520D21B76D2800CE6194 /* obstacle.cpp */,
 				937650522197AA50000897B2 /* ResourcePath.mm */,
 				937650542197AA50000897B2 /* ResourcePath.hpp */,
 				937650552197AA50000897B2 /* main.cpp */,
+				933E520B21B76B8700CE6194 /* map2.cpp */,
+				9386DF2E21BC41F1008C3C07 /* agent2.cpp */,
 				93765068219BBBC5000897B2 /* map.cpp */,
 				9376506A219BBE9D000897B2 /* agent.cpp */,
 				937650572197AA50000897B2 /* Resources */,
@@ -174,9 +183,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				933E520E21B76D2800CE6194 /* obstacle.cpp in Sources */,
 				93765069219BBBC5000897B2 /* map.cpp in Sources */,
+				9386DF2F21BC41F1008C3C07 /* agent2.cpp in Sources */,
 				9376506B219BBE9D000897B2 /* agent.cpp in Sources */,
 				937650562197AA50000897B2 /* main.cpp in Sources */,
+				933E520C21B76B8700CE6194 /* map2.cpp in Sources */,
 				937650532197AA50000897B2 /* ResourcePath.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
