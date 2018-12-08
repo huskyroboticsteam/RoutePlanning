@@ -4,6 +4,7 @@
 #include <iostream>
 
 #ifdef _WIN32
+	#include <windows.h>
 	#include <WS2tcpip.h>
 	#pragma comment (lib, "ws2_32.lib")
 #else
@@ -13,10 +14,11 @@
 	#include <arpa/inet.h>
 	#include <netdb.h> 
 	#include <errno.h>
+	#include <unistd.h>
 #endif
 
 
-
+const unsigned char WATCHDOG_ID = 0xF0;
 const std::string endpoint = "MainRover"; 
 sockaddr_in server;
 SOCKET out;
@@ -131,6 +133,21 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 	}
 	else {
 		return true;
+	}
+}
+
+void RoverPathfinding::Server::send_watchdog() {
+	boolean hasSent = RoverPathfinding::Server::send_action(WATCHDOG_ID);
+
+	while (!hasSent) {
+		// Sleep for 100 milliseconds and then try again
+#ifdef _WIN32 // Windows
+		Sleep(100); // in milliseconds
+#else // Unix
+		usleep(100 * 1000); // in microseconds
+#endif
+
+		RoverPathfinding::Server::send_action(WATCHDOG_ID);
 	}
 }
 
