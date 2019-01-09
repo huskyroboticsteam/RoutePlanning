@@ -23,8 +23,7 @@
 #include <string>
 
 // Here is a small helper for you! Have a look.
-// #include "ResourcePath.hpp"
-#include "agent.cpp"
+#include "grid.cpp"
 
 #include "../../src/utils.cpp"
 
@@ -32,21 +31,22 @@ const std::string RESOURCE_DIR = "Resources/";
 
 int main(int, char const**)
 {
-    const unsigned int FRAMERATE = 20;
+    const unsigned int FRAMERATE = 60;
     
-    sf::RenderWindow window(sf::VideoMode(1024, 1024), "Robot Simulator");
+    sf::RenderWindow window(sf::VideoMode(1476, 1576), "Robot Simulator");
     window.setFramerateLimit(FRAMERATE);
-
-    sf::Image icon;
-    //icon.loadFromFile("/Resources/HuskyRoboticsLogo.png");
-    // if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
-    //     return EXIT_FAILURE;
-    // }
-    //window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-
-    Map map(40.f, 40.f, 24);
     
-    Agent agent(map.getOrigin(), map);
+    bool hasFocus = true;
+    
+//    sf::Image icon;
+//
+//    if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
+//        return EXIT_FAILURE;
+//    }
+//    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+    
+    Grid grid(40.f, 40.f, 36);
+    Agent agent(grid.retrieveScale(), 2.f, 2.f);
     
     while (window.isOpen())
     {
@@ -57,56 +57,71 @@ int main(int, char const**)
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
-            
-            else if (event.type == sf::Event::KeyPressed) {
+            else if (event.type == sf::Event::GainedFocus) {
+                hasFocus = true;
+            }
+            else if (event.type == sf::Event::LostFocus) {
+                hasFocus = false;
+            }
+            else if (event.type == sf::Event::KeyPressed && hasFocus) {
                 switch (event.key.code) {
-                    case sf::Keyboard::P : {
-                        std::cout <<
-                        "Internal position: (" + std::to_string(agent.getX()) + "," +
-                        std::to_string(agent.getY()) + ") and " + std::to_string(agent.getRotation()) + " degrees"
-                        << std::endl;
-                        break;
-                    }
-                    case sf::Keyboard::I : {
-                        map.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
+                    case sf::Keyboard::G : {
+                        grid.toggleGrid();
                         break;
                     }
                     case sf::Keyboard::O : {
-                        map.printObstacles();
+                        grid.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
+                        std::cout << "Added obstacles" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::N : {
+                        grid.toggleClipping();
                         break;
                     }
                     case sf::Keyboard::Num0 : {
-                        agent.erasePath();
+                        agent.clearPath();
                         break;
                     }
-                    default:
-                        // do nothing
+                    case sf::Keyboard::Up : {
+                        grid.moveAgent(agent, .5f);
                         break;
+                    }
+                    case sf::Keyboard::Down : {
+                        grid.moveAgent(agent, -.5f);
+                        break;
+                    }
+                    case sf::Keyboard::Left : {
+                        grid.rotateAgent(agent, -15.f);
+                        break;
+                    }
+                    case sf::Keyboard::Right : {
+                        grid.rotateAgent(agent, 15.f);
+                        break;
+                    }
                 }
             }
-            
         }
         
-        
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            agent.move(10.f / FRAMERATE);
+        if (hasFocus) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+                grid.moveAgent(agent, 10.f / FRAMERATE);
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+                grid.moveAgent(agent, -10.f / FRAMERATE);
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+                grid.rotateAgent(agent, -200.f / FRAMERATE);
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+                grid.rotateAgent(agent, 200.f / FRAMERATE);
+            }
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            agent.move(-10.f / FRAMERATE);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-            agent.rotate(-200.f / FRAMERATE);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-            agent.rotate(200.f / FRAMERATE);
-        }
-
         
         window.clear(sf::Color::White);
-        window.draw(map);
+        window.draw(grid);
         window.draw(agent);
         window.display();
     }
-
+    
     return EXIT_SUCCESS;
 }
