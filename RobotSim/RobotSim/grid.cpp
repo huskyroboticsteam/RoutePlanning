@@ -14,7 +14,7 @@
 #include <math.h>
 
 #include "obstacle.cpp"
-#include "agent.cpp"
+#include "agent.h"
 
 class Grid : public sf::Drawable, public sf::Transformable {
 public:

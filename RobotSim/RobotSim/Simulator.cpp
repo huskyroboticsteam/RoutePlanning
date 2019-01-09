@@ -5,6 +5,7 @@
 #include <cmath>
 #include <assert.h>
 #include "Simulator.h"
+#include "grid.h"
 #include "../../src/Map.h"
 
 #define ASSERT_ON 1
@@ -16,7 +17,7 @@ RoverPathfinding::Simulator::Simulator(const std::string &map_path, float init_b
     cur_pos = point{0, 0};
 }
 
-RoverPathfinding::Simulator::Simulator() : Simulator("./obstacles.txt", 0.f, simulator_config{45.f, 10.f}) {}
+RoverPathfinding::Simulator::Simulator() : Simulator("../obstacles.txt", 0.f, simulator_config{45.f, 10.f}) {}
 
 void RoverPathfinding::Simulator::load_map(const std::string &path)
 {
