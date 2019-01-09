@@ -16,9 +16,9 @@
 #include "obstacle.cpp"
 #include "agent.cpp"
 
-class Map2 : public sf::Drawable, public sf::Transformable {
+class Grid : public sf::Drawable, public sf::Transformable {
 public:
-    Map2 (float w, float h, unsigned int s) {
+    Grid (float w, float h, unsigned int s) {
         width = w;
         height = h;
         scale = s;
@@ -97,7 +97,7 @@ public:
         obstacleList.push_back(Obstacle(x1, y1, x2, y2, scale, true));
     }
     
-    sf::Vertex moveAgent(Agent2 &agent, float ds) {
+    sf::Vertex moveAgent(Agent &agent, float ds) {
         float curR = agent.getInternalRotation();
         float xOffset = ds * cos(curR * PI / 180);
         float yOffset = ds * sin(curR * PI / 180);
@@ -106,7 +106,7 @@ public:
             agent.move(xOffset, yOffset);
     }
     
-    float rotateAgent(Agent2 &agent, float dr) {
+    float rotateAgent(Agent &agent, float dr) {
         if (!willCollide(agent, 0, 0, dr))
             agent.rotate(dr);
     }
@@ -151,7 +151,7 @@ public:
     // returns false if there will be no collisions
     // is not very sophisticated (simply checks target location instead of path), TODO make better
     // currently only checks the map borders
-    bool willCollide(Agent2 agent, float dx, float dy, float dr) {
+    bool willCollide(Agent agent, float dx, float dy, float dr) {
         if (noclip)
             return false;
         

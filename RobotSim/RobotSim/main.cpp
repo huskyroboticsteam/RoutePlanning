@@ -23,7 +23,7 @@
 
 // Here is a small helper for you! Have a look.
 #include "ResourcePath.hpp"
-#include "map.cpp"
+#include "grid.cpp"
 
 int main(int, char const**)
 {
@@ -40,8 +40,8 @@ int main(int, char const**)
     }
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     
-    Map2 map(40.f, 40.f, 36);
-    Agent2 agent(map.retrieveScale(), 2.f, 2.f);
+    Grid grid(40.f, 40.f, 36);
+    Agent agent(grid.retrieveScale(), 2.f, 2.f);
     
     while (window.isOpen())
     {
@@ -61,16 +61,16 @@ int main(int, char const**)
             else if (event.type == sf::Event::KeyPressed && hasFocus) {
                 switch (event.key.code) {
                     case sf::Keyboard::G : {
-                        map.toggleGrid();
+                        grid.toggleGrid();
                         break;
                     }
                     case sf::Keyboard::O : {
-                        map.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
+                        grid.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }
                     case sf::Keyboard::N : {
-                        map.toggleClipping();
+                        grid.toggleClipping();
                         break;
                     }
                     case sf::Keyboard::Num0 : {
@@ -78,19 +78,19 @@ int main(int, char const**)
                         break;
                     }
                     case sf::Keyboard::Up : {
-                        map.moveAgent(agent, .5f);
+                        grid.moveAgent(agent, .5f);
                         break;
                     }
                     case sf::Keyboard::Down : {
-                        map.moveAgent(agent, -.5f);
+                        grid.moveAgent(agent, -.5f);
                         break;
                     }
                     case sf::Keyboard::Left : {
-                        map.rotateAgent(agent, -15.f);
+                        grid.rotateAgent(agent, -15.f);
                         break;
                     }
                     case sf::Keyboard::Right : {
-                        map.rotateAgent(agent, 15.f);
+                        grid.rotateAgent(agent, 15.f);
                         break;
                     }
                 }
@@ -99,21 +99,21 @@ int main(int, char const**)
         
         if (hasFocus) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-                map.moveAgent(agent, 10.f / FRAMERATE);
+                grid.moveAgent(agent, 10.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-                map.moveAgent(agent, -10.f / FRAMERATE);
+                grid.moveAgent(agent, -10.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-                map.rotateAgent(agent, -200.f / FRAMERATE);
+                grid.rotateAgent(agent, -200.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-                map.rotateAgent(agent, 200.f / FRAMERATE);
+                grid.rotateAgent(agent, 200.f / FRAMERATE);
             }
         }
         
         window.clear(sf::Color::White);
-        window.draw(map);
+        window.draw(grid);
         window.draw(agent);
         window.display();
     }

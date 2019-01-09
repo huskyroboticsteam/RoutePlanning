@@ -14,9 +14,9 @@
 
 #define PI 3.141592654
 
-class Agent2 : public sf::Drawable, public sf::Transformable {
+class Agent : public sf::Drawable, public sf::Transformable {
 public:
-    Agent2(unsigned int mapScale, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f, float rSpeed = 1.f) {
+    Agent(unsigned int mapScale, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f, float rSpeed = 1.f) {
         xPos = startX;
         yPos = startY;
         rotation = startR;
