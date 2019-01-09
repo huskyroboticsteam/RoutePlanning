@@ -23,10 +23,10 @@
 #include <string>
 
 // Here is a small helper for you! Have a look.
-#include "grid.cpp"
+#include "grid.hpp"
 
 #include "../../src/utils.cpp"
-#include "Simulator.h"
+#include "Simulator.hpp"
 
 #define WINDOW_SCALE 0.5f
 
@@ -68,6 +68,16 @@ int main(int, char const**)
             }
             else if (event.type == sf::Event::KeyPressed && hasFocus) {
                 switch (event.key.code) {
+                    case sf::Keyboard::H : {
+                        std::cout << "Help Menu: " << std::endl;
+                        std::cout << "W/S -- Drive robot forward or back" << std::endl;
+                        std::cout << "A/D -- Rotate robot left or right" << std::endl;
+                        std::cout << "G   -- Toggle grid" << std::endl;
+                        std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
+                        std::cout << "N   -- Toggle clipping" << std::endl;
+                        std::cout << "0   -- Clear robot path" << std::endl;
+                        break;
+                    }
                     case sf::Keyboard::G : {
                         grid.toggleGrid();
                         break;
