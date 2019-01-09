@@ -26,7 +26,9 @@
 // #include "ResourcePath.hpp"
 #include "agent.cpp"
 
-const std::string RESOURCE_DIR = "../Resources/";
+#include "../../src/utils.cpp"
+
+const std::string RESOURCE_DIR = "Resources/";
 
 int main(int, char const**)
 {
@@ -36,11 +38,11 @@ int main(int, char const**)
     window.setFramerateLimit(FRAMERATE);
 
     sf::Image icon;
-    icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png");
+    //icon.loadFromFile("/Resources/HuskyRoboticsLogo.png");
     // if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
     //     return EXIT_FAILURE;
     // }
-    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+    //window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     Map map(40.f, 40.f, 24);
     
