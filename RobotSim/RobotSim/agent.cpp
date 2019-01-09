@@ -1,5 +1,5 @@
 //
-//  agent.cpp
+//  agent2.cpp
 //  RobotSim
 //
 //  Gary: used as both controller and view. Holds a Simulator instance as its model.
@@ -12,121 +12,105 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
-
-#include "map.cpp"
+#include <array>
 
 #define PI 3.141592654
 
 class Agent : public sf::Drawable, public sf::Transformable {
-    
 public:
-    Agent(sf::Vector2f startPos, Map map, float startX = 0.f, float startY = 0.f, float startR = 45.f, sf::Color color = sf::Color::Green) {
+    Agent(unsigned int mapScale, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f, float rSpeed = 1.f) {
         xPos = startX;
         yPos = startY;
         rotation = startR;
+        transSpeed = tSpeed;
+        rotSpeed = rSpeed;
         
-        shape = sf::CircleShape(SHAPE_RADIUS, 3); // equilateral triangle
-        shape.setOrigin(SHAPE_RADIUS, SHAPE_RADIUS);
-        shape.setFillColor(color);
-        shape.setPosition(startPos);
-        shape.setRotation(90 + startR);
+        scale = mapScale;
+        float fScale = (float) scale;
+        
+        shapeBase = sf::RectangleShape(sf::Vector2f(scale, 1.5 * scale));
+        shapeBase.setOrigin(scale * 0.5f, scale * 0.75f);
+        shapeBase.setFillColor(BASE_COLOR);
+        shapeBase.setPosition((xPos + 1) * scale, (yPos + 1) * scale);
+        shapeBase.setRotation(90 + startR);
+        
+        shapeTop = sf::CircleShape(scale * 0.5f, 3);
+        shapeTop.setOrigin(scale * 0.5f, scale * 0.5f);
+        shapeTop.setFillColor(TOP_COLOR);
+        shapeTop.setPosition((xPos + 1) * scale, (yPos + 1) * scale);
+        shapeTop.setRotation(90 + startR);
+        
+//        hitBox.push_back({-15.f / fScale, -20.f / fScale, -15.f / fScale, 20.f / fScale});
+//        hitBox.push_back({-15.f / fScale, 20.f / fScale, 15.f / fScale, 20.f / fScale});
+//        hitBox.push_back({15.f / fScale, 20.f / fScale, 15.f / fScale, -20.f / fScale});
+//        hitBox.push_back({15.f / fScale, -20.f / fScale, -15.f / fScale, -20.f / fScale});
+
+        hitBox[0] = {.9f, atan2(.75f, -.5f)};
+        hitBox[1] = {.9f, atan2(.75f, .5f)};
+        hitBox[2] = {.9f, atan2(-.75f, .5f)};
+        hitBox[3] = {.9f, atan2(-.75f, -.5f)};
         
         path.setPrimitiveType(sf::Lines);
-        
-        pixelsPerMeter = map.getScale();
-        
-        pathColor = color;
-        
-        internalMap = &map;
     }
     
-    void move(float distance) {
-        float xOffset = distance * cos(rotation * PI / 180);
-        float yOffset = distance * sin(rotation * PI / 180);
+    void move(float dx, float dy) {
+        xPos += dx;
+        yPos += dy;
         
-        float newX = xPos + xOffset;
-        float newY = yPos + yOffset;
+        path.append(shapeBase.getPosition());
         
-        if (newX < 0)
-            xOffset = 0 - xPos;
-        if (newX > (internalMap->getWidth() - 1))
-            xOffset = internalMap->getWidth() - 1 - xPos;
-        if (newY < 0)
-            yOffset = 0 - yPos;
-        if(newY > (internalMap->getHeight() - 1))
-            yOffset = internalMap->getWidth() - 1 - yPos;
+        shapeBase.move(dx * scale, dy * scale);
+        shapeTop.move(dx * scale, dy * scale);
         
-        xPos += xOffset;
-        yPos += yOffset;
+        path.append(shapeBase.getPosition());
         
-        sf::Vertex start = shape.getPosition();
-        start.color = pathColor;
-        
-        path.append(start);
-        
-        shape.move(xOffset * pixelsPerMeter, yOffset * pixelsPerMeter);
-        
-        sf::Vertex end = shape.getPosition();
-        end.color = pathColor;
-        
-        path.append(end);
+        path[path.getVertexCount() - 2].color = PATH_COLOR;
+        path[path.getVertexCount() - 1].color = PATH_COLOR;
     }
     
-    void rotate(float rotate) {
-        rotation += rotate;
-        shape.rotate(rotate);
+    void rotate(float dr) {
+        rotation += dr;
+        
+        shapeBase.rotate(dr);
+        shapeTop.rotate(dr);
     }
     
-    void place(float x, float y, float rot, bool drawPath = true) {
-        xPos = x;
-        yPos = y;
-        rotation = rot;
-        
-        // update shape
-        shape.setRotation(90.f + rot);
-        
-        if (drawPath) {
-            sf::Vertex start = shape.getPosition();
-            start.color = pathColor;
-            path.append(start);
-        }
-        shape.setPosition((x + 1.f) * pixelsPerMeter, (y + 1.f) * pixelsPerMeter);
-        if (drawPath) {
-            sf::Vertex end = shape.getPosition();
-            end.color = pathColor;
-            path.append(end);
-        }
-    }
-    
-    void erasePath() {
-        path = sf::VertexArray();
-        path.setPrimitiveType(sf::Lines);
-    }
+    void clearPath() { path.clear(); }
     
     float getX() { return xPos; }
     float getY() { return yPos; }
-    float getRotation() { return rotation; }
+    float getInternalRotation() { return rotation; }
+    float getTSpeed() { return transSpeed; }
+    float getRSpeed() { return rotSpeed; }
+    
+    std::array<std::pair<float, float>, 4> getHitBox() { return hitBox; }
+    
+    const sf::Color BASE_COLOR = sf::Color(55, 22, 126);
+    const sf::Color TOP_COLOR =  sf::Color(233, 213, 163);
+    const sf::Color PATH_COLOR = sf::Color(55, 22, 126);
     
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const {
         states.transform *= getTransform();
         
         target.draw(path, states);
-        target.draw(shape, states);
+        target.draw(shapeBase, states);
+        target.draw(shapeTop, states);
     }
     
-    sf::CircleShape shape;
+    sf::RectangleShape shapeBase;
+    sf::CircleShape shapeTop;
     sf::VertexArray path;
     
     float xPos;
     float yPos;
     float rotation;
+    float transSpeed;
+    float rotSpeed;
     
-    int pixelsPerMeter;
+    // stores the four corners of the hitbox as polar coordinates (r, θ)
+    // r is in meters, θ is in radians
+    std::array<std::pair<float, float>, 4> hitBox;
     
-    Map* internalMap;
-    
-    const float SHAPE_RADIUS = 20.f;
-    //const sf::Color SHAPE_COLOR = sf::Color::Green;
-    sf::Color pathColor;
+    unsigned int scale;
 };
