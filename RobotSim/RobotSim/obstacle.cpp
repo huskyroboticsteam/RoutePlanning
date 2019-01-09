@@ -31,6 +31,11 @@ public:
         line[1].color = sf::Color::Red;
     }
     
+    void recolor(sf::Color newColor) {
+        line[0].color = newColor;
+        line[1].color = newColor;
+    }
+    
     float x1;
     float y1;
     float x2;
