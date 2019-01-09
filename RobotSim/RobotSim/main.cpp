@@ -25,8 +25,12 @@
 // Here is a small helper for you! Have a look.
 // #include "ResourcePath.hpp"
 #include "agent.cpp"
+#include "Simulator.h"
+#include "../../src/utils.h"
 
-const std::string RESOURCE_DIR = "../Resources/";
+#define SHOW_VISIBLE_OBST 1
+
+const std::string RESOURCE_DIR = "./Resources/";
 
 int main(int, char const**)
 {
@@ -37,9 +41,6 @@ int main(int, char const**)
 
     sf::Image icon;
     icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png");
-    // if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
-    //     return EXIT_FAILURE;
-    // }
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     Map map(40.f, 40.f, 24);
@@ -107,4 +108,8 @@ int main(int, char const**)
     }
 
     return EXIT_SUCCESS;
+}
+
+static void draw_obstacles(std::list<RoverPathfinding::line> obstacles) {
+    
 }

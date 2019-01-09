@@ -2,6 +2,8 @@
 //  agent.cpp
 //  RobotSim
 //
+//  Gary: used as both controller and view. Holds a Simulator instance as its model.
+//
 //  Created by Tadeusz Pforte on 11/13/18.
 //  Copyright © 2018 Husky Robotics. All rights reserved.
 //

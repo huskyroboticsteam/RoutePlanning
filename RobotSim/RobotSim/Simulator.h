@@ -29,7 +29,8 @@ public:
   Simulator(const std::string &map_path, float init_bearing, simulator_config conf);
   Simulator();
   void load_map(const std::string &path);
-  std::list<line> visible_obstacles() { return view_obstacles; };
+  const std::list<line>& visible_obstacles() { return view_obstacles; };
+  const std::list<sim_obstacle>& all_obstacles() { return sim_obstacles; };
   void update_agent();
   //getters
   float get_bearing();
