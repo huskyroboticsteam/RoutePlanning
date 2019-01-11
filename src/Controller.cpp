@@ -1,6 +1,7 @@
 #include "Controller.h"
 #include <iostream>
 #include <cstring>
+#include <math.h>
 
 #define DATA_GPS 0xC0
 #define DATA_MAG 0xC1
@@ -21,9 +22,20 @@ namespace RoverPathfinding {
         if (packetID == DATA_GPS) {
             float lat = 0.0;
             std::memcpy(&lat, data, sizeof(float));
+<<<<<<< HEAD
             float lng = 0.0;
             std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
         // Magnometer has x, y, z values
+=======
+            float longitude = 0.0;
+            std::memcpy(&longitude, &data[sizeof(float)], sizeof(float));
+			std::vector<point> path = map.shortest_path_to(lat, longitude, TARGET_LAT, TARGET_LONGITUDE);
+			point nextPoint = path[0];
+			float heading = atan2(nextPoint.y - longitude, nextPoint.x - latitude);
+			setDirection(heading);
+			setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
+	   // Magnometer has x, y, z values
+>>>>>>> 961e8622ad8f519ae211d0f86c26b6fdd3121a7d
         } else if (packetID == DATA_MAG) {
             float x = 0.0, y = 0.0, z = 0.0;
             std::memcpy(&x, data, sizeof(float));
@@ -31,7 +43,13 @@ namespace RoverPathfinding {
             std::memcpy(&z, &data[2 * sizeof(float)], sizeof(float));
         }
     }
+<<<<<<< HEAD
 
 
+=======
+	
+	void setDirection(float heading) {}
+	void setSpeed(float speed) {}
+>>>>>>> 961e8622ad8f519ae211d0f86c26b6fdd3121a7d
 }
 
