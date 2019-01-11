@@ -15,6 +15,9 @@ namespace RoverPathfinding {
     // TODO: Feed lat/long to map to find vector pointing to next destination
     // TODO: Feed x/y/z into ??? to find current orientation, then we can find how much to turn
     // using given packet data and server send a packet containing either a direction or motor power
+	
+	void setDirection(float heading) {}
+	void setSpeed(float speed) {}
     void parsePacket(unsigned char packetID, unsigned char data[]) {
         // GPS has latitude and longitude
         if (packetID == DATA_GPS) {
@@ -24,7 +27,7 @@ namespace RoverPathfinding {
             std::memcpy(&longitude, &data[sizeof(float)], sizeof(float));
 			std::vector<point> path = map.shortest_path_to(lat, longitude, TARGET_LAT, TARGET_LONGITUDE);
 			point nextPoint = path[0];
-			float heading = atan2(nextPoint.y - longitude, nextPoint.x - latitude);
+			float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
 			setDirection(heading);
 			setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
 	   // Magnometer has x, y, z values
@@ -36,7 +39,6 @@ namespace RoverPathfinding {
         }
     }
 	
-	void setDirection(float heading) {}
-	void setSpeed(float speed) {}
+	
 }
 
