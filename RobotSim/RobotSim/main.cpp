@@ -23,9 +23,12 @@
 #include <string>
 
 // Here is a small helper for you! Have a look.
-#include "grid.cpp"
+#include "grid.hpp"
 
 #include "../../src/utils.cpp"
+#include "Simulator.hpp"
+
+#define WINDOW_SCALE 0.5f
 
 const std::string RESOURCE_DIR = "Resources/";
 
@@ -33,7 +36,7 @@ int main(int, char const**)
 {
     const unsigned int FRAMERATE = 60;
     
-    sf::RenderWindow window(sf::VideoMode(1476, 1576), "Robot Simulator");
+    sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(FRAMERATE);
     
     bool hasFocus = true;
@@ -45,7 +48,7 @@ int main(int, char const**)
 //    }
 //    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     
-    Grid grid(40.f, 40.f, 36);
+    Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     Agent agent(grid.retrieveScale(), 2.f, 2.f);
     
     while (window.isOpen())
@@ -65,12 +68,22 @@ int main(int, char const**)
             }
             else if (event.type == sf::Event::KeyPressed && hasFocus) {
                 switch (event.key.code) {
+                    case sf::Keyboard::H : {
+                        std::cout << "Help Menu: " << std::endl;
+                        std::cout << "W/S -- Drive robot forward or back" << std::endl;
+                        std::cout << "A/D -- Rotate robot left or right" << std::endl;
+                        std::cout << "G   -- Toggle grid" << std::endl;
+                        std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
+                        std::cout << "N   -- Toggle clipping" << std::endl;
+                        std::cout << "0   -- Clear robot path" << std::endl;
+                        break;
+                    }
                     case sf::Keyboard::G : {
                         grid.toggleGrid();
                         break;
                     }
                     case sf::Keyboard::O : {
-                        grid.readObstaclesFromFile("/Users/tadtiger/Documents/HuskyRobotics/RoutePlanning/RobotSim/RobotSim/obstacles.txt");
+                        grid.readObstaclesFromFile("../obstacles.txt");
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }
