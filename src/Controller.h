@@ -21,7 +21,8 @@ class Controller
   private:
     // TODO might take some parameters
     void update();                    // Update the current world state.
-
+	void setSpeed(float speed);       // Update the speed the robot should be moving at
+	void setDirection(float heading); // Update the direction the robot should be facing
     RoverPathfinding::Map map;    // The agent that handles the logic of finding a path         
     RoverPathfinding::Server server;  // The server that handles networking and triggers
 };
