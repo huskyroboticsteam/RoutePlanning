@@ -36,11 +36,8 @@ namespace RoverPathfinding {
             std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
 			std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
 			point nextPoint = path[0];
-<<<<<<< HEAD
 			float heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
-=======
 			float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
->>>>>>> a15ae7726bfd7c1d43bd393c94848aede6d6a497
 			setDirection(heading);
 			setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
 	    // Magnometer has x, y, z values
@@ -54,7 +51,6 @@ namespace RoverPathfinding {
 
 
 	
-<<<<<<< HEAD
 	void setDirection(float heading) {}
 	void setSpeed(float speed) {}
 
@@ -71,8 +67,6 @@ namespace RoverPathfinding {
     }
 
 
-=======
 	
->>>>>>> a15ae7726bfd7c1d43bd393c94848aede6d6a497
 }
 
