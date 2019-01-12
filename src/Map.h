@@ -10,10 +10,11 @@ namespace RoverPathfinding
 
 struct node
 {
+  using edge = std::pair<int, float>; // The index of a neighboring node in nodes and its distance
   int prev;
   float dist_to;
   point coord;
-  std::vector<std::pair<int, float>> connection;
+  std::vector<edge> connection;
 };
 
 struct obstacle
@@ -33,6 +34,8 @@ public:
   point compute_search();                        // search for the tennis ball once the goal is reached. Return a target direction vector.
   std::vector<point> shortest_path_to(float cur_lat, float cur_lng,
                                       float tar_lat, float tar_lng); //Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination (for debugging)
+  std::vector<point> a_star_algorithm(float cur_lat, float cur_lng,
+									  float tar_lat, float tar_lng); //Returns a vector of lat/lng pairs for the shortest path to the target location, determined by A* algorithm
 private:
   line add_length_to_line_segment(point p, point q, float length); //Returns a pair of points that are "length" away from the ends of segment pq
   void add_edge(int n1, int n2);                                   //Adds an edge to the graph

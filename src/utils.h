@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include <stack>
 
 namespace RoverPathfinding
 {

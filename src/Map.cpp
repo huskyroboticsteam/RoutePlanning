@@ -215,3 +215,34 @@ std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to(flo
     std::reverse(result.begin(), result.end());
     return (result);
 }
+
+std::vector<RoverPathfinding::point> RoverPathfinding::Map::a_star_algorithm(float cur_lat, float cur_lng, 
+																			float tar_lat, float tar_lng)
+{
+	auto cur = point{ cur_lat, cur_lng };
+	auto tar = point{ tar_lat, tar_lng };
+	std::vector<node> nodes = build_graph(cur, tar);
+	std::vector<node> path;
+
+	std::stack<node> stack;
+	stack.push(nodes[0]);
+	while (!stack.empty()) { // Iterate through the most efficient nodes
+		node n = stack.top();
+		stack.pop();
+		for (auto e : n.connection) {
+
+		}
+
+	}
+
+	std::vector<point> result;
+	int i = 1;
+	while (i != 0)
+	{
+		node &n = nodes[i];
+		result.push_back(n.coord);
+		i = n.prev;
+	}
+	std::reverse(result.begin(), result.end());
+	return result;
+}
