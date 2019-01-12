@@ -50,11 +50,13 @@ namespace RoverPathfinding {
 	void setDirection(float heading) {}
 	void setSpeed(float speed) {}
 
+    // angle must be in radians, dist in meters
+    // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
     point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float angle) {
         float x = dist * cos(angle);
         float y = dist * sin(angle);
         float lat = y / EARTH_RADIUS;
-        float lng = x / (EARTH_RADIUS * cos(HANKSVILLE_LAT));
+        float lng = x / (EARTH_RADIUS * cos(HANKSVILLE_LAT * M_PI / 180.0));
         point p;
         p.x = lng;
         p.y = lat;
