@@ -1,0 +1,6 @@
+namespace RoverPathFinding 
+{
+    class Controller
+    {
+    }
+}
