@@ -2,46 +2,25 @@
 #include <cmath>
 #include <algorithm>    
 #include "Map.h"
-
-
-
-RoverPathfinding::point convertFloatsToPoint(float first, float second)
-{
-	RoverPathfinding::point p = { first, second };
-	return p;
-}
-
-RoverPathfinding::point convertPairToPoint(std::pair<float, float> pair)
-{
-	RoverPathfinding::point p = { pair.first, pair.second };
-	return p;
-}
+#include "utils.h"
 
 void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
 {
-	obstacle o;
-	o.marked = false;
-	o.coord1 = coord1;
-	o.coord2 = coord2;
-	obstacles.push_back(o);
+    // obstacle o{};
+    std::pair<int, int> pair = std::make_pair(-1, -1);
+    obstacles.push_back(obstacle{false, coord1, coord2, pair});
 }
 
-void RoverPathfinding::Map::add_obstacle(std::pair<float, float> coord1, std::pair<float, float> coord2) {
-	add_obstacle(convertPairToPoint(coord1), convertPairToPoint(coord2));
-}
-
-// Adds extra distance between p and q, returns a pair of points in the line
-std::pair<RoverPathfinding::point, RoverPathfinding::point> RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
+RoverPathfinding::line RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
 {
-    // boom_bam();
-	point pq = convertFloatsToPoint(q.x - p.x, q.y - p.y); //vector (delta x, delta y)
-    float pq_len = sqrt(pq.x * pq.x + pq.y * pq.y); // Length of vector(pythag)
-    pq.x = length * pq.x / pq_len;
-    pq.y = length * pq.y / pq_len;
+    std::pair<float, float> pq = std::make_pair(q.x - p.x, q.y - p.y); //vector
+    float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second);
+    pq.first = length * pq.first / pq_len;
+    pq.second = length * pq.second / pq_len;
 
-	point p1 = convertFloatsToPoint(q.x + pq.x, q.y + pq.y);
-	point p2 = convertFloatsToPoint(p.x - pq.x, p.y - pq.y);
-    return (std::make_pair(p1, p2));
+    point p1 = point{q.x + pq.first, q.y + pq.second};
+    point p2 = point{p.x - pq.first, p.y - pq.second};
+    return line{p1, p2};
 }
 
 void RoverPathfinding::Map::add_edge(int n1, int n2)
@@ -139,12 +118,12 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
                 for (int safety = 2; safety < nodes.size(); safety++) // possibly to check whether nodes are safe or not
                 {
                     node &n = nodes[safety];
-                    if (RoverPathfinding::within_radius(n.coord, obstacle_side_pts.first, TOLERANCE))
+                    if (RoverPathfinding::within_radius(n.coord, obstacle_side_pts.p, TOLERANCE))
                     {
                         create_n1 = false;
                         n1 = safety;
                     }
-                    if (RoverPathfinding::within_radius(n.coord, obstacle_side_pts.second, TOLERANCE))
+                    if (RoverPathfinding::within_radius(n.coord, obstacle_side_pts.q, TOLERANCE))
                     {
                         create_n2 = false;
                         n2 = safety;
@@ -152,14 +131,15 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
                 }
 
                 if (create_n1)
-                    n1 = create_node(obstacle_side_pts.first);
+                    n1 = create_node(obstacle_side_pts.p);
 
                 if (create_n2)
-                    n2 = create_node(obstacle_side_pts.second);
+                    n2 = create_node(obstacle_side_pts.q);
 
-                obst.side_safety_nodes = std::make_pair(n1, n2);
+                obst.side_safety_nodes.first = n1;
+                obst.side_safety_nodes.second = n2;
 
-                point center_coord = RoverPathfinding::center_point_with_radius(nodes[curr_node].coord, obstacle_side_pts.first, obstacle_side_pts.second, TOLERANCE);
+                point center_coord = RoverPathfinding::center_point_with_radius(nodes[curr_node].coord, obstacle_side_pts.p, obstacle_side_pts.q, TOLERANCE);
                 obst.center_safety_node = create_node(center_coord);
                 add_edge(curr_node, obst.center_safety_node);
                 add_edge(n1, obst.center_safety_node);
@@ -190,8 +170,8 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to(float cur_lat, float cur_lng,
                                                                            float tar_lat, float tar_lng)
 {
-    auto cur = convertFloatsToPoint(cur_lat, cur_lng);
-    auto tar = convertFloatsToPoint(tar_lat, tar_lng);
+    auto cur = point{cur_lat, cur_lng};
+    auto tar = point{tar_lat, tar_lng};
     std::vector<node> nodes = build_graph(cur, tar);
 
 #if 0
