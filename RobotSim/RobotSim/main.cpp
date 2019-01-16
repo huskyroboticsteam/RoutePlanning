@@ -47,8 +47,9 @@ int main(int, char const **)
     }
 
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
-    Agent agent(grid.retrieveScale(), 2.f, 2.f);
+    Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
     RoverPathfinding::Simulator sim(grid.obstacleList, agent, RoverPathfinding::simulator_config{70.f, 10.f}, grid.retrieveScale());
+    
     while (window.isOpen())
     {
         sf::Event event;
@@ -132,13 +133,11 @@ int main(int, char const **)
             {
                 grid.moveAgent(agent, -10.f / FRAMERATE);
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-            {
-                grid.rotateAgent(agent, -200.f / FRAMERATE);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-            {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
                 grid.rotateAgent(agent, 200.f / FRAMERATE);
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+                grid.rotateAgent(agent, -200.f / FRAMERATE);
             }
         }
 

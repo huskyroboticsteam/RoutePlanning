@@ -1,6 +1,6 @@
 #include "agent.hpp"
 
-Agent::Agent(unsigned int mapScale, float startX, float startY, float startR, float tSpeed, float rSpeed)
+Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float startY, float startR, float tSpeed, float rSpeed)
 {
     // internal position stored in meters
     xPos = startX;
@@ -13,7 +13,8 @@ Agent::Agent(unsigned int mapScale, float startX, float startY, float startR, fl
 
     // the map's scale (pixels per meter)
     scale = mapScale;
-    float fScale = (float)scale;
+    mapWidth = mapW;
+    mapHeight = mapH;
 
     // default agent size in pixels (meters * pixels per meter)
     float agentWidth = 1.f * scale;
@@ -23,14 +24,14 @@ Agent::Agent(unsigned int mapScale, float startX, float startY, float startR, fl
     shapeBase = sf::RectangleShape(sf::Vector2f(agentWidth, agentLength));
     shapeBase.setOrigin(agentWidth / 2.f, agentLength / 2.f);
     shapeBase.setFillColor(BASE_COLOR);
-    shapeBase.setPosition((xPos + 1) * scale, (yPos + 1) * scale);
+    shapeBase.setPosition((xPos + 1) * scale, (mapHeight - yPos) * scale);
     shapeBase.setRotation(90 + startR);
 
     // this is a triangle, drawn on top of the rectangle
     shapeTop = sf::CircleShape(agentWidth / 2.f, 3);
     shapeTop.setOrigin(agentWidth / 2.f, agentWidth / 2.f);
     shapeTop.setFillColor(TOP_COLOR);
-    shapeTop.setPosition((xPos + 1) * scale, (yPos + 1) * scale);
+    shapeTop.setPosition((xPos + 1) * scale, (mapHeight - yPos) * scale);
     shapeTop.setRotation(90 + startR);
 
     // the hitbox is stored as four vectors in polar coordinates
@@ -53,8 +54,9 @@ void Agent::move(float dx, float dy)
 
     path.append(shapeBase.getPosition());
 
-    shapeBase.move(dx * scale, dy * scale);
-    shapeTop.move(dx * scale, dy * scale);
+    // SFML y position (top is 0) is opposite of internal y position (bottom is 0)
+    shapeBase.move(dx * scale, -dy * scale);
+    shapeTop.move(dx * scale, -dy * scale);
 
     path.append(shapeBase.getPosition());
 
@@ -72,8 +74,9 @@ void Agent::rotate(float dr)
     else if (rotation < 0)
         rotation += 360;
 
-    shapeBase.rotate(dr);
-    shapeTop.rotate(dr);
+    // SFML rotation (clockwise) is opposite of internal rotation (counter-clockwise)
+    shapeBase.rotate(-dr);
+    shapeTop.rotate(-dr);
 }
 
 // erases the path drawn so far
