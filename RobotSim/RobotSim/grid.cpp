@@ -101,15 +101,18 @@ void Grid::readObstaclesFromFile(std::string fileName) {
 
 // creates a new obstacle from (x1, y1) to (x2, y2)
 void Grid::placeObstacle(float x1, float y1, float x2, float y2) {
-    obstacleList.push_back(Obstacle(x1, y1, x2, y2, scale, true));
+    obstacleList.push_back(Obstacle(x1, y1, x2, y2, scale, width, height));
 }
 
 // moves the agent forward by distance ds (which can be negative)
 // if clipping is enabled, collisions with obstacles and borders will block movement
 sf::Vertex Grid::moveAgent(Agent &agent, float ds) {
-    float curR = agent.getInternalRotation();
+    // convert internal rotation (counter-clockwise) to SFML rotation (clockwise)
+    float curR = -agent.getInternalRotation();
+    
     float xOffset = ds * cos(curR * PI / 180);
-    float yOffset = ds * sin(curR * PI / 180);
+    // convert y from SFML (top is 0) to internal position (bottom is 0)
+    float yOffset = -ds * sin(curR * PI / 180);
     
     if (!willCollide(agent, xOffset, yOffset, 0))
         agent.move(xOffset, yOffset);
@@ -120,11 +123,6 @@ sf::Vertex Grid::moveAgent(Agent &agent, float ds) {
 float Grid::rotateAgent(Agent &agent, float dr) {
     if (!willCollide(agent, 0, 0, dr))
         agent.rotate(dr);
-}
-
-// returns the grid scale, in pixels per meter
-unsigned int Grid::retrieveScale() {
-    return scale;
 }
 
 // returns true if the two lines, stored as {x1, y1, x2, y2}, intersect

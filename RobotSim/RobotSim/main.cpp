@@ -49,7 +49,7 @@ int main(int, char const**)
 //    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
-    Agent agent(grid.retrieveScale(), 2.f, 2.f);
+    Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
     
     while (window.isOpen())
     {
@@ -129,10 +129,10 @@ int main(int, char const**)
                 grid.moveAgent(agent, -10.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-                grid.rotateAgent(agent, -200.f / FRAMERATE);
+                grid.rotateAgent(agent, 200.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-                grid.rotateAgent(agent, 200.f / FRAMERATE);
+                grid.rotateAgent(agent, -200.f / FRAMERATE);
             }
         }
         

@@ -61,16 +61,16 @@
 		9376504F2197AA50000897B2 /* RobotSim */ = {
 			isa = PBXGroup;
 			children = (
+				9393454521E5A9C8005CF43C /* agent.hpp */,
+				9386DF2E21BC41F1008C3C07 /* agent.cpp */,
 				9393454621E5A9D8005CF43C /* grid.hpp */,
+				933E520B21B76B8700CE6194 /* grid.cpp */,
 				9393454821E5A9D8005CF43C /* main.hpp */,
+				937650552197AA50000897B2 /* main.cpp */,
 				9393454921E5A9D8005CF43C /* obstacle.hpp */,
+				933E520D21B76D2800CE6194 /* obstacle.cpp */,
 				9393454A21E5A9D9005CF43C /* Simulator.cpp */,
 				9393454721E5A9D8005CF43C /* Simulator.hpp */,
-				937650552197AA50000897B2 /* main.cpp */,
-				9393454521E5A9C8005CF43C /* agent.hpp */,
-				933E520B21B76B8700CE6194 /* grid.cpp */,
-				933E520D21B76D2800CE6194 /* obstacle.cpp */,
-				9386DF2E21BC41F1008C3C07 /* agent.cpp */,
 				937650572197AA50000897B2 /* Resources */,
 				937650502197AA50000897B2 /* Supporting Files */,
 				936B5FC821A0A57900797E10 /* obstacles.txt */,
