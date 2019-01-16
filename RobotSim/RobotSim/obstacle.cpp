@@ -3,7 +3,7 @@
 Obstacle::Obstacle(float p1x, float p1y, float p2x, float p2y, float mapScale, bool dispQ)
 {
     // disabled drawing quadrants because I'm not using quadrants unless I have to later
-    drawQuadrants = false; //dispQ;
+    drawQuadrants = false;
 
     scale = mapScale;
 
@@ -20,6 +20,7 @@ Obstacle::Obstacle(float p1x, float p1y, float p2x, float p2y, float mapScale, b
     line[1].color = sf::Color::Red;
 }
 
+// changes the obstacle color to the given new color
 void Obstacle::recolor(sf::Color newColor)
 {
     line[0].color = newColor;
