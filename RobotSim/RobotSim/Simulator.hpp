@@ -3,8 +3,9 @@
 
 #include <list>
 #include <string>
-#include "../../src/utils.h"
-#include "../../src/Map.h"
+#include "Map.hpp"
+#include "obstacle.hpp"
+#include "agent.hpp"
 
 #define MAX_GRID_RESOLUTION 100 // max number of grid cells on each side of the map
 
@@ -23,35 +24,34 @@ struct sim_obstacle
   std::list<RoverPathfinding::point> endpoints;
 };
 
-class Simulator
+class Simulator : public sf::Drawable
 {
 public:
-  Simulator(const std::string &map_path, float init_bearing, simulator_config conf);
-  Simulator();
-  void load_map(const std::string &path);
+  Simulator(const std::list<Obstacle>& obstacleList, const Agent& agent, simulator_config conf, float map_scale);
   const std::list<line>& visible_obstacles() { return view_obstacles; };
-  const std::list<sim_obstacle>& all_obstacles() { return sim_obstacles; };
   void update_agent();
-  //getters
-  float get_bearing();
-  point get_pos();
-  //setters
-  void set_bearing(float brng);
-  void set_pos(float x, float y);
 
 private:
   std::vector<point> intersection_with_arc(const point &p, const point &q, const point &lower_point, const point &upper_point);
-  bool out_of_view(const point &pt);
-
+  bool within_view(const point &pt);
+  float scale; // scale is only used when calling draw
   Map map;
-  point cur_pos;
-  float bearing;  //Bearing in degrees counterclockwise from the positive x-axis
+  const Agent& agent;
+
+  // for computations; not actual attributes of the system
+  point cur_pos; //updated every cal to update_agent()
   float lower_vis; //Bearing subtracted by half of vision_angle (lower bound of FoV) for caching
   float upper_vis; //Bearing added by half of vision_angle (upper bound of FoV)
+  float vision_dist_sq;
+  point fov_lower;
+  point fov_upper;
+
   point target_pos;
   simulator_config config;
-  std::list<sim_obstacle> sim_obstacles;
+  const std::list<Obstacle>& sim_obstacles;
   std::list<line> view_obstacles;
+
+  virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 };
 } // namespace RoverPathfinding
 

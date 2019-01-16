@@ -12,6 +12,7 @@
 #include <SFML/Graphics.hpp>
 #include "agent.hpp"
 #include "obstacle.hpp"
+#include <list>
 
 class Grid : public sf::Drawable, public sf::Transformable
 {
@@ -36,7 +37,7 @@ class Grid : public sf::Drawable, public sf::Transformable
     sf::Color BORDER_COLOR = sf::Color::Black;
     sf::Color GRID_COLOR = sf::Color(128, 128, 128);
 
-    std::vector<Obstacle> obstacleList;
+    std::list<Obstacle> obstacleList; // using list for fast add/removal
 
   private:
     virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;

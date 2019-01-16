@@ -223,5 +223,5 @@ void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 }
 
 void Grid::debugMsg(std::string msg) {
-    std::cout << msg << std::endl;
+    // std::cout << msg << std::endl;
 }

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include "utils.hpp"
+#include <cstdio>
 
 #define PI 3.14159265359
 
@@ -211,6 +212,7 @@ bool RoverPathfinding::within_angle(float ang, float lower, float upper)
     {
         upper += 2 * PI;
     }
+    printf("Angle: %.2f; Lower: %.2f; Upper: %.2f\n", ang, lower, upper);
     return ang >= lower && ang <= upper;
 }
 
@@ -224,7 +226,7 @@ float RoverPathfinding::relative_angle(point o, point p)
     return std::atan((p.y - o.y) / (p.x - o.x));
 }
 
-bool RoverPathfinding::same_point(const point &p, const point &q, float tol)
+bool RoverPathfinding::same_point(const point &p, const point &q, float tol=0.05)
 {
     return std::sqrt(dist_sq(p, q)) <= tol;
 }

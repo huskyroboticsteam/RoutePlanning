@@ -24,11 +24,11 @@ public:
     void move(float dx, float dy);
     void rotate(float dr);
     void clearPath();
-    float getX() { return xPos; }
-    float getY() { return yPos; }
-    float getInternalRotation() { return rotation; }
-    float getTSpeed() { return transSpeed; }
-    float getRSpeed() { return rotSpeed; }
+    float getX() const { return xPos; }
+    float getY() const { return yPos; } 
+    float getInternalRotation() const { return rotation; } 
+    float getTSpeed() const { return transSpeed; }
+    float getRSpeed() const { return rotSpeed; } 
     
     std::array<std::pair<float, float>, 4> getHitBox() { return hitBox; }
     
