@@ -1,5 +1,5 @@
 //
-//  agent2.h
+//  agent.h
 //  RobotSim
 //
 //  Gary: used as both controller and view. Holds a Simulator instance as its model.

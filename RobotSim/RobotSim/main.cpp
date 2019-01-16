@@ -72,10 +72,16 @@ int main(int, char const**)
                         std::cout << "Help Menu: " << std::endl;
                         std::cout << "W/S -- Drive robot forward or back" << std::endl;
                         std::cout << "A/D -- Rotate robot left or right" << std::endl;
+                        std::cout << "P   -- Returns the internal position of the robot" << std::endl;
                         std::cout << "G   -- Toggle grid" << std::endl;
                         std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                         std::cout << "N   -- Toggle clipping" << std::endl;
                         std::cout << "0   -- Clear robot path" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::P : {
+                        std::cout << "Internal Position: (" << agent.getX() << "," << agent.getY()
+                                  << ") at " << agent.getInternalRotation() << " degrees" << std::endl;
                         break;
                     }
                     case sf::Keyboard::G : {
