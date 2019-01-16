@@ -67,69 +67,6 @@ int main(int, char const **)
             {
                 hasFocus = false;
             }
-<<<<<<< HEAD
-            else if (event.type == sf::Event::KeyPressed && hasFocus)
-            {
-                switch (event.key.code)
-                {
-                case sf::Keyboard::H:
-                {
-                    std::cout << "Help Menu: " << std::endl;
-                    std::cout << "W/S -- Drive robot forward or back" << std::endl;
-                    std::cout << "A/D -- Rotate robot left or right" << std::endl;
-                    std::cout << "G   -- Toggle grid" << std::endl;
-                    std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
-                    std::cout << "N   -- Toggle clipping" << std::endl;
-                    std::cout << "0   -- Clear robot path" << std::endl;
-                    break;
-                }
-                case sf::Keyboard::G:
-                {
-                    grid.toggleGrid();
-                    break;
-                }
-                case sf::Keyboard::O:
-                {
-                    grid.readObstaclesFromFile("./obstacles.txt");
-                    std::cout << "Added obstacles" << std::endl;
-                    break;
-                }
-                case sf::Keyboard::N:
-                {
-                    grid.toggleClipping();
-                    break;
-                }
-                case sf::Keyboard::Num0:
-                {
-                    agent.clearPath();
-                    break;
-                }
-                case sf::Keyboard::Up:
-                {
-                    grid.moveAgent(agent, .5f);
-                    break;
-                }
-                case sf::Keyboard::Down:
-                {
-                    grid.moveAgent(agent, -.5f);
-                    break;
-                }
-                case sf::Keyboard::Left:
-                {
-                    grid.rotateAgent(agent, -15.f);
-                    break;
-                }
-                case sf::Keyboard::Right:
-                {
-                    grid.rotateAgent(agent, 15.f);
-                    break;
-                }
-                case sf::Keyboard::P:
-                    std::cout << "X: " << agent.getX() << std::endl;
-                    std::cout << "Y: " << agent.getY() << std::endl;
-                    std::cout << "rot: " << agent.getInternalRotation() << std::endl;
-                    break;
-=======
             else if (event.type == sf::Event::KeyPressed && hasFocus) {
                 switch (event.key.code) {
                     case sf::Keyboard::H : {
@@ -181,7 +118,6 @@ int main(int, char const **)
                         grid.rotateAgent(agent, 15.f);
                         break;
                     }
->>>>>>> 46932aea942d7268e6a1620e14fbb5dfb896a682
                 }
             }
         }
