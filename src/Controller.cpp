@@ -65,8 +65,5 @@ namespace RoverPathfinding {
         p.x = lng;
         p.y = lat;
     }
-
-
-	
 }
 
