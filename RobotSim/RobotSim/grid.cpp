@@ -1,5 +1,5 @@
 //
-//  map2.cpp
+//  grid.cpp
 //  RobotSim
 //
 //  Created by Tadeusz Pforte on 12/4/18.
@@ -13,6 +13,13 @@
 
 #include "grid.hpp"
 
+// creates a grid that can have obstacles and agents that it moves around
+// !!! NOTE !!!
+// For aesthetic purposes and to be a pain in the ass,
+// the grid is not drawn starting at (0, 0) in the window.
+// Instead it starts at (1 meter, 1 meter), aka (scale, scale) in the window.
+// Things you draw, if they are using the grid's scale, will need to be drawn
+// with this 1 meter offset taken into account.
 Grid::Grid (float w, float h, unsigned int s) {
     width = w;
     height = h;
@@ -56,10 +63,12 @@ Grid::Grid (float w, float h, unsigned int s) {
     }
 }
 
+// toggles whether or not gridlines are drawn every meter
 void Grid::toggleGrid() {
     showGrid = !showGrid;
 }
 
+// toggles whether or not the agent collides with obstacles and borders
 void Grid::toggleClipping() {
     if (noclip)
         debugMsg("Clipping toggled on");
@@ -69,6 +78,8 @@ void Grid::toggleClipping() {
     noclip = !noclip;
 }
 
+// reads obstacles from a file
+// expects four floats per line, corresponding to the (x, y) of the start and end points in that order
 void Grid::readObstaclesFromFile(std::string fileName) {
     std::ifstream file;
     file.open(fileName);
@@ -88,26 +99,30 @@ void Grid::readObstaclesFromFile(std::string fileName) {
     file.close();
 }
 
+// creates a new obstacle from (x1, y1) to (x2, y2)
 void Grid::placeObstacle(float x1, float y1, float x2, float y2) {
-    obstacleList.push_back(Obstacle(x1, y1, x2, y2, scale, true));
+    obstacleList.push_back(Obstacle(x1, y1, x2, y2, scale, width, height));
 }
 
+// moves the agent forward by distance ds (which can be negative)
+// if clipping is enabled, collisions with obstacles and borders will block movement
 sf::Vertex Grid::moveAgent(Agent &agent, float ds) {
-    float curR = agent.getInternalRotation();
+    // convert internal rotation (counter-clockwise) to SFML rotation (clockwise)
+    float curR = -agent.getInternalRotation();
+    
     float xOffset = ds * cos(curR * PI / 180);
-    float yOffset = ds * sin(curR * PI / 180);
+    // convert y from SFML (top is 0) to internal position (bottom is 0)
+    float yOffset = -ds * sin(curR * PI / 180);
     
     if (!willCollide(agent, xOffset, yOffset, 0))
         agent.move(xOffset, yOffset);
 }
 
+// rotates the agent clockwise by the angle dr (which can be negative)
+// if clipping is enabled, collisions with obstacles and borders will block rotation
 float Grid::rotateAgent(Agent &agent, float dr) {
     if (!willCollide(agent, 0, 0, dr))
         agent.rotate(dr);
-}
-
-unsigned int Grid::retrieveScale() {
-    return scale;
 }
 
 // returns true if the two lines, stored as {x1, y1, x2, y2}, intersect
@@ -131,6 +146,9 @@ bool Grid::linesCollide(std::array<float, 4> line1, std::array<float, 4> line2) 
     return 0 <= uA && uA <= 1 && 0 <= uB && uB <= 1;
 }
 
+// returns true if any of four lines in an array collides with the other given line
+// otherwise returns false
+// expects all lines to be arrays storing {x1, y1, x2, y2} in that order
 bool Grid::boxCollision(std::array<std::array<float, 4>, 4> box, std::array<float, 4> line) {
     bool flag = false;
     for (std::array<float, 4> boxLine : box) {

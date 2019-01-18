@@ -1,5 +1,5 @@
 //
-//  agent2.h
+//  agent.h
 //  RobotSim
 //
 //  Gary: used as both controller and view. Holds a Simulator instance as its model.
@@ -20,7 +20,7 @@
 
 class Agent : public sf::Drawable, public sf::Transformable {
 public:
-    Agent(unsigned int mapScale, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f, float rSpeed = 1.f);
+    Agent(unsigned int mapScale, float mapW, float mapH, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f, float rSpeed = 1.f);
     void move(float dx, float dy);
     void rotate(float dr);
     void clearPath();
@@ -53,5 +53,7 @@ private:
     std::array<std::pair<float, float>, 4> hitBox;
     
     unsigned int scale;
+    float mapWidth;
+    float mapHeight;
 };
 #endif

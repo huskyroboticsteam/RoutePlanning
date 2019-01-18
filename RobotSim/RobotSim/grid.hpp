@@ -27,7 +27,9 @@ class Grid : public sf::Drawable, public sf::Transformable
     sf::Vertex moveAgent(Agent &agent, float ds);
     float rotateAgent(Agent &agent, float dr);
 
-    unsigned int retrieveScale();
+    unsigned int retrieveScale() { return scale; }
+    float retrieveWidth() { return width; }
+    float retrieveHeight() { return height; }
 
     bool linesCollide(std::array<float, 4> line1, std::array<float, 4> line2);
     bool boxCollision(std::array<std::array<float, 4>, 4> box, std::array<float, 4> line);

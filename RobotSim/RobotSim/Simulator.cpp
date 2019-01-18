@@ -4,8 +4,8 @@
 #include <cctype>
 #include <cmath>
 #include <assert.h>
-#include "Simulator.h"
-#include "grid.h"
+#include "Simulator.hpp"
+#include "grid.hpp"
 #include "../../src/Map.h"
 
 #define ASSERT_ON 1

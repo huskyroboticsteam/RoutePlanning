@@ -49,7 +49,7 @@ int main(int, char const**)
 //    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
-    Agent agent(grid.retrieveScale(), 2.f, 2.f);
+    Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
     
     while (window.isOpen())
     {
@@ -72,10 +72,16 @@ int main(int, char const**)
                         std::cout << "Help Menu: " << std::endl;
                         std::cout << "W/S -- Drive robot forward or back" << std::endl;
                         std::cout << "A/D -- Rotate robot left or right" << std::endl;
+                        std::cout << "P   -- Returns the internal position of the robot" << std::endl;
                         std::cout << "G   -- Toggle grid" << std::endl;
                         std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                         std::cout << "N   -- Toggle clipping" << std::endl;
                         std::cout << "0   -- Clear robot path" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::P : {
+                        std::cout << "Internal Position: (" << agent.getX() << "," << agent.getY()
+                                  << ") at " << agent.getInternalRotation() << " degrees" << std::endl;
                         break;
                     }
                     case sf::Keyboard::G : {
@@ -123,10 +129,10 @@ int main(int, char const**)
                 grid.moveAgent(agent, -10.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-                grid.rotateAgent(agent, -200.f / FRAMERATE);
+                grid.rotateAgent(agent, 200.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-                grid.rotateAgent(agent, 200.f / FRAMERATE);
+                grid.rotateAgent(agent, -200.f / FRAMERATE);
             }
         }
         
