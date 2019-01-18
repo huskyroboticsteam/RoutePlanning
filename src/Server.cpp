@@ -139,7 +139,7 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 }
 
 void RoverPathfinding::Server::send_watchdog() {
-	boolean hasSent = RoverPathfinding::Server::send_action(WATCHDOG_ID);
+	bool hasSent = RoverPathfinding::Server::send_action(WATCHDOG_ID);
 
 	while (!hasSent) {
 		// Sleep for 100 milliseconds and then try again
