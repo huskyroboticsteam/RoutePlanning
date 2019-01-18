@@ -1,7 +1,5 @@
 #include "Server.h"
-#include <vector>
-#include <ctime>
-#include <iostream>
+
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -15,6 +13,9 @@
 	#include <netdb.h> 
 	#include <errno.h>
 	#include <unistd.h>
+	#include <string.h>
+	#define SOCKET int
+	#define SOCKET_ERROR -1
 #endif
 
 
@@ -40,36 +41,47 @@ RoverPathfinding::Server::Server()
 
 	// Socket creation
 	out = socket(AF_INET, SOCK_DGRAM, 0);
+	//std::cout << out;
 	in = socket(AF_INET, SOCK_DGRAM, 0);
 
 	// Bind socket to ip address and port
 	sockaddr_in serverHint;
-	serverHint.sin_addr.S_un.S_addr = ADDR_ANY;
+	serverHint.sin_addr.s_addr = INADDR_ANY;
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(54000);
 
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
+#ifdef WIN32
 		std::cout << "Can't bind socket! " << WSAGetLastError();
+#else
+		std::cout << "Can't bind socket! " << strerror(errno);
+#endif
 	}
 
+	
+	
+
+
+
+}
+
+void RoverPathfinding::Server::go() {
 	sockaddr_in client;
-	ZeroMemory(&client, sizeof(client));
-	int clientLength = sizeof(client);
+	memset(&client, 0, sizeof(client));
+	unsigned int clientLength = sizeof(client);
 
 	char buf[256];
-	ZeroMemory(buf, 256);
+	memset(buf,0, 256);
 
-	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr);
-
-
-
+	inet_pton(AF_INET, "192.168.43.196", &server.sin_addr);
 	while (true) 
 	{
-		ZeroMemory(buf, 256);
+		memset(buf, 0, 256);
 
 		// Wait for message
 		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
+		std::cout << "got something";
 		if (bytesIn == SOCKET_ERROR) 
 		{
 #ifdef WIN32
@@ -83,7 +95,7 @@ RoverPathfinding::Server::Server()
 
 		// Display message and client 
 		char clientIp[256];
-		ZeroMemory(clientIp, 256);
+		memset(clientIp, 0, 256);
 
 		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
 
@@ -122,7 +134,13 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 	packet.push_back(id); // represents component to be controlled
 
 	// packet.data() first four bytes are the time stamp, fifth is the id, and sixth is the data
-	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
+	struct sockaddr_in my_addr;
+	my_addr.sin_family = AF_INET;
+	my_addr.sin_port = htons(54000);
+	inet_aton("127.0.0.1", &(my_addr.sin_addr));
+	memset(&(my_addr.sin_zero), '\0', 8); 
+	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*) &my_addr, sizeof(my_addr));
+	
 	if (sendOk == SOCKET_ERROR)
 	{
 #ifdef _WIN32
@@ -155,8 +173,10 @@ void RoverPathfinding::Server::send_watchdog() {
 
 void RoverPathfinding::Server::stop()
 {
-	closesocket(out);
+	close(out);
+#ifdef _WIN32
 	WSACleanup();
+#endif
 }
 
 std::vector<unsigned char> RoverPathfinding::Server::current_time()
