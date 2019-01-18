@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cmath>
 #include "utils.hpp"
-#include <cstdio>
 
 #define PI 3.14159265359
 
@@ -131,6 +130,25 @@ bool RoverPathfinding::segments_intersect(point p1, point p2, point q1, point q2
     return (false);
 }
 
+// returns the intersection between two points. returned point is at {inf, inf} if
+// no intersection exists
+RoverPathfinding::point RoverPathfinding::segments_intersection(point a, point b, point c, point d)
+{
+    point x = intersection(a, b, c, d);
+    if (x.x == INFINITY)
+        return x;
+    if (!within_segment(a, b, x) || !within_segment(c, d, x))
+        return point{INFINITY, INFINITY};
+    return x;
+}
+
+bool RoverPathfinding::within_segment(point a, point b, point c)
+{
+    // dot product of ab and ac
+    float dotprod = ((b.y - a.y) * (c.y - a.y) + (b.x - a.x) * (c.x - a.x));
+    return dotprod > 0 && dotprod <= dist_sq(a, b);
+}
+
 //Returns a point in the center of segment pq and then moves it R towards cur
 RoverPathfinding::point RoverPathfinding::center_point_with_radius(RoverPathfinding::point cur, RoverPathfinding::point p, RoverPathfinding::point q, float R)
 {
@@ -210,10 +228,16 @@ bool RoverPathfinding::within_angle(float ang, float lower, float upper)
 {
     if (upper < lower)
     {
-        upper += 2 * PI;
+        return ang >= lower || ang <= upper;
     }
-    printf("Angle: %.2f; Lower: %.2f; Upper: %.2f\n", ang, lower, upper);
+    // printf("Angle: %.2f; Lower: %.2f; Upper: %.2f\n", ang, lower, upper);
     return ang >= lower && ang <= upper;
+}
+
+// return if ab and ac are in the same direction, assuming abc is a line
+bool RoverPathfinding::same_dir(point a, point b, point c)
+{
+    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) > 0;
 }
 
 RoverPathfinding::point RoverPathfinding::polar_to_cartesian(point origin, float r, float theta)
@@ -226,7 +250,7 @@ float RoverPathfinding::relative_angle(point o, point p)
     return std::atan((p.y - o.y) / (p.x - o.x));
 }
 
-bool RoverPathfinding::same_point(const point &p, const point &q, float tol=0.05)
+bool RoverPathfinding::same_point(const point &p, const point &q, float tol = 0.05)
 {
     return std::sqrt(dist_sq(p, q)) <= tol;
 }

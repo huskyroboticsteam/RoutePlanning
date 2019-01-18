@@ -8,7 +8,7 @@ OBJECTS = $(patsubst %,$(ODIR)/%,$(_OBJECTS))
 SFML = C:/SFML-2.5.1/
 INC = -I$(SFML)include
 LINK = -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
-CFLAGS = -std=c++11 -g -DNDEBUG
+CFLAGS = -std=c++11 -g
 OUT = build/simulator.exe
 
 all: $(OUT)
@@ -19,6 +19,6 @@ $(ODIR)/%.o: $(SDIR)/%.cpp
 $(OUT): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) $(LINK) -o $(OUT)
 
+.PHONY: clean
 clean:
-	rm -rf $(ODIR)/*
 	rm $(OUT)

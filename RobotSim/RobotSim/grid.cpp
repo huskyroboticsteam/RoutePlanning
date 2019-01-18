@@ -86,15 +86,16 @@ void Grid::readObstaclesFromFile(std::string fileName) {
     if (file) {
         std::string line;
         
+        float x1, y1, x2, y2;
         while (getline(file, line)) {
             std::istringstream in(line);
-            
-            float x1 = 0.f, y1 = 0.f, x2 = 0.f, y2 = 0.f;
-            
+            if (line.length() == 0) continue;
             in >> x1 >> y1 >> x2 >> y2;
             
             placeObstacle(x1, y1, x2, y2);
         }
+        if (obstacleList.empty())
+            debugMsg("Warning: no obstacle loaded");
     }
     file.close();
 }

@@ -39,11 +39,19 @@ bool on_segment(point p, point q, point r);
 //Returns true if segment p1q1 intersects p2q2
 bool segments_intersect(point p1, point p2, point q1, point q2);
 
+// intersection() but constrained by segment length
+point segments_intersection(point a, point b, point c, point d);
+
+//check if point a is on segment pq
+bool within_segment(point p, point q, point a);
+
 //Returns a point that is in the middle of pq and is R in the direction of cur
 point center_point_with_radius(point cur, point p, point q, float R);
 
 //Returns the square of the distance between two points
 float dist_sq(point p1, point p2);
+
+bool same_dir(point a, point b, point c);
 
 //Returns whether p1 and p2 are within R of each other
 bool within_radius(point p1, point p2, float R);
