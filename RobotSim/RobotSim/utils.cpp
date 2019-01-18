@@ -142,6 +142,7 @@ RoverPathfinding::point RoverPathfinding::segments_intersection(point a, point b
     return x;
 }
 
+//returns whether c is on ab assuming that abc is a line
 bool RoverPathfinding::within_segment(point a, point b, point c)
 {
     // dot product of ab and ac

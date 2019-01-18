@@ -21,27 +21,35 @@ struct sim_obstacle
 {
   point p;
   point q;
+  uint index; // index of corresponding "parent" obstacle
+};
+
+struct proc_obstacle
+{
+  point p;
+  point q;
+  char sides; // 0 if neither is side, 1 if p, 2 if q, 3 if both
   std::list<RoverPathfinding::point> endpoints;
-  int id;
 };
 
 class Simulator : public sf::Drawable
 {
 public:
-  Simulator(const std::list<Obstacle>& obstacleList, const Agent& agent, simulator_config conf, float map_scale, float windowH);
-  const std::list<line>& visible_obstacles() { return view_obstacles; };
+  Simulator(const std::list<Obstacle> &obstacleList, const Agent &agent, simulator_config conf, float map_scale, float windowH);
+  const std::list<line> &visible_obstacles() { return view_obstacles; };
   void update_agent();
 
 private:
   std::vector<point> intersection_with_arc(const point &p, const point &q, const point &lower_point, const point &upper_point);
   bool within_view(const point &pt);
-  float scale; // scale is only used when calling draw
+  float scale;         // scale is only used when calling draw
   float window_height; // only used when calling draw
   Map map;
-  const Agent& agent;
+  const Agent &agent;
 
   // for computations; not actual attributes of the system
-  point cur_pos; //updated every cal to update_agent()
+  point cur_pos;   //updated every cal to update_agent()
+  float bearing;
   float lower_vis; //Bearing subtracted by half of vision_angle (lower bound of FoV) for caching
   float upper_vis; //Bearing added by half of vision_angle (upper bound of FoV)
   float vision_dist_sq;
@@ -50,11 +58,12 @@ private:
 
   point target_pos;
   simulator_config config;
-  const std::list<Obstacle>& raw_obstacles;
-  std::list<sim_obstacle> all_obstacles;
+  const std::list<Obstacle> &raw_obstacles;
+  std::list<sim_obstacle*> all_obstacles;
   std::list<line> view_obstacles;
 
   virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+  std::list<sf::VertexArray> getCircleLines(float angular_pos, float radius, float angle_spread, point pos, int maxpts=10) const;
 };
 } // namespace RoverPathfinding
 

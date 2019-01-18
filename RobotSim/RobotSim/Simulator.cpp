@@ -23,15 +23,12 @@ RoverPathfinding::Simulator::Simulator(const std::list<Obstacle> &obstacleList, 
 
 void RoverPathfinding::Simulator::update_agent()
 {
-    all_obstacles.clear();
-    int id = 0;
     for (auto const &obst : raw_obstacles)
     {
-        sim_obstacle to_add{point{obst.x1, obst.y1}, point{obst.x2, obst.y2}};
-        all_obstacles.push_back(to_add);
+        all_obstacles.push_back(new sim_obstacle{point{obst.x1, obst.y1}, point{obst.x2, obst.y2}});
     }
     cur_pos = point{agent.getX(), agent.getY()};
-    float bearing = agent.getInternalRotation();
+    bearing = agent.getInternalRotation();
 
     point cur_pos{agent.getX(), agent.getY()};
     upper_vis = normalize_angle(deg_to_rad(bearing + config.vision_angle / 2));
@@ -44,12 +41,13 @@ void RoverPathfinding::Simulator::update_agent()
         return;
     }
 
-    std::list<sim_obstacle> cropped_obst;
+    std::vector<proc_obstacle> cropped_obst;
     // crop obstacles
-    for (auto it = all_obstacles.begin(); it != all_obstacles.end(); it++)
+    for (auto it = all_obstacles.begin(); it != all_obstacles.end();)
     {
-        point p = it->p;
-        point q = it->q;
+        auto aop = *it;
+        point p = aop->p;
+        point q = aop->q;
         //possible optimization here for large map:
         //remove obstacles if they seem too far (i.e. much farther than vis_dist)
         bool p_within_view = within_view(p);
@@ -57,21 +55,21 @@ void RoverPathfinding::Simulator::update_agent()
         if (p_within_view && q_within_view)
         {
             debugmsg("BOTH endpoints within view");
-            sim_obstacle so = {p, q};
-            so.id = it->id;
+            proc_obstacle so{p, q, 3};
+            aop->index = cropped_obst.size();
             cropped_obst.push_back(so);
         }
         else if (p_within_view || q_within_view)
         {
             debugmsg("ONE endpoints within view");
-            point fixed_pt = p_within_view ? p : q;
+            point& fixed_pt = p_within_view ? p : q;
             std::vector<point> pts = intersection_with_arc(p, q, fov_lower, fov_upper);
             debugmsg("intersecting with arc");
             // assert(pts.size() == 1);
             if (pts.size() == 1)
             {
-                sim_obstacle so = {fixed_pt, pts.at(0)};
-                so.id = it->id;
+                proc_obstacle so{fixed_pt, pts.at(0), 1};
+                aop->index = cropped_obst.size();
                 cropped_obst.push_back(so);
             }
         }
@@ -84,18 +82,22 @@ void RoverPathfinding::Simulator::update_agent()
             if (pts.size() == 2)
             {
                 debugmsg("intersecting with arc");
-                sim_obstacle so {pts.at(0), pts.at(1)};
-                so.id = it->id;
+                proc_obstacle so{pts.at(0), pts.at(1), 0};
+                aop->index = cropped_obst.size();
                 cropped_obst.push_back(so);
             }
             else
             {
-                if (pts.size() != 0)
-                {
-                    intersection_with_arc(p, q, fov_lower, fov_upper);
-                }
+                assert(pts.size() == 0);
+                it = all_obstacles.erase(it);
+                continue; // don't increment it
+                // if (pts.size() != 0)
+                // {
+                //     intersection_with_arc(p, q, fov_lower, fov_upper);
+                // }
             }
         }
+        it++;
     }
     // std::cout << cropped_obst.size() << std::endl;
     /*
@@ -104,22 +106,24 @@ void RoverPathfinding::Simulator::update_agent()
     any other obstacle. If that intersection is closer to cur_pos than endpoint is, remove this endpoint from obstacle.
     Else, add that intersection point to the obstacle it landed on.
     */
-    for (auto it = cropped_obst.begin(); it != cropped_obst.end(); it++)
+    for (uint i = 0; i < cropped_obst.size(); i++)
     {
+        auto& co = cropped_obst.at(i);
         // iterate over two endpoints
-        point pts[2] = {it->p, it->q};
-        for (point p : pts)
+        point pts[2] = {co.p, co.q};
+        for (uint pi = 0; pi < 2; pi++)
         {
+            point p = pts[pi], q = pts[1-pi];
             // find intersection
             float closest_dist = INFINITY;
             point closest;
-            sim_obstacle closest_obstacle;
-            for (auto jt = all_obstacles.begin(); jt != all_obstacles.end(); jt++)
+            sim_obstacle* closest_obstacle;
+            for (auto aop : all_obstacles)
             {
-                if (it->id == jt->id) // same one
+                if (aop->index == i) // same one
                     continue;
-                point s = intersection(cur_pos, p, jt->p, jt->q);
-                if (s.x == INFINITY)
+                point s = intersection(cur_pos, p, aop->p, aop->q);
+                if (s.x == INFINITY || !same_dir(cur_pos, p, s) || !within_segment(aop->p, aop->q, s))
                     continue;
                 if (same_point(s, p, 1e-5))
                 {
@@ -129,7 +133,7 @@ void RoverPathfinding::Simulator::update_agent()
                     // is in the same direction as q relative to cur_pos, then
                     // this p should be discarded
                     point q = pts[p == pts[0]];
-                    point inter = intersection(jt->p, jt->q, cur_pos, q);
+                    point inter = intersection(pts[0], pts[1], cur_pos, q);
                     if (inter.x == INFINITY || same_dir(cur_pos, inter, q))
                     {
                         goto sidepoint_end; // skip this sidepoint
@@ -140,16 +144,17 @@ void RoverPathfinding::Simulator::update_agent()
                 {
                     closest_dist = dist;
                     closest = s;
-                    closest_obstacle = *jt;
+                    closest_obstacle = aop;
                 }
             }
 
             // not blocked
             if (closest_dist >= dist_sq(cur_pos, p))
             {
-                it->endpoints.push_back(p);
-                if (closest_dist != INFINITY && closest_dist <= config.vision_dist)
-                    closest_obstacle.endpoints.push_back(closest); // add projection
+                co.endpoints.push_back(p);
+                // TODO don't add it here! add it to the cropped_obstacle!
+                if ((co.sides & (1 << pi)) && closest_dist != INFINITY && closest_dist <= vision_dist_sq)
+                    cropped_obst.at(closest_obstacle->index).endpoints.push_back(closest); // add projection
             }
         sidepoint_end:
         {
@@ -159,9 +164,9 @@ void RoverPathfinding::Simulator::update_agent()
     //note: side rays already accounted for in "crop obstacles"
     //collect and add obstacles
     view_obstacles.clear();
-    for (sim_obstacle obs : cropped_obst)
+    for (auto &obs : cropped_obst)
     {
-        assert(obs.endpoints.size() % 2 == 0);
+        // assert(obs.endpoints.size() % 2 == 0);
         obs.endpoints.sort([](const point &p, const point &q) { return p.x > q.x; });
         for (auto it = obs.endpoints.begin(); it != obs.endpoints.end(); it++)
         {
@@ -171,6 +176,7 @@ void RoverPathfinding::Simulator::update_agent()
             view_obstacles.push_back(line{a, *it});
         }
     }
+    all_obstacles.clear();
 }
 
 void debugmsg(const char *line)
@@ -235,15 +241,15 @@ bool RoverPathfinding::Simulator::within_view(const point &pt)
         return false;
     }
 
-    for (auto it = all_obstacles.begin(); it != all_obstacles.end(); it++)
-    {
-        const point p = it->p;
-        const point &q = it->q;
-        if (segments_intersection(p, q, cur_pos, pt).x != INFINITY && (!same_point(p, pt, 1e-4) && !same_point(q, pt, 1e-4)))
-        { // intersection is not self
-            return false;
-        }
-    }
+    // for (auto it = all_obstacles.begin(); it != all_obstacles.end(); it++)
+    // {
+    //     const point p = it->p;
+    //     const point &q = it->q;
+    //     if (segments_intersection(p, q, cur_pos, pt).x != INFINITY && (!same_point(p, pt, 1e-4) && !same_point(q, pt, 1e-4)))
+    //     { // intersection is not self
+    //         return false;
+    //     }
+    // }
     return true;
 }
 
@@ -263,8 +269,27 @@ void RoverPathfinding::Simulator::draw(sf::RenderTarget &target, sf::RenderState
 {
     target.draw(get_vertex_line(cur_pos, fov_lower, sf::Color::Blue, scale, window_height));
     target.draw(get_vertex_line(cur_pos, fov_upper, sf::Color::Blue, scale, window_height));
+    std::list<sf::VertexArray> circleLines = getCircleLines(bearing, config.vision_dist, config.vision_angle, cur_pos);
+    for (auto seg : circleLines)
+        target.draw(seg);
     for (auto obst : view_obstacles)
-    {
         target.draw(get_vertex_line(obst.p, obst.q, sf::Color::Green, scale, window_height), states);
+}
+
+std::list<sf::VertexArray> RoverPathfinding::Simulator::getCircleLines(float angular_pos, float radius, float angle_spread, RoverPathfinding::point pos, int maxpts) const
+{
+    std::vector<RoverPathfinding::point> points;
+    const float lower = deg_to_rad(angular_pos - angle_spread / 2.f);
+    const float inc = deg_to_rad(angle_spread / (maxpts - 1));
+    for(int i = 0; i < maxpts; ++i)
+    {
+        const float a = lower + i * inc;
+        points.push_back(RoverPathfinding::point{pos.x + radius * std::cos(a), pos.y + radius * std::sin(a)});
     }
+    std::list<sf::VertexArray> ret;
+    for (uint i = 0; i < maxpts - 1; i++)
+    {
+        ret.push_back(get_vertex_line(points.at(i), points.at(i+1), sf::Color::Blue, scale, window_height));
+    }
+    return ret;
 }

@@ -3,7 +3,7 @@
 
 #include <utility>
 #include <vector>
-
+typedef unsigned int uint;
 namespace RoverPathfinding
 {
 struct point
