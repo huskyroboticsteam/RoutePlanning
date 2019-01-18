@@ -24,9 +24,11 @@ RoverPathfinding::Simulator::Simulator(const std::list<Obstacle> &obstacleList, 
 void RoverPathfinding::Simulator::update_agent()
 {
     all_obstacles.clear();
-    for (auto obst : raw_obstacles)
+    int id = 0;
+    for (auto const &obst : raw_obstacles)
     {
-        all_obstacles.emplace_back(sim_obstacle{point{obst.x1, obst.y1}, point{obst.x2, obst.y2}});
+        sim_obstacle to_add{point{obst.x1, obst.y1}, point{obst.x2, obst.y2}};
+        all_obstacles.push_back(to_add);
     }
     cur_pos = point{agent.getX(), agent.getY()};
     float bearing = agent.getInternalRotation();
@@ -42,9 +44,7 @@ void RoverPathfinding::Simulator::update_agent()
         return;
     }
 
-    std::vector<point> intersects;
     std::list<sim_obstacle> cropped_obst;
-
     // crop obstacles
     for (auto it = all_obstacles.begin(); it != all_obstacles.end(); it++)
     {
@@ -57,7 +57,9 @@ void RoverPathfinding::Simulator::update_agent()
         if (p_within_view && q_within_view)
         {
             debugmsg("BOTH endpoints within view");
-            cropped_obst.push_back(sim_obstacle{p, q});
+            sim_obstacle so = {p, q};
+            so.id = it->id;
+            cropped_obst.push_back(so);
         }
         else if (p_within_view || q_within_view)
         {
@@ -67,7 +69,11 @@ void RoverPathfinding::Simulator::update_agent()
             debugmsg("intersecting with arc");
             // assert(pts.size() == 1);
             if (pts.size() == 1)
-                cropped_obst.push_back(sim_obstacle{fixed_pt, pts.at(0)});
+            {
+                sim_obstacle so = {fixed_pt, pts.at(0)};
+                so.id = it->id;
+                cropped_obst.push_back(so);
+            }
         }
         else
         {
@@ -78,7 +84,9 @@ void RoverPathfinding::Simulator::update_agent()
             if (pts.size() == 2)
             {
                 debugmsg("intersecting with arc");
-                cropped_obst.push_back(sim_obstacle{pts.at(0), pts.at(1)});
+                sim_obstacle so {pts.at(0), pts.at(1)};
+                so.id = it->id;
+                cropped_obst.push_back(so);
             }
             else
             {
@@ -96,7 +104,6 @@ void RoverPathfinding::Simulator::update_agent()
     any other obstacle. If that intersection is closer to cur_pos than endpoint is, remove this endpoint from obstacle.
     Else, add that intersection point to the obstacle it landed on.
     */
-    std::list<point> temp;
     for (auto it = cropped_obst.begin(); it != cropped_obst.end(); it++)
     {
         // iterate over two endpoints
@@ -109,18 +116,24 @@ void RoverPathfinding::Simulator::update_agent()
             sim_obstacle closest_obstacle;
             for (auto jt = all_obstacles.begin(); jt != all_obstacles.end(); jt++)
             {
-                if (it == jt)
+                if (it->id == jt->id) // same one
                     continue;
                 point s = intersection(cur_pos, p, jt->p, jt->q);
                 if (s.x == INFINITY)
                     continue;
-                if (same_point(s, p, 1e-4))
+                if (same_point(s, p, 1e-5))
                 {
                     // TODO this is a shared vertex. decide if this should be added
                     // simply see the line intesection of jt and point{cur_pos, q}
                     // where q is the other side point (from p). If the intersect
                     // is in the same direction as q relative to cur_pos, then
                     // this p should be discarded
+                    point q = pts[p == pts[0]];
+                    point inter = intersection(jt->p, jt->q, cur_pos, q);
+                    if (inter.x == INFINITY || same_dir(cur_pos, inter, q))
+                    {
+                        goto sidepoint_end; // skip this sidepoint
+                    }
                 }
                 float dist = dist_sq(cur_pos, s);
                 if (same_dir(cur_pos, p, s) && dist < closest_dist)
@@ -134,15 +147,14 @@ void RoverPathfinding::Simulator::update_agent()
             // not blocked
             if (closest_dist >= dist_sq(cur_pos, p))
             {
-                temp.push_back(p);
+                it->endpoints.push_back(p);
                 if (closest_dist != INFINITY && closest_dist <= config.vision_dist)
                     closest_obstacle.endpoints.push_back(closest); // add projection
             }
+        sidepoint_end:
+        {
         }
-        // only add if both endpoints are visible
-        for (auto pt : temp)
-            it->endpoints.push_back(pt);
-        temp.clear();
+        }
     }
     //note: side rays already accounted for in "crop obstacles"
     //collect and add obstacles

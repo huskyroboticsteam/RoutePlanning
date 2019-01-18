@@ -22,6 +22,7 @@ struct sim_obstacle
   point p;
   point q;
   std::list<RoverPathfinding::point> endpoints;
+  int id;
 };
 
 class Simulator : public sf::Drawable
