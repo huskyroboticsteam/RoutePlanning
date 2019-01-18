@@ -23,6 +23,7 @@ class Grid : public sf::Drawable, public sf::Transformable
     void toggleClipping();
 
     void readObstaclesFromFile(std::string filename);
+    void addBorderObstacles();
     void placeObstacle(float x1, float y1, float x2, float y2);
 
     sf::Vertex moveAgent(Agent &agent, float ds);

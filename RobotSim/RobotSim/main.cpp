@@ -91,7 +91,9 @@ int main(int, char const **)
                         break;
                     }
                     case sf::Keyboard::O : {
+                        grid.obstacleList.clear();
                         grid.readObstaclesFromFile("./obstacles.txt");
+                        grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }
