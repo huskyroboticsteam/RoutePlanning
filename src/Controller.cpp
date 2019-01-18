@@ -54,23 +54,6 @@ namespace RoverPathfinding {
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
     point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float angle) {
-        /*float x = dist * cos(angle);
-        float y = dist * sin(angle);
-        float lat = y / EARTH_RADIUS;
-        float lng = x / (EARTH_RADIUS * cos(HANKSVILLE_LAT * M_PI / 180.0));
-        point p;
-        p.x = lng;
-        p.y = lat;
-        return p;
-    }
-
-    void obst_lat_lng(float dist, float angle, float curr_angle) {
-        delta_x = EARTH_RADIUS * cos(angle + curr_angle);
-        delta_y = EARTH_RADIUS * sin(angle + curr_angle);
-        delta_lng = delta_x / 8.627 * 0.0001;
-        delta_lat = delta_y / EARTH_RADIUS;
-    }
-		return p;*/
 		float delta_x = dist * cos(angle + curr_dir + M_PI/2);
 		float delta_y = dist * sin(angle + curr_dir + M_PI/2);
 		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
@@ -85,28 +68,4 @@ namespace RoverPathfinding {
 
 	
 }
-
-
-	/*int main() {
-		float curr_lat;
-		std::cout << "curr_lat: \n";
-		std::cin >> curr_lat;
-		float curr_lng;
-		std::cout << "curr_lng: \n";
-		std::cin >> curr_lng;
-		float curr_dir;
-		std::cout << "curr_dir: \n";
-		std::cin >> curr_dir;
-		while(true) {
-			float dist;
-			std::cout << "dist: \n";
-			std::cin >> dist;
-			float angle;
-			std::cout << "angle: \n";
-			std::cin >> angle;
-			RoverPathfinding::point result = RoverPathfinding::convertToLatLng(curr_lat, curr_lng, curr_dir, dist, angle);
-			std::cout << "lat: " << result.x << " long: " << result.y << "\n";
-		}
-		return 0;
-	}*/
 

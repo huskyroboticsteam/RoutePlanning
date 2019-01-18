@@ -1,3 +1,4 @@
+#include <vector>
 /*
 Server class that handles networking; e.g. setting up a server and connections,
 sending/receiving and encoding/decoding data packets, etc.
@@ -5,8 +6,6 @@ sending/receiving and encoding/decoding data packets, etc.
 
 #ifndef ROVERPATHFINDING_SERVER_H
 #define ROVERPATHFINDING_SERVER_H
-
-#include "Controller.h"
 
 namespace RoverPathfinding
 {

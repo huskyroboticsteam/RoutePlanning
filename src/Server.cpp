@@ -17,7 +17,6 @@
 	#include <unistd.h>
 #endif
 
-
 const unsigned char WATCHDOG_ID = 0xF0;
 const std::string endpoint = "MainRover"; 
 sockaddr_in server;
@@ -48,7 +47,7 @@ RoverPathfinding::Server::Server()
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(54000);
 
-	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
+	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SO_ERROR)
 	{
 		std::cout << "Can't bind socket! " << WSAGetLastError();
 	}
@@ -70,13 +69,13 @@ RoverPathfinding::Server::Server()
 
 		// Wait for message
 		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
-		if (bytesIn == SOCKET_ERROR) 
+		if (bytesIn == SO_ERROR) 
 		{
 #ifdef WIN32
 			std::cout << "Error receiving from client" << WSAGetLastError();
 			continue;
 #else
-			std::cout << "That didn't work! " << strerror(errno);
+			std::cout << "That didn't work! " << hstrerror(errno);
 			continue;
 #endif
 		}
@@ -101,13 +100,13 @@ bool RoverPathfinding::Server::send_action(std::vector<unsigned char> dataBody, 
 
 	// packet.data() first four bytes are the time stamp, fifth is the id, and the rest is the data
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
-	if (sendOk == SOCKET_ERROR)
+	if (sendOk == SO_ERROR)
 	{
 #ifdef _WIN32
 		std::cout << "That didn't work! " << WSAGetLastError();
 		return false;
 #else
-		std::cout << "That didn't work! " << strerror(errno);
+		std::cout << "That didn't work! " << hstrerror(errno);
 		return false;
 #endif
 	}
@@ -123,13 +122,13 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 
 	// packet.data() first four bytes are the time stamp, fifth is the id, and sixth is the data
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
-	if (sendOk == SOCKET_ERROR)
+	if (sendOk == SO_ERROR)
 	{
 #ifdef _WIN32
 		std::cout << "That didn't work! " << WSAGetLastError();
 		return false;
 #else
-		std::cout << "That didn't work! " << strerror(errno);
+		std::cout << "That didn't work! " << hstrerror(errno);
 		return false;
 #endif
 	}
@@ -139,7 +138,7 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 }
 
 void RoverPathfinding::Server::send_watchdog() {
-	boolean hasSent = RoverPathfinding::Server::send_action(WATCHDOG_ID);
+	bool hasSent = RoverPathfinding::Server::send_action(WATCHDOG_ID);
 
 	while (!hasSent) {
 		// Sleep for 100 milliseconds and then try again
