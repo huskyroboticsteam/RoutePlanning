@@ -34,10 +34,11 @@ namespace RoverPathfinding {
             std::memcpy(&lat, data, sizeof(float));
             float lng = 0.0;
             std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
-			std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
+			//std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
+			std::vector<point> path;
 			point nextPoint = path[0];
 			float heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
-			float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
+			//float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
 			setDirection(heading);
 			setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
 	    // Magnometer has x, y, z values
@@ -49,24 +50,53 @@ namespace RoverPathfinding {
         }
     }
 
-
-	
-	void setDirection(float heading) {}
-	void setSpeed(float speed) {}
-
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
     point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float angle) {
-        float x = dist * cos(angle);
+        /*float x = dist * cos(angle);
         float y = dist * sin(angle);
         float lat = y / EARTH_RADIUS;
         float lng = x / (EARTH_RADIUS * cos(HANKSVILLE_LAT * M_PI / 180.0));
         point p;
         p.x = lng;
         p.y = lat;
+		return p;*/
+		float delta_x = dist * cos(angle + curr_dir + M_PI/2);
+		float delta_y = dist * sin(angle + curr_dir + M_PI/2);
+		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
+		float delta_lng = delta_x / 8.627 * 0.0001;
+		float delta_lat = delta_y / 111319.9;
+		//std::cout << "delta_lat: " << delta_lat << " delta_lng: " << delta_lng << "\n";
+		point p;
+		p.x = delta_lat + curr_lat;
+		p.y = delta_lng + curr_lng;
+		return p;
     }
-
 
 	
 }
+
+
+	/*int main() {
+		float curr_lat;
+		std::cout << "curr_lat: \n";
+		std::cin >> curr_lat;
+		float curr_lng;
+		std::cout << "curr_lng: \n";
+		std::cin >> curr_lng;
+		float curr_dir;
+		std::cout << "curr_dir: \n";
+		std::cin >> curr_dir;
+		while(true) {
+			float dist;
+			std::cout << "dist: \n";
+			std::cin >> dist;
+			float angle;
+			std::cout << "angle: \n";
+			std::cin >> angle;
+			RoverPathfinding::point result = RoverPathfinding::convertToLatLng(curr_lat, curr_lng, curr_dir, dist, angle);
+			std::cout << "lat: " << result.x << " long: " << result.y << "\n";
+		}
+		return 0;
+	}*/
 
