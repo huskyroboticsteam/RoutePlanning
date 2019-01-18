@@ -8,5 +8,6 @@ namespace RoverPathfinding
     {
         public:
             RoverPathfinding::Map map;
+            RoverPathfinding::Server server;
     };
 }

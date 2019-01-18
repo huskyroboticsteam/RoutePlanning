@@ -15,6 +15,7 @@
 
 namespace RoverPathfinding {
     RoverPathfinding::Map map;
+    RoverPathfinding::Server server;
 
     // TODO: split packet into separate parts (timestamp, packetID, data)
     // TODO: Feed lat/long to map to find vector pointing to next destination
@@ -64,6 +65,14 @@ namespace RoverPathfinding {
         point p;
         p.x = lng;
         p.y = lat;
+        return p;
+    }
+
+    void obst_lat_lng(float dist, float angle, float curr_angle) {
+        delta_x = EARTH_RADIUS * cos(angle + curr_angle);
+        delta_y = EARTH_RADIUS * sin(angle + curr_angle);
+        delta_lng = delta_x / 8.627 * 0.0001;
+        delta_lat = delta_y / EARTH_RADIUS;
     }
 }
 
