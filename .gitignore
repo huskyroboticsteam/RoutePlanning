@@ -3,6 +3,7 @@ build
 cmake-build-debug
 CMakeLists.txt
 .vs
+.Debug
 RoutePlanning.xcworkspace
 RoutePlanning.sln
 RoutePlanning.vcxproj
@@ -24,3 +25,4 @@ Debug/Simulator.obj
 Debug/TestMap.obj
 Debug/utils.obj
 Debug/vc141.pdb
+RobotSim/RobotSim/obj

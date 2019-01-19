@@ -6,7 +6,10 @@ sending/receiving and encoding/decoding data packets, etc.
 #ifndef ROVERPATHFINDING_SERVER_H
 #define ROVERPATHFINDING_SERVER_H
 
-#include "Controller.h"
+#include <vector>
+#include <ctime>
+#include <iostream>
+//#include "Controller.h"
 
 namespace RoverPathfinding
 {
@@ -14,11 +17,16 @@ class Server
 {
   public:
     Server();
+	void go();
     // TODO add parameters that encapsulate the action
-    bool send_action_response();    // Encode the best action as bytes and send to the client. Return true if succeeded and false if not.
-    // TODO is this event driven? if it is, we need to add event trigger here and event handler in Controller.
-  private:
+	bool send_action(std::vector<unsigned char> data, unsigned char id);    // Sends action to client with data body, returns whether action was successful or not
+	bool send_action(unsigned char data, unsigned char id);    // Sends action to client with data body, returns whether action was successful or not
+	bool send_action(unsigned char id);    // Sends action to client without data body, returns whether action was successful or not
+	void send_watchdog(); // Sends watchdog so this client isn't kicked out
+	void stop(); // Stops socket and cleans up
 
+  private:
+	std::vector<unsigned char> current_time();	// Stores unix timestamp in 4 bytes
     // RoverPathfinding::Controller controller;
 };
 } // namespace RoverPathfinding

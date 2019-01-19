@@ -11,10 +11,11 @@
 #include <SFML/Graphics.hpp>
 #include <stdio.h>
 #include <iostream>
+#include "utils.hpp"
 
 class Obstacle : public sf::Drawable {
 public:
-    Obstacle(float p1x, float p1y, float p2x, float p2y, float mapScale, bool dispQ = false);
+    Obstacle(float p1x, float p1y, float p2x, float p2y, float mapScale, float mapW, float mapH);
     
     void recolor(sf::Color newColor);
     
@@ -32,6 +33,8 @@ private:
     sf::VertexArray line;
     
     float scale;
+    float mapWidth;
+    float mapHeight;
 };
 
 #endif
