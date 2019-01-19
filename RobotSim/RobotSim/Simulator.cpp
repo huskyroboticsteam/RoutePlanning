@@ -7,6 +7,7 @@
 #include "Simulator.hpp"
 #include "grid.hpp"
 #include "Map.hpp"
+#include <cstdio>
 
 #define DEBUG_MSG 0
 
@@ -62,7 +63,7 @@ void RoverPathfinding::Simulator::update_agent()
         else if (p_within_view || q_within_view)
         {
             debugmsg("ONE endpoints within view");
-            point& fixed_pt = p_within_view ? p : q;
+            point &fixed_pt = p_within_view ? p : q;
             std::vector<point> pts = intersection_with_arc(p, q, fov_lower, fov_upper);
             debugmsg("intersecting with arc");
             // assert(pts.size() == 1);
@@ -108,23 +109,29 @@ void RoverPathfinding::Simulator::update_agent()
     */
     for (uint i = 0; i < cropped_obst.size(); i++)
     {
-        auto& co = cropped_obst.at(i);
+        auto &co = cropped_obst.at(i);
         // iterate over two endpoints
         point pts[2] = {co.p, co.q};
         for (uint pi = 0; pi < 2; pi++)
         {
-            point p = pts[pi], q = pts[1-pi];
+            point p = pts[pi], q = pts[1 - pi];
             // find intersection
             float closest_dist = INFINITY;
             point closest;
-            sim_obstacle* closest_obstacle;
+            sim_obstacle *closest_obstacle;
+            bool drop_pt = false;
             for (auto aop : all_obstacles)
             {
                 if (aop->index == i) // same one
                     continue;
+                
                 point s = intersection(cur_pos, p, aop->p, aop->q);
                 if (s.x == INFINITY || !same_dir(cur_pos, p, s) || !within_segment(aop->p, aop->q, s))
+                {
+                    // if (same_point(p, point{5.f, 5.f}, 1e-7) && same_point(aop->p, point{5.f, 5.f}, 1e-7))
+                    // std::cout << "HOO\n";
                     continue;
+                }
                 if (same_point(s, p, 1e-5))
                 {
                     // TODO this is a shared vertex. decide if this should be added
@@ -132,11 +139,16 @@ void RoverPathfinding::Simulator::update_agent()
                     // where q is the other side point (from p). If the intersect
                     // is in the same direction as q relative to cur_pos, then
                     // this p should be discarded
-                    point q = pts[p == pts[0]];
-                    point inter = intersection(pts[0], pts[1], cur_pos, q);
-                    if (inter.x == INFINITY || same_dir(cur_pos, inter, q))
+                    point inter = intersection(aop->p, aop->q, cur_pos, q);
+                    // i.e. there is an intersection, the intersection is not the shared vertex, and
+                    // the intersection falls on the contending obstacle. This means that p is a shared
+                    // vertex and is blocked
+                    if (inter.x != INFINITY && !same_point(inter, p, 1e-5) && within_segment(aop->p, aop->q, inter) && dist_sq(cur_pos, inter) < dist_sq(cur_pos, q))
                     {
-                        goto sidepoint_end; // skip this sidepoint
+                        drop_pt = true;
+                        // if (same_point(p, point{5.f, 10.f}, 1e-7) && same_point(q, point{5.f, 5.f}, 1e-7))
+                        printf("dropping point (%f, %f)\n", p.x, p.y);
+                        break;
                     }
                 }
                 float dist = dist_sq(cur_pos, s);
@@ -148,17 +160,20 @@ void RoverPathfinding::Simulator::update_agent()
                 }
             }
 
+            if (drop_pt)
+                continue;
+            float my_dist = dist_sq(cur_pos, p);
             // not blocked
-            if (closest_dist >= dist_sq(cur_pos, p))
+            if (closest_dist + 1e-3 >= my_dist)
             {
                 co.endpoints.push_back(p);
-                // TODO don't add it here! add it to the cropped_obstacle!
-                if ((co.sides & (1 << pi)) && closest_dist != INFINITY && closest_dist <= vision_dist_sq)
+                // i.e. p is a side point AND closest point is not the same point as p AND closest_point is in view
+                if ((co.sides & (1 << pi)) && closest_dist != INFINITY && closest_dist - my_dist > 1e-3 && closest_dist <= vision_dist_sq)
+                {
+                    // printf("Adding projection for (%f, %f)\n", closest.x, closest.y);
                     cropped_obst.at(closest_obstacle->index).endpoints.push_back(closest); // add projection
+                }
             }
-        sidepoint_end:
-        {
-        }
         }
     }
     //note: side rays already accounted for in "crop obstacles"
@@ -176,6 +191,11 @@ void RoverPathfinding::Simulator::update_agent()
             view_obstacles.push_back(line{a, *it});
         }
     }
+    // for (auto & obs : view_obstacles)
+    // {
+    //     printf("(%f, %f) - (%f, %f); ", obs.p.x, obs.p.y, obs.q.x, obs.q.y);
+    // }
+    // printf("\n");
     all_obstacles.clear();
 }
 
@@ -281,7 +301,7 @@ std::list<sf::VertexArray> RoverPathfinding::Simulator::getCircleLines(float ang
     std::vector<RoverPathfinding::point> points;
     const float lower = deg_to_rad(angular_pos - angle_spread / 2.f);
     const float inc = deg_to_rad(angle_spread / (maxpts - 1));
-    for(int i = 0; i < maxpts; ++i)
+    for (int i = 0; i < maxpts; ++i)
     {
         const float a = lower + i * inc;
         points.push_back(RoverPathfinding::point{pos.x + radius * std::cos(a), pos.y + radius * std::sin(a)});
@@ -289,7 +309,7 @@ std::list<sf::VertexArray> RoverPathfinding::Simulator::getCircleLines(float ang
     std::list<sf::VertexArray> ret;
     for (uint i = 0; i < maxpts - 1; i++)
     {
-        ret.push_back(get_vertex_line(points.at(i), points.at(i+1), sf::Color::Blue, scale, window_height));
+        ret.push_back(get_vertex_line(points.at(i), points.at(i + 1), sf::Color::Blue, scale, window_height));
     }
     return ret;
 }

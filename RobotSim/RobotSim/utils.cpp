@@ -3,6 +3,8 @@
 #include "utils.hpp"
 
 #define PI 3.14159265359
+#define FLOAT_TOL -1e-4 // floating point error tolerance. Set to high value for now
+                        // since we don't need too much precision
 
 bool RoverPathfinding::point::operator==(const point &p) const
 {
@@ -147,7 +149,7 @@ bool RoverPathfinding::within_segment(point a, point b, point c)
 {
     // dot product of ab and ac
     float dotprod = ((b.y - a.y) * (c.y - a.y) + (b.x - a.x) * (c.x - a.x));
-    return dotprod > 0 && dotprod <= dist_sq(a, b);
+    return dotprod >= FLOAT_TOL && dotprod <= dist_sq(a, b) + FLOAT_TOL;
 }
 
 //Returns a point in the center of segment pq and then moves it R towards cur
@@ -238,7 +240,7 @@ bool RoverPathfinding::within_angle(float ang, float lower, float upper)
 // return if ab and ac are in the same direction, assuming abc is a line
 bool RoverPathfinding::same_dir(point a, point b, point c)
 {
-    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) > 0;
+    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) >= FLOAT_TOL;
 }
 
 RoverPathfinding::point RoverPathfinding::polar_to_cartesian(point origin, float r, float theta)
@@ -251,7 +253,7 @@ float RoverPathfinding::relative_angle(point o, point p)
     return std::atan((p.y - o.y) / (p.x - o.x));
 }
 
-bool RoverPathfinding::same_point(const point &p, const point &q, float tol = 0.05)
+bool RoverPathfinding::same_point(const point &p, const point &q, float tol = 1e-6)
 {
-    return std::sqrt(dist_sq(p, q)) <= tol;
+    return dist_sq(p, q) <= tol;
 }
