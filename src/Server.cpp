@@ -140,6 +140,29 @@ bool RoverPathfinding::Server::send_action(std::vector<unsigned char> dataBody, 
 	}
 }
 
+bool RoverPathfinding::Server::send_action(unsigned char dataBody, unsigned char id) // same data and id format as in Scarlet
+{
+	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
+	packet.push_back(id); // represents component to be controlled
+	packet.push_back(dataBody); // represents speed/position to be sent
+
+	// packet.data() first four bytes are the time stamp, fifth is the id, and the rest is the data
+	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
+	if (sendOk == SOCKET_ERROR)
+	{
+#ifdef _WIN32
+		std::cout << "That didn't work! " << WSAGetLastError();
+		return false;
+#else
+		std::cout << "That didn't work! " << strerror(errno);
+		return false;
+#endif
+	}
+	else {
+		return true;
+	}
+}
+
 bool RoverPathfinding::Server::send_action(unsigned char id) // same id format as in Scarlet
 {
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
