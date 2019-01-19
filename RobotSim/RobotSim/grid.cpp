@@ -1,5 +1,5 @@
 //
-//  map2.cpp
+//  grid.cpp
 //  RobotSim
 //
 //  Created by Tadeusz Pforte on 12/4/18.
@@ -13,33 +13,40 @@
 
 #include "grid.hpp"
 
+// creates a grid that can have obstacles and agents that it moves around
+// !!! NOTE !!!
+// For aesthetic purposes and to be a pain in the ass,
+// the grid is not drawn starting at (0, 0) in the window.
+// Instead it starts at (1 meter, 1 meter), aka (scale, scale) in the window.
+// Things you draw, if they are using the grid's scale, will need to be drawn
+// with this 1 meter offset taken into account.
 Grid::Grid (float w, float h, unsigned int s) {
     width = w;
     height = h;
     scale = s;
     
-    TOP_BORDER = {0.f, 0.f, width - 1, 0.f};
-    RIGHT_BORDER = {width - 1, 0.f, width - 1, height - 1};
-    BOTTOM_BORDER = {0.f, height - 1, width - 1, height - 1};
-    LEFT_BORDER = {0.f, 0.f, 0.f, height - 1};
+    // TOP_BORDER = {0.f, 0.f, width - 1, 0.f};
+    // RIGHT_BORDER = {width - 1, 0.f, width - 1, height - 1};
+    // BOTTOM_BORDER = {0.f, height - 1, width - 1, height - 1};
+    // LEFT_BORDER = {0.f, 0.f, 0.f, height - 1};
     
     showGrid = false;
     noclip = false;
     
-    border.setPrimitiveType(sf::LinesStrip);
-    border.resize(5);
+    // border.setPrimitiveType(sf::LinesStrip);
+    // border.resize(5);
     
-    border[0] = sf::Vector2f(scale, scale);
-    border[1] = sf::Vector2f(scale, scale * width);
-    border[2] = sf::Vector2f(scale * height, scale * width);
-    border[3] = sf::Vector2f(scale * height, scale);
-    border[4] = sf::Vector2f(scale, scale);
+    // border[0] = sf::Vector2f(scale, scale);
+    // border[1] = sf::Vector2f(scale, scale * width);
+    // border[2] = sf::Vector2f(scale * height, scale * width);
+    // border[3] = sf::Vector2f(scale * height, scale);
+    // border[4] = sf::Vector2f(scale, scale);
     
-    border[0].color = BORDER_COLOR;
-    border[1].color = BORDER_COLOR;
-    border[2].color = BORDER_COLOR;
-    border[3].color = BORDER_COLOR;
-    border[4].color = BORDER_COLOR;
+    // border[0].color = BORDER_COLOR;
+    // border[1].color = BORDER_COLOR;
+    // border[2].color = BORDER_COLOR;
+    // border[3].color = BORDER_COLOR;
+    // border[4].color = BORDER_COLOR;
     
     gridlines.setPrimitiveType(sf::Lines);
     for (int x = 1; x < width; x++) {
@@ -56,10 +63,12 @@ Grid::Grid (float w, float h, unsigned int s) {
     }
 }
 
+// toggles whether or not gridlines are drawn every meter
 void Grid::toggleGrid() {
     showGrid = !showGrid;
 }
 
+// toggles whether or not the agent collides with obstacles and borders
 void Grid::toggleClipping() {
     if (noclip)
         debugMsg("Clipping toggled on");
@@ -69,45 +78,62 @@ void Grid::toggleClipping() {
     noclip = !noclip;
 }
 
+// reads obstacles from a file
+// expects four floats per line, corresponding to the (x, y) of the start and end points in that order
 void Grid::readObstaclesFromFile(std::string fileName) {
     std::ifstream file;
     file.open(fileName);
     if (file) {
         std::string line;
         
+        float x1, y1, x2, y2;
         while (getline(file, line)) {
             std::istringstream in(line);
-            
-            float x1 = 0.f, y1 = 0.f, x2 = 0.f, y2 = 0.f;
-            
+            if (line.length() == 0) continue;
             in >> x1 >> y1 >> x2 >> y2;
             
             placeObstacle(x1, y1, x2, y2);
         }
+        if (obstacleList.empty())
+            debugMsg("Warning: no obstacle loaded");
     }
     file.close();
 }
 
-void Grid::placeObstacle(float x1, float y1, float x2, float y2) {
-    obstacleList.push_back(Obstacle(x1, y1, x2, y2, scale, true));
+void Grid::addBorderObstacles()
+{
+    placeObstacle(0.f, 0.f, width - 1, 0.f);
+    placeObstacle(width - 1, 0.f, width - 1, height - 1);
+    placeObstacle(0.f, height - 1, width - 1, height - 1);
+    placeObstacle(0.f, 0.f, 0.f, height - 1);
 }
 
+// creates a new obstacle from (x1, y1) to (x2, y2)
+void Grid::placeObstacle(float x1, float y1, float x2, float y2) {
+    obstacleList.push_back(Obstacle(x1, y1, x2, y2, scale, width, height));
+}
+
+// moves the agent forward by distance ds (which can be negative)
+// if clipping is enabled, collisions with obstacles and borders will block movement
 sf::Vertex Grid::moveAgent(Agent &agent, float ds) {
-    float curR = agent.getInternalRotation();
+    // convert internal rotation (counter-clockwise) to SFML rotation (clockwise)
+    float curR = -agent.getInternalRotation();
+    
     float xOffset = ds * cos(curR * PI / 180);
-    float yOffset = ds * sin(curR * PI / 180);
+    // convert y from SFML (top is 0) to internal position (bottom is 0)
+    float yOffset = -ds * sin(curR * PI / 180);
     
     if (!willCollide(agent, xOffset, yOffset, 0))
         agent.move(xOffset, yOffset);
+    return agent.getPosition();
 }
 
+// rotates the agent clockwise by the angle dr (which can be negative)
+// if clipping is enabled, collisions with obstacles and borders will block rotation
 float Grid::rotateAgent(Agent &agent, float dr) {
     if (!willCollide(agent, 0, 0, dr))
         agent.rotate(dr);
-}
-
-unsigned int Grid::retrieveScale() {
-    return scale;
+    return 0.f;
 }
 
 // returns true if the two lines, stored as {x1, y1, x2, y2}, intersect
@@ -131,6 +157,9 @@ bool Grid::linesCollide(std::array<float, 4> line1, std::array<float, 4> line2) 
     return 0 <= uA && uA <= 1 && 0 <= uB && uB <= 1;
 }
 
+// returns true if any of four lines in an array collides with the other given line
+// otherwise returns false
+// expects all lines to be arrays storing {x1, y1, x2, y2} in that order
 bool Grid::boxCollision(std::array<std::array<float, 4>, 4> box, std::array<float, 4> line) {
     bool flag = false;
     for (std::array<float, 4> boxLine : box) {
@@ -183,22 +212,22 @@ bool Grid::willCollide(Agent agent, float dx, float dy, float dr) {
     bool flag = false;
     
     // check edge collisions
-    if (xQuadrant == 0 && boxCollision(hitboxLines, LEFT_BORDER)) {
-        flag = true;
-        debugMsg("Hit left border");
-    }
-    else if (yQuadrant == 0 && boxCollision(hitboxLines, TOP_BORDER)) {
-        flag = true;
-        debugMsg("Hit top border");
-    }
-    else if (xQuadrant == (width / 4 - 1) && boxCollision(hitboxLines, RIGHT_BORDER)) {
-        flag = true;
-        debugMsg("Hit right border");
-    }
-    else if (yQuadrant == (height / 4 - 1) && boxCollision(hitboxLines, BOTTOM_BORDER)) {
-        flag = true;
-        debugMsg("Hit bottom border");
-    }
+    // if (xQuadrant == 0 && boxCollision(hitboxLines, LEFT_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit left border");
+    // }
+    // else if (yQuadrant == 0 && boxCollision(hitboxLines, TOP_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit top border");
+    // }
+    // else if (xQuadrant == (width / 4 - 1) && boxCollision(hitboxLines, RIGHT_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit right border");
+    // }
+    // else if (yQuadrant == (height / 4 - 1) && boxCollision(hitboxLines, BOTTOM_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit bottom border");
+    // }
     
     for (Obstacle o : obstacleList) {
         if (boxCollision(hitboxLines, {o.x1, o.y1, o.x2, o.y2})) {
@@ -216,12 +245,12 @@ void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     
     if (showGrid)
         target.draw(gridlines, states);
-    target.draw(border, states);
     for (Obstacle o : obstacleList) {
         target.draw(o, states);
+    // target.draw(border, states);
     }
 }
 
 void Grid::debugMsg(std::string msg) {
-    std::cout << msg << std::endl;
+    // std::cout << msg << std::endl;
 }
