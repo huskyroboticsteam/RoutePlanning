@@ -107,7 +107,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
             if (!obst.marked)
             {
                 obst.marked = true;
-                // TODO we might need to handle edge cases where we cannot circumvent the obstacle because we might be   of bounds
+                // TODO we might need to handle edge cases where we cannot circumvent the obstacle because we might be out of bounds
                 auto obstacle_side_pts = add_length_to_line_segment(obst.coord1, obst.coord2, TOLERANCE);  // Add tolerance 
 
                 bool create_n1 = true;
