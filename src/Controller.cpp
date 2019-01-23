@@ -8,6 +8,7 @@
 #define DATA_MAG 0xC1
 
 #define SET_SPEED 0x95
+#define HEADING_CHANGE 0x97
 
 #define TARGET_LAT 123.0
 #define TARGET_LNG 321.0
@@ -32,8 +33,10 @@ namespace RoverPathfinding {
     
     // using given packet data and server send a packet containing either a direction or motor power
 	
-	void Controller::setDirection(float heading) {
-		
+	void Controller::setDirection(float delta_heading) {
+        std::vector<unsigned char> data(4);
+        std::memcpy(&data[0], &delta_heading, 4);
+		return server.send_action(delta_heading, HEADING_CHANGE); 
 	}
 	bool Controller::setSpeed(float speed) {
 		std::vector<unsigned char> data(4);
@@ -50,9 +53,9 @@ namespace RoverPathfinding {
 			//std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
 			std::vector<point> path;
 			point nextPoint = path[0];
-			float heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
+			float delta_heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
 			//float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
-			setDirection(heading);
+			setDirection(delta_heading);
 			setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
 	    // Magnometer has x, y, z values
         } else if (packetID == DATA_MAG) {
