@@ -24,32 +24,31 @@
 
 // Here is a small helper for you! Have a look.
 #include "grid.hpp"
-
-#include "../../src/utils.cpp"
 #include "Simulator.hpp"
 
 #define WINDOW_SCALE 0.5f
 
-const std::string RESOURCE_DIR = "Resources/";
+const std::string RESOURCE_DIR = "./Resources/";
 
-int main(int, char const**)
+int main(int, char const **)
 {
     const unsigned int FRAMERATE = 60;
-    
+
     sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(FRAMERATE);
-    
+
     bool hasFocus = true;
-    
-//    sf::Image icon;
-//
-//    if (!icon.loadFromFile(resourcePath() + "HuskyRoboticsLogo.png")) {
-//        return EXIT_FAILURE;
-//    }
-//    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-    
+
+    sf::Image icon;
+
+    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
+    {
+        window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+    }
+
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
+    RoverPathfinding::Simulator sim(grid.obstacleList, agent, RoverPathfinding::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
     
     while (window.isOpen())
     {
@@ -57,13 +56,16 @@ int main(int, char const**)
         while (window.pollEvent(event))
         {
             // Close window on X or Cmd+W
-            if (event.type == sf::Event::Closed) {
+            if (event.type == sf::Event::Closed)
+            {
                 window.close();
             }
-            else if (event.type == sf::Event::GainedFocus) {
+            else if (event.type == sf::Event::GainedFocus)
+            {
                 hasFocus = true;
             }
-            else if (event.type == sf::Event::LostFocus) {
+            else if (event.type == sf::Event::LostFocus)
+            {
                 hasFocus = false;
             }
             else if (event.type == sf::Event::KeyPressed && hasFocus) {
@@ -89,7 +91,9 @@ int main(int, char const**)
                         break;
                     }
                     case sf::Keyboard::O : {
-                        grid.readObstaclesFromFile("../obstacles.txt");
+                        grid.obstacleList.clear();
+                        grid.readObstaclesFromFile("./obstacles.txt");
+                        grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }
@@ -120,12 +124,15 @@ int main(int, char const**)
                 }
             }
         }
-        
-        if (hasFocus) {
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+
+        if (hasFocus)
+        {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+            {
                 grid.moveAgent(agent, 10.f / FRAMERATE);
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+            {
                 grid.moveAgent(agent, -10.f / FRAMERATE);
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
@@ -135,12 +142,14 @@ int main(int, char const**)
                 grid.rotateAgent(agent, -200.f / FRAMERATE);
             }
         }
-        
+
+        sim.update_agent();
         window.clear(sf::Color::White);
         window.draw(grid);
         window.draw(agent);
+        window.draw(sim);
         window.display();
     }
-    
+
     return EXIT_SUCCESS;
 }

@@ -1,7 +1,5 @@
 #include "Server.h"
-#include <vector>
-#include <ctime>
-#include <iostream>
+
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -15,6 +13,9 @@
 	#include <netdb.h> 
 	#include <errno.h>
 	#include <unistd.h>
+	#include <string.h>
+	#define SOCKET int
+	#define SOCKET_ERROR -1
 #endif
 
 const unsigned char WATCHDOG_ID = 0xF0;
@@ -41,37 +42,58 @@ RoverPathfinding::Server::Server()
 	out = socket(AF_INET, SOCK_DGRAM, 0);
 	in = socket(AF_INET, SOCK_DGRAM, 0);
 
+	//Example of how to set up sendto address:
+	server.sin_family = AF_INET;
+	server.sin_port = htons(54000);
+	inet_aton("10.19.161.242", &(server.sin_addr));
+	memset(&(server.sin_zero), '\0', 8);
+	
 	// Bind socket to ip address and port
 	sockaddr_in serverHint;
-	serverHint.sin_addr.S_un.S_addr = ADDR_ANY;
+	serverHint.sin_addr.s_addr = INADDR_ANY;
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(54000);
 
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SO_ERROR)
+	
+	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
+#ifdef _WIN32
 		std::cout << "Can't bind socket! " << WSAGetLastError();
+#else
+		std::cout << "Can't bind socket! " << strerror(errno);
+#endif
 	}
+}
 
+void RoverPathfinding::Server::go() {
 	sockaddr_in client;
+#ifdef _WIN32
 	ZeroMemory(&client, sizeof(client));
-	int clientLength = sizeof(client);
-
+#else
+	memset(&client, 0, sizeof(client));
+#endif
+	unsigned int clientLength = sizeof(client);
 	char buf[256];
+#ifdef _WIN32
 	ZeroMemory(buf, 256);
-
-	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr);
-
-
-
+#else
+	memset(buf,0, 256);
+#endif
+	
 	while (true) 
 	{
+#ifdef _WIN32
 		ZeroMemory(buf, 256);
+#else
+		memset(buf, 0, 256);
+#endif
 
 		// Wait for message
 		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
 		if (bytesIn == SO_ERROR) 
 		{
-#ifdef WIN32
+#ifdef _WIN32
 			std::cout << "Error receiving from client" << WSAGetLastError();
 			continue;
 #else
@@ -82,11 +104,15 @@ RoverPathfinding::Server::Server()
 
 		// Display message and client 
 		char clientIp[256];
+#ifdef _WIN32
 		ZeroMemory(clientIp, 256);
-
+#else
+		memset(clientIp, 0, 256);
+#endif
 		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
 
-		std::cout << "Message recieved from" << clientIp << " : " << buf;
+		std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
+		
 	}
 }
 
@@ -115,6 +141,29 @@ bool RoverPathfinding::Server::send_action(std::vector<unsigned char> dataBody, 
 	}
 }
 
+bool RoverPathfinding::Server::send_action(unsigned char dataBody, unsigned char id) // same data and id format as in Scarlet
+{
+	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
+	packet.push_back(id); // represents component to be controlled
+	packet.push_back(dataBody); // represents speed/position to be sent
+
+	// packet.data() first four bytes are the time stamp, fifth is the id, and the rest is the data
+	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
+	if (sendOk == SOCKET_ERROR)
+	{
+#ifdef _WIN32
+		std::cout << "That didn't work! " << WSAGetLastError();
+		return false;
+#else
+		std::cout << "That didn't work! " << strerror(errno);
+		return false;
+#endif
+	}
+	else {
+		return true;
+	}
+}
+
 bool RoverPathfinding::Server::send_action(unsigned char id) // same id format as in Scarlet
 {
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
@@ -123,6 +172,9 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 	// packet.data() first four bytes are the time stamp, fifth is the id, and sixth is the data
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
 	if (sendOk == SO_ERROR)
+	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*) &server, sizeof(server));
+	
+	if (sendOk == SOCKET_ERROR)
 	{
 #ifdef _WIN32
 		std::cout << "That didn't work! " << WSAGetLastError();
@@ -154,8 +206,10 @@ void RoverPathfinding::Server::send_watchdog() {
 
 void RoverPathfinding::Server::stop()
 {
-	closesocket(out);
+	close(out);
+#ifdef _WIN32
 	WSACleanup();
+#endif
 }
 
 std::vector<unsigned char> RoverPathfinding::Server::current_time()

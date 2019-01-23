@@ -25,28 +25,28 @@ Grid::Grid (float w, float h, unsigned int s) {
     height = h;
     scale = s;
     
-    TOP_BORDER = {0.f, 0.f, width - 1, 0.f};
-    RIGHT_BORDER = {width - 1, 0.f, width - 1, height - 1};
-    BOTTOM_BORDER = {0.f, height - 1, width - 1, height - 1};
-    LEFT_BORDER = {0.f, 0.f, 0.f, height - 1};
+    // TOP_BORDER = {0.f, 0.f, width - 1, 0.f};
+    // RIGHT_BORDER = {width - 1, 0.f, width - 1, height - 1};
+    // BOTTOM_BORDER = {0.f, height - 1, width - 1, height - 1};
+    // LEFT_BORDER = {0.f, 0.f, 0.f, height - 1};
     
     showGrid = false;
     noclip = false;
     
-    border.setPrimitiveType(sf::LinesStrip);
-    border.resize(5);
+    // border.setPrimitiveType(sf::LinesStrip);
+    // border.resize(5);
     
-    border[0] = sf::Vector2f(scale, scale);
-    border[1] = sf::Vector2f(scale, scale * width);
-    border[2] = sf::Vector2f(scale * height, scale * width);
-    border[3] = sf::Vector2f(scale * height, scale);
-    border[4] = sf::Vector2f(scale, scale);
+    // border[0] = sf::Vector2f(scale, scale);
+    // border[1] = sf::Vector2f(scale, scale * width);
+    // border[2] = sf::Vector2f(scale * height, scale * width);
+    // border[3] = sf::Vector2f(scale * height, scale);
+    // border[4] = sf::Vector2f(scale, scale);
     
-    border[0].color = BORDER_COLOR;
-    border[1].color = BORDER_COLOR;
-    border[2].color = BORDER_COLOR;
-    border[3].color = BORDER_COLOR;
-    border[4].color = BORDER_COLOR;
+    // border[0].color = BORDER_COLOR;
+    // border[1].color = BORDER_COLOR;
+    // border[2].color = BORDER_COLOR;
+    // border[3].color = BORDER_COLOR;
+    // border[4].color = BORDER_COLOR;
     
     gridlines.setPrimitiveType(sf::Lines);
     for (int x = 1; x < width; x++) {
@@ -86,17 +86,26 @@ void Grid::readObstaclesFromFile(std::string fileName) {
     if (file) {
         std::string line;
         
+        float x1, y1, x2, y2;
         while (getline(file, line)) {
             std::istringstream in(line);
-            
-            float x1 = 0.f, y1 = 0.f, x2 = 0.f, y2 = 0.f;
-            
+            if (line.length() == 0) continue;
             in >> x1 >> y1 >> x2 >> y2;
             
             placeObstacle(x1, y1, x2, y2);
         }
+        if (obstacleList.empty())
+            debugMsg("Warning: no obstacle loaded");
     }
     file.close();
+}
+
+void Grid::addBorderObstacles()
+{
+    placeObstacle(0.f, 0.f, width - 1, 0.f);
+    placeObstacle(width - 1, 0.f, width - 1, height - 1);
+    placeObstacle(0.f, height - 1, width - 1, height - 1);
+    placeObstacle(0.f, 0.f, 0.f, height - 1);
 }
 
 // creates a new obstacle from (x1, y1) to (x2, y2)
@@ -116,6 +125,7 @@ sf::Vertex Grid::moveAgent(Agent &agent, float ds) {
     
     if (!willCollide(agent, xOffset, yOffset, 0))
         agent.move(xOffset, yOffset);
+    return agent.getPosition();
 }
 
 // rotates the agent clockwise by the angle dr (which can be negative)
@@ -123,6 +133,7 @@ sf::Vertex Grid::moveAgent(Agent &agent, float ds) {
 float Grid::rotateAgent(Agent &agent, float dr) {
     if (!willCollide(agent, 0, 0, dr))
         agent.rotate(dr);
+    return 0.f;
 }
 
 // returns true if the two lines, stored as {x1, y1, x2, y2}, intersect
@@ -201,22 +212,22 @@ bool Grid::willCollide(Agent agent, float dx, float dy, float dr) {
     bool flag = false;
     
     // check edge collisions
-    if (xQuadrant == 0 && boxCollision(hitboxLines, LEFT_BORDER)) {
-        flag = true;
-        debugMsg("Hit left border");
-    }
-    else if (yQuadrant == 0 && boxCollision(hitboxLines, TOP_BORDER)) {
-        flag = true;
-        debugMsg("Hit top border");
-    }
-    else if (xQuadrant == (width / 4 - 1) && boxCollision(hitboxLines, RIGHT_BORDER)) {
-        flag = true;
-        debugMsg("Hit right border");
-    }
-    else if (yQuadrant == (height / 4 - 1) && boxCollision(hitboxLines, BOTTOM_BORDER)) {
-        flag = true;
-        debugMsg("Hit bottom border");
-    }
+    // if (xQuadrant == 0 && boxCollision(hitboxLines, LEFT_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit left border");
+    // }
+    // else if (yQuadrant == 0 && boxCollision(hitboxLines, TOP_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit top border");
+    // }
+    // else if (xQuadrant == (width / 4 - 1) && boxCollision(hitboxLines, RIGHT_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit right border");
+    // }
+    // else if (yQuadrant == (height / 4 - 1) && boxCollision(hitboxLines, BOTTOM_BORDER)) {
+    //     flag = true;
+    //     debugMsg("Hit bottom border");
+    // }
     
     for (Obstacle o : obstacleList) {
         if (boxCollision(hitboxLines, {o.x1, o.y1, o.x2, o.y2})) {
@@ -234,12 +245,12 @@ void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     
     if (showGrid)
         target.draw(gridlines, states);
-    target.draw(border, states);
     for (Obstacle o : obstacleList) {
         target.draw(o, states);
+    // target.draw(border, states);
     }
 }
 
 void Grid::debugMsg(std::string msg) {
-    std::cout << msg << std::endl;
+    // std::cout << msg << std::endl;
 }
