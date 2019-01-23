@@ -1,8 +1,8 @@
-#include "Controller.h"
+#include "Controller.hpp"
 #include <iostream>
 #include <cstring>
 #include <math.h>
-#include "Server.cpp"
+#include "Server.hpp"
 
 #define DATA_GPS 0xC0
 #define DATA_MAG 0xC1
@@ -29,10 +29,7 @@ namespace RoverPathfinding {
     // TODO: Feed lat/long to map to find vector pointing to next destination
     // TODO: Feed x/y/z into ??? to find current orientation, then we can find how much to turn
 
-   
-    
     // using given packet data and server send a packet containing either a direction or motor power
-	
 	bool Controller::setDirection(float delta_heading) {
         std::vector<unsigned char> data(4);
         std::memcpy(&data[0], &delta_heading, 4);
@@ -68,9 +65,9 @@ namespace RoverPathfinding {
         }
     }
 
-    void Controller::addObstacle(float curr_lat, float curr_lng, float curr_dir, float dist1, float dir1, float dist2, float angle2) {
-        point latlng1 = convertToLatLng(0, 0, 0, dist1, dir1);
-        point latlng2 = convertToLatLng(0, 0, 0, dist2, dir2);
+    void Controller::addObstacle(float curr_lat, float curr_lng, float curr_dir, float dist1, float dir1, float dist2, float dir2) {
+        point latlng1 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist1, dir1);
+        point latlng2 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist2, dir2);
         map.add_obstacle(latlng1, latlng2);
     }
 
