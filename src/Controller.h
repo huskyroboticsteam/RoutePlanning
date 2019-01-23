@@ -12,19 +12,19 @@ Basically this class handles everything: model/logic (Map), networking
 #include "Map.h"
 #include "Server.h"
 
-namespace RoverPathfinding
+namespace RP
 {
 class Controller
 {
   public:
-    Controller(RoverPathfinding::Map map, RoverPathfinding::Server serv);
+    Controller(RP::Map map, RP::Server serv);
   private:
     // TODO might take some parameters
     void update();                    // Update the current world state.
 
-    RoverPathfinding::Map map;    // The agent that handles the logic of finding a path         
-    RoverPathfinding::Server server;  // The server that handles networking and triggers
+    RP::Map map;    // The agent that handles the logic of finding a path         
+    RP::Server server;  // The server that handles networking and triggers
 };
-} // namespace RoverPathfinding
+} // namespace RP
 
 #endif

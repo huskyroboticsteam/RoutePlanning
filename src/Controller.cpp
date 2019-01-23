@@ -1,3 +1,3 @@
 #include "Controller.h"
 
-RoverPathfinding::Controller::Controller(RoverPathfinding::Map map, RoverPathfinding::Server serv): map(map), server(serv) {}
+RP::Controller::Controller(RP::Map map, RP::Server serv): map(map), server(serv) {}

@@ -54,8 +54,8 @@ int main(int, char const **)
 
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
-    RoverPathfinding::Simulator sim(grid.obstacleList, agent, RoverPathfinding::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
-    RoverPathfinding::Map map(sim.getpos(), grid.target, sim.visible_obstacles());
+    RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
+    RP::Map map(sim.getpos(), grid.target, sim.visible_obstacles());
     while (window.isOpen())
     {
         sf::Event event;

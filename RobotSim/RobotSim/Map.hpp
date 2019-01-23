@@ -5,7 +5,7 @@
 #include <vector>
 #include <utility>
 
-namespace RoverPathfinding
+namespace RP
 {
 
 struct node
@@ -44,6 +44,6 @@ private:
   const point& tar;
   const std::list<line>& view_obstacles;
 };
-} // namespace RoverPathfinding
+} // namespace RP
 
 #endif

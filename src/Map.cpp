@@ -4,14 +4,14 @@
 #include "Map.hpp"
 #include "utils.hpp"
 
-void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
+void RP::Map::add_obstacle(point coord1, point coord2)
 {
     // obstacle o{};
     std::pair<int, int> pair = std::make_pair(-1, -1);
     obstacles.push_back(obstacle{false, coord1, coord2, pair});
 }
 
-RoverPathfinding::line RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
+RP::line RP::Map::add_length_to_line_segment(point p, point q, float length)
 {
     std::pair<float, float> pq = std::make_pair(q.x - p.x, q.y - p.y); //vector
     float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second);
@@ -23,7 +23,7 @@ RoverPathfinding::line RoverPathfinding::Map::add_length_to_line_segment(point p
     return line{p1, p2};
 }
 
-void RoverPathfinding::Map::add_edge(int n1, int n2)
+void RP::Map::add_edge(int n1, int n2)
 {
     float dist = std::sqrt(dist_sq(nodes[n1].coord, nodes[n2].coord));
 
@@ -34,7 +34,7 @@ void RoverPathfinding::Map::add_edge(int n1, int n2)
     nodes[n2].connection.push_back(n2_to_n1);
 }
 
-int RoverPathfinding::Map::create_node(point coord)
+int RP::Map::create_node(point coord)
 {
     node n;
     n.prev = -1;
@@ -44,13 +44,13 @@ int RoverPathfinding::Map::create_node(point coord)
     return (nodes.size() - 1);
 }
 
-std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur, point tar)
+std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 {
     //TODO(sasha): make R a constant - the following few lines are just a hack
     //             to get R to be in lat/lng units
     //<hack>
 #define R_METERS 0.5f
-    auto offset = RoverPathfinding::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
+    auto offset = RP::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
     auto diff = std::make_pair(offset.x - cur.x, offset.y - cur.y);
     float TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
 #undef R_METERS
@@ -88,11 +88,11 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
         for (int i = 0; i < obstacles.size(); i++)
         {
             auto &obst = obstacles[i];
-            if (RoverPathfinding::segments_intersect(nodes[curr_node].coord, obst.coord1, tar, obst.coord2))
+            if (RP::segments_intersect(nodes[curr_node].coord, obst.coord1, tar, obst.coord2))
             {
                 destination_blocked = true;
                 point inters = intersection(nodes[curr_node].coord, tar, obst.coord1, obst.coord2);
-                float dist = RoverPathfinding::dist_sq(nodes[curr_node].coord, inters);
+                float dist = RP::dist_sq(nodes[curr_node].coord, inters);
                 if (dist < min_dist)
                 {
                     min_dist = dist;
@@ -118,12 +118,12 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
                 for (int safety = 2; safety < nodes.size(); safety++) // possibly to check whether nodes are safe or not
                 {
                     node &n = nodes[safety];
-                    if (RoverPathfinding::within_radius(n.coord, obstacle_side_pts.p, TOLERANCE))
+                    if (RP::within_radius(n.coord, obstacle_side_pts.p, TOLERANCE))
                     {
                         create_n1 = false;
                         n1 = safety;
                     }
-                    if (RoverPathfinding::within_radius(n.coord, obstacle_side_pts.q, TOLERANCE))
+                    if (RP::within_radius(n.coord, obstacle_side_pts.q, TOLERANCE))
                     {
                         create_n2 = false;
                         n2 = safety;
@@ -139,7 +139,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
                 obst.side_safety_nodes.first = n1;
                 obst.side_safety_nodes.second = n2;
 
-                point center_coord = RoverPathfinding::center_point_with_radius(nodes[curr_node].coord, obstacle_side_pts.p, obstacle_side_pts.q, TOLERANCE);
+                point center_coord = RP::center_point_with_radius(nodes[curr_node].coord, obstacle_side_pts.p, obstacle_side_pts.q, TOLERANCE);
                 obst.center_safety_node = create_node(center_coord);
                 add_edge(curr_node, obst.center_safety_node);
                 add_edge(n1, obst.center_safety_node);
@@ -167,7 +167,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
-std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to(float cur_lat, float cur_lng,
+std::vector<RP::point> RP::Map::shortest_path_to(float cur_lat, float cur_lng,
                                                                            float tar_lat, float tar_lng)
 {
     auto cur = point{cur_lat, cur_lng};

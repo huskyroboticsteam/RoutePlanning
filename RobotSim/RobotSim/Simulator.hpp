@@ -8,7 +8,7 @@
 
 #define MAX_GRID_RESOLUTION 100 // max number of grid cells on each side of the map
 
-namespace RoverPathfinding
+namespace RP
 {
 struct simulator_config
 {
@@ -28,7 +28,7 @@ struct proc_obstacle
   point p;
   point q;
   char sides; // 0 if neither is side, 1 if p, 2 if q, 3 if both
-  std::list<RoverPathfinding::point> endpoints;
+  std::list<RP::point> endpoints;
 };
 
 class Simulator : public sf::Drawable
@@ -64,6 +64,6 @@ private:
   virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
   std::list<sf::VertexArray> getCircleLines(float angular_pos, float radius, float angle_spread, point pos, int maxpts=10) const;
 };
-} // namespace RoverPathfinding
+} // namespace RP
 
 #endif
