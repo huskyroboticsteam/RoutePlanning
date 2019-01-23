@@ -4,17 +4,15 @@
 #include <list>
 #include "Map.hpp"
 #include "utils.hpp"
-#include "obstacle.hpp"
 
-RoverPathfinding::Map::Map(const point &cpos, const point &tget, const std::list<Obstacle> &vobs) : cur(cpos), tar(tget), view_obstacles(vobs)
+RoverPathfinding::Map::Map(const point &cpos, const point &tget, const std::list<line> &vobs) : cur(cpos), tar(tget), view_obstacles(vobs)
 {
 }
 
 void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
 {
     // obstacle o{};
-    std::pair<int, int> pair = std::make_pair(-1, -1);
-    obstacles.push_back(obstacle{false, coord1, coord2, pair});
+    obstacles.push_back(obstacle{false, coord1, coord2});
 }
 
 RoverPathfinding::line RoverPathfinding::Map::add_length_to_line_segment(point p, point q, float length)
@@ -61,7 +59,10 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
     float TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
 #undef R_METERS
     //</hack>
-
+    obstacles.clear();
+    obstacles.reserve(view_obstacles.size());
+    for (const auto& vo : view_obstacles)
+        obstacles.emplace_back(obstacle{false, vo.p, vo.q});
     node start;
     for (auto &n : nodes)
     {
@@ -69,12 +70,9 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
         n.connection.clear();
     }
     nodes.clear();
-    // nodes.push_back(create_node())
-    nodes[0].prev = -1;
+    create_node(cur);
     nodes[0].dist_to = 0.0f;
-    nodes[0].coord = cur;
-
-    nodes[1].coord = tar;
+    create_node(tar);
 
     if (obstacles.empty())
     {

@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "grid.hpp"
+#include "utils.hpp"
 
 // creates a grid that can have obstacles and agents that it moves around
 // !!! NOTE !!!
@@ -246,15 +247,19 @@ bool Grid::willCollide(Agent agent, float dx, float dy, float dr) {
     return flag;
 }
 
-void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void Grid::draw(sf::RenderTarget& renderTarget, sf::RenderStates states) const {
     states.transform *= getTransform();
     
     if (showGrid)
-        target.draw(gridlines, states);
+        renderTarget.draw(gridlines, states);
     for (Obstacle o : obstacleList) {
-        target.draw(o, states);
+        renderTarget.draw(o, states);
     // target.draw(border, states);
     }
+     #define TARGET_SZ 5.f
+    renderTarget.draw(get_vertex_line(RoverPathfinding::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RoverPathfinding::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
+    sf::Color::Magenta, scale, height), states);
+    #undef TARGET_SZ
 }
 
 void Grid::debugMsg(std::string msg) {

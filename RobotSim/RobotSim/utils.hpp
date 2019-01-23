@@ -3,6 +3,8 @@
 
 #include <utility>
 #include <vector>
+#include <SFML/Graphics.hpp>
+
 typedef unsigned int uint;
 namespace RoverPathfinding
 {
@@ -67,6 +69,9 @@ bool within_angle(float ang, float lower, float upper);                         
 point polar_to_cartesian(point origin, float r, float theta);                   //Polar to cartesian relative to the given origin
 float relative_angle(point origin, point p);                                    //Find angle of p relative to origin, where positive x-axis is 0 radians.
 bool same_point(const point &p, const point &q, float tol);
+
 } // namespace RoverPathfinding
+
+sf::VertexArray get_vertex_line(RoverPathfinding::point p, RoverPathfinding::point q, sf::Color c, float scale, float window_height);
 
 #endif

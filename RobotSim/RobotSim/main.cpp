@@ -55,7 +55,7 @@ int main(int, char const **)
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
     RoverPathfinding::Simulator sim(grid.obstacleList, agent, RoverPathfinding::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
-    RoverPathfinding::Map map;
+    RoverPathfinding::Map map(sim.getpos(), grid.target, sim.visible_obstacles());
     while (window.isOpen())
     {
         sf::Event event;
@@ -99,7 +99,7 @@ int main(int, char const **)
                     case sf::Keyboard::O : {
                         grid.obstacleList.clear();
                         grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
-                        // grid.addBorderObstacles();
+                        grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }

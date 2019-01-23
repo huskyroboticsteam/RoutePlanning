@@ -6,7 +6,6 @@
 #include <assert.h>
 #include "Simulator.hpp"
 #include "grid.hpp"
-#include "Map.hpp"
 #include <cstdio>
 
 #define DEBUG_MSG 0
@@ -273,18 +272,6 @@ bool RoverPathfinding::Simulator::within_view(const point &pt)
     return true;
 }
 
-sf::VertexArray get_vertex_line(RoverPathfinding::point p, RoverPathfinding::point q, sf::Color c, float scale, float window_height)
-{
-    sf::VertexArray line;
-    line.setPrimitiveType(sf::Lines);
-    line.resize(2);
-    line[0] = sf::Vertex(sf::Vector2f((p.x + 1) * scale, (window_height - p.y) * scale));
-    line[0].color = c;
-    line[1] = sf::Vertex(sf::Vector2f((q.x + 1) * scale, (window_height - q.y) * scale));
-    line[1].color = c;
-    return line;
-}
-
 void RoverPathfinding::Simulator::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     target.draw(get_vertex_line(cur_pos, fov_lower, sf::Color::Blue, scale, window_height));
@@ -312,4 +299,9 @@ std::list<sf::VertexArray> RoverPathfinding::Simulator::getCircleLines(float ang
         ret.push_back(get_vertex_line(points.at(i), points.at(i + 1), sf::Color::Blue, scale, window_height));
     }
     return ret;
+}
+
+const RoverPathfinding::point& RoverPathfinding::Simulator::getpos()
+{
+    return cur_pos;
 }

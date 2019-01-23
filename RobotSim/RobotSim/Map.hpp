@@ -21,13 +21,13 @@ struct obstacle
   bool marked; // indicates whether this obstacle has already been accounted for in build_graph()
   point coord1;
   point coord2;
-  std::pair<int, int> &side_safety_nodes;
+  std::pair<int, int> side_safety_nodes;
   int center_safety_node;
 };
 class Map
 {
 public:
-  Map(const point& cur_pos, const point& target, const std::list<Obstacle>& obstacles);
+  Map(const point& cur_pos, const point& target, const std::list<line>& obstacles);
   point compute_goal();                          // find the shortest path to the goal and return a target direction vector.
   point compute_search();                        // search for the tennis ball once the goal is reached. Return a target direction vector.
   std::vector<point> shortest_path_to(); //Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination (for debugging)
@@ -42,7 +42,7 @@ private:
   std::vector<obstacle> obstacles;                                 //The obstacles
   const point& cur;
   const point& tar;
-  const std::list<Obstacle> view_obstacles;
+  const std::list<line>& view_obstacles;
 };
 } // namespace RoverPathfinding
 
