@@ -81,6 +81,8 @@ void Grid::toggleClipping() {
 
 // reads obstacles from a file
 // expects four floats per line, corresponding to the (x, y) of the start and end points in that order
+// blank lines are ignored
+// any line starting with a non-number (ie. text) is considered a comment and ignored
 void Grid::readObstaclesFromFile(std::string fileName) {
     std::ifstream file;
     file.open(fileName);
@@ -90,8 +92,11 @@ void Grid::readObstaclesFromFile(std::string fileName) {
         float x1, y1, x2, y2;
         while (getline(file, line)) {
             std::istringstream in(line);
-            if (line.length() == 0) continue;
-            in >> x1 >> y1 >> x2 >> y2;
+            // text is ignored as a comment
+            if (!(in >> x1))
+                continue;
+            
+            in >> y1 >> x2 >> y2;
             
             placeObstacle(x1, y1, x2, y2);
         }

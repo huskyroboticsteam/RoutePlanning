@@ -22,14 +22,20 @@
 #include <time.h>
 #include <string>
 
-// Here is a small helper for you! Have a look.
+// Imports resourcePath() for macos
+#include "ResourcePath.hpp"
+
 #include "grid.hpp"
 #include "Simulator.hpp"
 #include "Map.hpp"
 
-#define WINDOW_SCALE 0.5f
-
-const std::string RESOURCE_DIR = "./Resources/";
+#ifdef _WIN32
+    const std::string RESOURCE_DIR = "./Resources/";
+    #define WINDOW_SCALE 0.5f
+#elif __APPLE__
+    const std::string RESOURCE_DIR = resourcePath();
+    #define WINDOW_SCALE 1.f
+#endif
 
 int main(int, char const **)
 {
@@ -41,7 +47,6 @@ int main(int, char const **)
     bool hasFocus = true;
 
     sf::Image icon;
-
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
     {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
@@ -93,8 +98,8 @@ int main(int, char const **)
                     }
                     case sf::Keyboard::O : {
                         grid.obstacleList.clear();
-                        grid.readObstaclesFromFile("./obstacles.txt");
-                        grid.addBorderObstacles();
+                        grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
+                        // grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }

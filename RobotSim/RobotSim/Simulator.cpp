@@ -143,11 +143,11 @@ void RoverPathfinding::Simulator::update_agent()
                     // i.e. there is an intersection, the intersection is not the shared vertex, and
                     // the intersection falls on the contending obstacle. This means that p is a shared
                     // vertex and is blocked
-                    if (inter.x != INFINITY && !same_point(inter, p, 1e-5) && within_segment(aop->p, aop->q, inter) && dist_sq(cur_pos, inter) < dist_sq(cur_pos, q))
+                    if (inter.x != INFINITY && !same_point(inter, p, 1e-5) && within_segment(aop->p, aop->q, inter) && within_segment(cur_pos, q, inter))
                     {
                         drop_pt = true;
                         // if (same_point(p, point{5.f, 10.f}, 1e-7) && same_point(q, point{5.f, 5.f}, 1e-7))
-                        // printf("dropping point (%f, %f)\n", p.x, p.y);
+                        printf("dropping point (%f, %f)\n", p.x, p.y);
                         break;
                     }
                 }
