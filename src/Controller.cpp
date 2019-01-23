@@ -38,11 +38,13 @@ namespace RoverPathfinding {
         std::memcpy(&data[0], &delta_heading, 4);
 		return server.send_action(delta_heading, HEADING_CHANGE); 
 	}
+
 	bool Controller::setSpeed(float speed) {
 		std::vector<unsigned char> data(4);
 		std::memcpy(&data[0], &speed, 4);
 		return server.send_action(data, SET_SPEED);
 	}
+
     void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
         // GPS has latitude and lng
         if (packetID == DATA_GPS) {
