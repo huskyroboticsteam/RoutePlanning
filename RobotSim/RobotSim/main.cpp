@@ -25,6 +25,7 @@
 // Here is a small helper for you! Have a look.
 #include "grid.hpp"
 #include "Simulator.hpp"
+#include "Map.hpp"
 
 #define WINDOW_SCALE 0.5f
 
@@ -49,7 +50,7 @@ int main(int, char const **)
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
     RoverPathfinding::Simulator sim(grid.obstacleList, agent, RoverPathfinding::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
-    
+    RoverPathfinding::Map map;
     while (window.isOpen())
     {
         sf::Event event;

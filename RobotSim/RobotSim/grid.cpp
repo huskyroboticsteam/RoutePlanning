@@ -24,6 +24,7 @@ Grid::Grid (float w, float h, unsigned int s) {
     width = w;
     height = h;
     scale = s;
+    target = RoverPathfinding::point{-1, -1};
     
     // TOP_BORDER = {0.f, 0.f, width - 1, 0.f};
     // RIGHT_BORDER = {width - 1, 0.f, width - 1, height - 1};

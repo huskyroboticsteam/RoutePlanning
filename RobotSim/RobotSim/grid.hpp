@@ -44,6 +44,7 @@ class Grid : public sf::Drawable, public sf::Transformable
 
   private:
     virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+    RoverPathfinding::point target;
 
     sf::VertexArray border;
     sf::VertexArray gridlines;

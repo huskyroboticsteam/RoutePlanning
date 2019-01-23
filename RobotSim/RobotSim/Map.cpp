@@ -1,8 +1,14 @@
 #include <queue>
 #include <cmath>
-#include <algorithm>    
+#include <algorithm>
+#include <list>
 #include "Map.hpp"
 #include "utils.hpp"
+#include "obstacle.hpp"
+
+RoverPathfinding::Map::Map(const point &cpos, const point &tget, const std::list<Obstacle> &vobs) : cur(cpos), tar(tget), view_obstacles(vobs)
+{
+}
 
 void RoverPathfinding::Map::add_obstacle(point coord1, point coord2)
 {
@@ -62,7 +68,8 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
         n.dist_to = INFINITY;
         n.connection.clear();
     }
-
+    nodes.clear();
+    // nodes.push_back(create_node())
     nodes[0].prev = -1;
     nodes[0].dist_to = 0.0f;
     nodes[0].coord = cur;
@@ -108,7 +115,7 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
             {
                 obst.marked = true;
                 // TODO we might need to handle edge cases where we cannot circumvent the obstacle because we might be out of bounds
-                auto obstacle_side_pts = add_length_to_line_segment(obst.coord1, obst.coord2, TOLERANCE);  // Add tolerance 
+                auto obstacle_side_pts = add_length_to_line_segment(obst.coord1, obst.coord2, TOLERANCE); // Add tolerance
 
                 bool create_n1 = true;
                 bool create_n2 = true;
@@ -167,13 +174,9 @@ std::vector<RoverPathfinding::node> RoverPathfinding::Map::build_graph(point cur
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
-std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to(float cur_lat, float cur_lng,
-                                                                           float tar_lat, float tar_lng)
+std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to()
 {
-    auto cur = point{cur_lat, cur_lng};
-    auto tar = point{tar_lat, tar_lng};
     std::vector<node> nodes = build_graph(cur, tar);
-
 #if 0
     for(int i = 0; i < nodes.size(); i++)
     {
