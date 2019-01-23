@@ -29,7 +29,7 @@
 #include "Simulator.hpp"
 #include "Map.hpp"
 
-#ifdef _WIN32 || __linux__ || __unix__
+#if defined(_WIN32) || defined(__linux__) || defined(__unix__)
     const std::string RESOURCE_DIR = "./Resources/";
     #define WINDOW_SCALE 0.5f
 #elif __APPLE__
