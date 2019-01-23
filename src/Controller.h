@@ -11,6 +11,6 @@ namespace RoverPathfinding
 			void setDirection(float heading);
 			bool setSpeed(float speed);
 			void parsePacket(unsigned char packetID, unsigned char data[]);
-			RoverPathfinding::Server server;
+			RoverPathfinding::Server* server;
     };
 }
