@@ -13,6 +13,10 @@
 #define HANKSVILLE_LNG 110.7140
 #define EARTH_RADIUS 6371000
 
+#define CONV_FACTOR_LNG 8.627
+#define DEGREES_METER_LNG 0.0001
+#define CONV_FACTOR_LAT 111319.9
+
 namespace RoverPathfinding {
     RoverPathfinding::Map map;
     RoverPathfinding::Server server;
@@ -57,8 +61,8 @@ namespace RoverPathfinding {
 		float delta_x = dist * cos(angle + curr_dir + M_PI/2);
 		float delta_y = dist * sin(angle + curr_dir + M_PI/2);
 		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
-		float delta_lng = delta_x / 8.627 * 0.0001;
-		float delta_lat = delta_y / 111319.9;
+		float delta_lng = delta_x / CONV_FACTOR_LNG * DEGREES_METER_LNG;
+		float delta_lat = delta_y / CONV_FACTOR_LNG;
 		//std::cout << "delta_lat: " << delta_lat << " delta_lng: " << delta_lng << "\n";
 		point p;
 		p.x = delta_lat + curr_lat;

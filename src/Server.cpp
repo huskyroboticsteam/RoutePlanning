@@ -54,8 +54,6 @@ RoverPathfinding::Server::Server()
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(54000);
 
-	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SO_ERROR)
-	
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
 #ifdef _WIN32
@@ -91,7 +89,7 @@ void RoverPathfinding::Server::go() {
 
 		// Wait for message
 		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
-		if (bytesIn == SO_ERROR) 
+		if (bytesIn == ) 
 		{
 #ifdef _WIN32
 			std::cout << "Error receiving from client" << WSAGetLastError();
@@ -126,7 +124,7 @@ bool RoverPathfinding::Server::send_action(std::vector<unsigned char> dataBody, 
 
 	// packet.data() first four bytes are the time stamp, fifth is the id, and the rest is the data
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
-	if (sendOk == SO_ERROR)
+	if (sendOk == )
 	{
 #ifdef _WIN32
 		std::cout << "That didn't work! " << WSAGetLastError();
@@ -170,8 +168,6 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 	packet.push_back(id); // represents component to be controlled
 
 	// packet.data() first four bytes are the time stamp, fifth is the id, and sixth is the data
-	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
-	if (sendOk == SO_ERROR)
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*) &server, sizeof(server));
 	
 	if (sendOk == SOCKET_ERROR)
