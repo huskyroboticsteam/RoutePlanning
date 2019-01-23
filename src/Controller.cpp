@@ -68,6 +68,12 @@ namespace RoverPathfinding {
         }
     }
 
+    void Controller::addObstacle(float curr_lat, float curr_lng, float curr_dir, float dist1, float dir1, float dist2, float angle2) {
+        point latlng1 = convertToLatLng(0, 0, 0, dist1, dir1);
+        point latlng2 = convertToLatLng(0, 0, 0, dist2, dir2);
+        map.add_obstacle(latlng1, latlng2);
+    }
+
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
     point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float angle) {
@@ -82,7 +88,5 @@ namespace RoverPathfinding {
 		p.y = delta_lng + curr_lng;
 		return p;
     }
-
-	
 }
 
