@@ -4,27 +4,27 @@
 
 #define PI 3.14159265359
 
-bool RoverPathfinding::point::operator==(const point &p) const
+bool RP::point::operator==(const point &p) const
 {
     return x == p.x && y == p.y;
 }
 
-bool RoverPathfinding::point::operator!=(const point &p) const
+bool RP::point::operator!=(const point &p) const
 {
     return !(*this == p);
 }
 
-float RoverPathfinding::deg_to_rad(float deg)
+float RP::deg_to_rad(float deg)
 {
     return (deg * PI / 180.0f);
 }
 
-float RoverPathfinding::rad_to_deg(float rad)
+float RP::rad_to_deg(float rad)
 {
     return (rad * 180.0f / PI);
 }
 
-float RoverPathfinding::normalize_angle(float rad)
+float RP::normalize_angle(float rad)
 {
     rad = std::fmod(rad, 2 * PI);
     if (rad < 0)
@@ -32,7 +32,7 @@ float RoverPathfinding::normalize_angle(float rad)
     return rad;
 }
 
-RoverPathfinding::point RoverPathfinding::intersection(point A, point B, point C, point D)
+RP::point RP::intersection(point A, point B, point C, point D)
 {
     // Line AB represented as a1x + b1y = c1
     float a1 = B.y - A.y;
@@ -57,7 +57,7 @@ RoverPathfinding::point RoverPathfinding::intersection(point A, point B, point C
 }
 
 //start, end, circle, and R are in lat/long coordinates
-bool RoverPathfinding::segment_intersects_circle(point start,
+bool RP::segment_intersects_circle(point start,
                                                  point end,
                                                  point circle,
                                                  float R)
@@ -88,7 +88,7 @@ bool RoverPathfinding::segment_intersects_circle(point start,
 //Returns 0 if p, q, and r are colinear.
 //Returns 1 if pq, qr, and rp are clockwise
 //Returns 2 if pq, qr, and rp are counterclockwise
-int RoverPathfinding::orientation(point p, point q, point r)
+int RP::orientation(point p, point q, point r)
 {
     float v = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
     if (-1e-7 <= v && v <= 1e-7)
@@ -98,14 +98,14 @@ int RoverPathfinding::orientation(point p, point q, point r)
 }
 
 //Tells if r is on segment pq
-bool RoverPathfinding::on_segment(point p, point q, point r)
+bool RP::on_segment(point p, point q, point r)
 {
     return (q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
             q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y));
 }
 
 //Probably returns whether p1q1 and p2q2 intersect
-bool RoverPathfinding::segments_intersect(point p1, point p2, point q1, point q2)
+bool RP::segments_intersect(point p1, point p2, point q1, point q2)
 {
     int o1 = orientation(p1, q1, p2);
     int o2 = orientation(p1, q1, q2);
@@ -131,7 +131,7 @@ bool RoverPathfinding::segments_intersect(point p1, point p2, point q1, point q2
 }
 
 //Returns a point in the center of segment pq and then moves it R towards cur
-RoverPathfinding::point RoverPathfinding::center_point_with_radius(RoverPathfinding::point cur, RoverPathfinding::point p, RoverPathfinding::point q, float R)
+RP::point RP::center_point_with_radius(RP::point cur, RP::point p, RP::point q, float R)
 {
     point vec{-p.y + q.y, p.x - q.x};
     float len = sqrt((vec.x * vec.x) + (vec.y * vec.y));
@@ -152,12 +152,12 @@ RoverPathfinding::point RoverPathfinding::center_point_with_radius(RoverPathfind
     return (result);
 }
 
-float RoverPathfinding::dist_sq(point p1, point p2)
+float RP::dist_sq(point p1, point p2)
 {
     return ((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
 
-bool RoverPathfinding::within_radius(point p1, point p2, float R)
+bool RP::within_radius(point p1, point p2, float R)
 {
     return (dist_sq(p1, p2) <= R * R);
 }
@@ -165,7 +165,7 @@ bool RoverPathfinding::within_radius(point p1, point p2, float R)
 #define R_EARTH 6371.0088 // in km
 
 // given lat, long, bearing (in degrees), and distance (in km), returns a new point
-RoverPathfinding::point RoverPathfinding::lat_long_offset(float lat1, float lon1, float brng, float dist)
+RP::point RP::lat_long_offset(float lat1, float lon1, float brng, float dist)
 {
     dist /= 1000.0f;
 
@@ -180,13 +180,13 @@ RoverPathfinding::point RoverPathfinding::lat_long_offset(float lat1, float lon1
 }
 
 // Given two xy coordinates in degrees, returns the distance between them in meters.
-RoverPathfinding::point RoverPathfinding::lat_long_to_meters(RoverPathfinding::point pt, RoverPathfinding::point origin)
+RP::point RP::lat_long_to_meters(RP::point pt, RP::point origin)
 {
     return point{(pt.x - origin.x) * 87029, (pt.y - origin.y) * 111111};
 }
 
 // generates 100 points in spiral formation around origin and returns in vector
-std::vector<RoverPathfinding::point> RoverPathfinding::generate_spiral()
+std::vector<RP::point> RP::generate_spiral()
 {
     int scaleFactor = 10;
     std::vector<point> spiralPoints;
@@ -205,7 +205,7 @@ std::vector<RoverPathfinding::point> RoverPathfinding::generate_spiral()
 }
 
 // All angles should already be normalized and in radians
-bool RoverPathfinding::within_angle(float ang, float lower, float upper)
+bool RP::within_angle(float ang, float lower, float upper)
 {
     if (upper < lower)
     {
@@ -214,17 +214,17 @@ bool RoverPathfinding::within_angle(float ang, float lower, float upper)
     return ang >= lower && ang <= upper;
 }
 
-RoverPathfinding::point RoverPathfinding::polar_to_cartesian(point origin, float r, float theta)
+RP::point RP::polar_to_cartesian(point origin, float r, float theta)
 {
-    return RoverPathfinding::point{origin.x + r * std::cos(theta), origin.y + r * std::sin(theta)};
+    return RP::point{origin.x + r * std::cos(theta), origin.y + r * std::sin(theta)};
 }
 
-float RoverPathfinding::relative_angle(point o, point p)
+float RP::relative_angle(point o, point p)
 {
     return std::atan((p.y - o.y) / (p.x - o.x));
 }
 
-bool RoverPathfinding::same_point(const point &p, const point &q, float tol)
+bool RP::same_point(const point &p, const point &q, float tol)
 {
     return std::sqrt(dist_sq(p, q)) <= tol;
 }

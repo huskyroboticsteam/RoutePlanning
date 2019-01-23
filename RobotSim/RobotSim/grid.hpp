@@ -42,7 +42,7 @@ class Grid : public sf::Drawable, public sf::Transformable
 
     std::list<Obstacle> obstacleList; // using list for fast add/removal
 
-    RoverPathfinding::point target;
+    RP::point target;
   private:
     virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 

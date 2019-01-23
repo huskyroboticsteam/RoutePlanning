@@ -25,7 +25,7 @@ Grid::Grid (float w, float h, unsigned int s) {
     width = w;
     height = h;
     scale = s;
-    target = RoverPathfinding::point{-1, -1};
+    target = RP::point{-1, -1};
     
     // TOP_BORDER = {0.f, 0.f, width - 1, 0.f};
     // RIGHT_BORDER = {width - 1, 0.f, width - 1, height - 1};
@@ -257,7 +257,7 @@ void Grid::draw(sf::RenderTarget& renderTarget, sf::RenderStates states) const {
     // target.draw(border, states);
     }
      #define TARGET_SZ 5.f
-    renderTarget.draw(get_vertex_line(RoverPathfinding::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RoverPathfinding::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
+    renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
     sf::Color::Magenta, scale, height), states);
     #undef TARGET_SZ
 }

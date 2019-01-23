@@ -25,7 +25,7 @@ sockaddr_in server;
 SOCKET out;
 SOCKET in;
 
-RoverPathfinding::Server::Server()
+RP::Server::Server()
 {
 #ifdef _WIN32
 	// Windows-Specific - Startup Winsock
@@ -65,7 +65,7 @@ RoverPathfinding::Server::Server()
 	}
 }
 
-void RoverPathfinding::Server::go() {
+void RP::Server::go() {
 	sockaddr_in client;
 #ifdef _WIN32
 	ZeroMemory(&client, sizeof(client));
@@ -115,7 +115,7 @@ void RoverPathfinding::Server::go() {
 	}
 }
 
-bool RoverPathfinding::Server::send_action(std::vector<unsigned char> dataBody, unsigned char id) // same data and id format as in Scarlet
+bool RP::Server::send_action(std::vector<unsigned char> dataBody, unsigned char id) // same data and id format as in Scarlet
 {
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
 	packet.push_back(id); // represents component to be controlled
@@ -140,7 +140,7 @@ bool RoverPathfinding::Server::send_action(std::vector<unsigned char> dataBody, 
 	}
 }
 
-bool RoverPathfinding::Server::send_action(unsigned char dataBody, unsigned char id) // same data and id format as in Scarlet
+bool RP::Server::send_action(unsigned char dataBody, unsigned char id) // same data and id format as in Scarlet
 {
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
 	packet.push_back(id); // represents component to be controlled
@@ -163,7 +163,7 @@ bool RoverPathfinding::Server::send_action(unsigned char dataBody, unsigned char
 	}
 }
 
-bool RoverPathfinding::Server::send_action(unsigned char id) // same id format as in Scarlet
+bool RP::Server::send_action(unsigned char id) // same id format as in Scarlet
 {
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
 	packet.push_back(id); // represents component to be controlled
@@ -186,8 +186,8 @@ bool RoverPathfinding::Server::send_action(unsigned char id) // same id format a
 	}
 }
 
-void RoverPathfinding::Server::send_watchdog() {
-	bool hasSent = RoverPathfinding::Server::send_action(WATCHDOG_ID);
+void RP::Server::send_watchdog() {
+	bool hasSent = RP::Server::send_action(WATCHDOG_ID);
 
 	while (!hasSent) {
 		// Sleep for 100 milliseconds and then try again
@@ -197,11 +197,11 @@ void RoverPathfinding::Server::send_watchdog() {
 		usleep(100 * 1000); // in microseconds
 #endif
 
-		RoverPathfinding::Server::send_action(WATCHDOG_ID);
+		RP::Server::send_action(WATCHDOG_ID);
 	}
 }
 
-void RoverPathfinding::Server::stop()
+void RP::Server::stop()
 {
 	close(out);
 #ifdef _WIN32
@@ -209,7 +209,7 @@ void RoverPathfinding::Server::stop()
 #endif
 }
 
-std::vector<unsigned char> RoverPathfinding::Server::current_time()
+std::vector<unsigned char> RP::Server::current_time()
 {
 	std::time_t time = std::time(0);
 	std::vector<unsigned char> timebytes;
