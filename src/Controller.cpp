@@ -2,9 +2,12 @@
 #include <iostream>
 #include <cstring>
 #include <math.h>
+#include "Server.cpp"
 
 #define DATA_GPS 0xC0
 #define DATA_MAG 0xC1
+
+#define SET_SPEED 0x95
 
 #define TARGET_LAT 123.0
 #define TARGET_LNG 321.0
@@ -25,14 +28,19 @@ namespace RoverPathfinding {
     // TODO: Feed lat/long to map to find vector pointing to next destination
     // TODO: Feed x/y/z into ??? to find current orientation, then we can find how much to turn
 
-    void setDirection(float heading);
-    void setSpeed(float speed);
+   
     
     // using given packet data and server send a packet containing either a direction or motor power
 	
-	void setDirection(float heading) {}
-	void setSpeed(float speed) {}
-    void parsePacket(unsigned char packetID, unsigned char data[]) {
+	void Controller::setDirection(float heading) {
+		
+	}
+	bool Controller::setSpeed(float speed) {
+		std::vector<unsigned char> data(4);
+		std::memcpy(&data[0], &speed, 4);
+		return server.send_action(data, SET_SPEED);
+	}
+    void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
         // GPS has latitude and lng
         if (packetID == DATA_GPS) {
             float lat = 0.0;
