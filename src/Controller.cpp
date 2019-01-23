@@ -33,7 +33,7 @@ namespace RoverPathfinding {
     
     // using given packet data and server send a packet containing either a direction or motor power
 	
-	void Controller::setDirection(float delta_heading) {
+	bool Controller::setDirection(float delta_heading) {
         std::vector<unsigned char> data(4);
         std::memcpy(&data[0], &delta_heading, 4);
 		return server.send_action(delta_heading, HEADING_CHANGE); 
