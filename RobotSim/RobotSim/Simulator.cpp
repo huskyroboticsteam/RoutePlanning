@@ -6,14 +6,13 @@
 #include <assert.h>
 #include "Simulator.hpp"
 #include "grid.hpp"
-#include "Map.hpp"
 #include <cstdio>
 
 #define DEBUG_MSG 0
 
 void debugmsg(const char *);
 
-RoverPathfinding::Simulator::Simulator(const std::list<Obstacle> &obstacleList, const Agent &agt,
+RP::Simulator::Simulator(const std::list<Obstacle> &obstacleList, const Agent &agt,
                                        simulator_config conf, float map_scale, float windowH) : raw_obstacles(obstacleList),
                                                                                                 agent(agt), config(conf), scale(map_scale),
                                                                                                 window_height(windowH),
@@ -22,7 +21,7 @@ RoverPathfinding::Simulator::Simulator(const std::list<Obstacle> &obstacleList, 
     // std::cout << vision_dist_sq;
 }
 
-void RoverPathfinding::Simulator::update_agent()
+void RP::Simulator::update_agent()
 {
     for (auto const &obst : raw_obstacles)
     {
@@ -143,11 +142,11 @@ void RoverPathfinding::Simulator::update_agent()
                     // i.e. there is an intersection, the intersection is not the shared vertex, and
                     // the intersection falls on the contending obstacle. This means that p is a shared
                     // vertex and is blocked
-                    if (inter.x != INFINITY && !same_point(inter, p, 1e-5) && within_segment(aop->p, aop->q, inter) && dist_sq(cur_pos, inter) < dist_sq(cur_pos, q))
+                    if (inter.x != INFINITY && !same_point(inter, p, 1e-5) && within_segment(aop->p, aop->q, inter) && within_segment(cur_pos, q, inter))
                     {
                         drop_pt = true;
                         // if (same_point(p, point{5.f, 10.f}, 1e-7) && same_point(q, point{5.f, 5.f}, 1e-7))
-                        // printf("dropping point (%f, %f)\n", p.x, p.y);
+                        printf("dropping point (%f, %f)\n", p.x, p.y);
                         break;
                     }
                 }
@@ -207,8 +206,8 @@ void debugmsg(const char *line)
 }
 
 // Find the intersection of a line with the field of view arc (https://stackoverflow.com/a/30012445)
-std::vector<RoverPathfinding::point>
-RoverPathfinding::Simulator::intersection_with_arc(const point &p1, const point &p2,
+std::vector<RP::point>
+RP::Simulator::intersection_with_arc(const point &p1, const point &p2,
                                                    const point &lower_point, const point &upper_point)
 {
     std::vector<point> ret;
@@ -247,7 +246,7 @@ RoverPathfinding::Simulator::intersection_with_arc(const point &p1, const point 
     return ret;
 }
 
-bool RoverPathfinding::Simulator::within_view(const point &pt)
+bool RP::Simulator::within_view(const point &pt)
 {
     // too far?
     if (dist_sq(cur_pos, pt) > vision_dist_sq)
@@ -273,19 +272,7 @@ bool RoverPathfinding::Simulator::within_view(const point &pt)
     return true;
 }
 
-sf::VertexArray get_vertex_line(RoverPathfinding::point p, RoverPathfinding::point q, sf::Color c, float scale, float window_height)
-{
-    sf::VertexArray line;
-    line.setPrimitiveType(sf::Lines);
-    line.resize(2);
-    line[0] = sf::Vertex(sf::Vector2f((p.x + 1) * scale, (window_height - p.y) * scale));
-    line[0].color = c;
-    line[1] = sf::Vertex(sf::Vector2f((q.x + 1) * scale, (window_height - q.y) * scale));
-    line[1].color = c;
-    return line;
-}
-
-void RoverPathfinding::Simulator::draw(sf::RenderTarget &target, sf::RenderStates states) const
+void RP::Simulator::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     target.draw(get_vertex_line(cur_pos, fov_lower, sf::Color::Blue, scale, window_height));
     target.draw(get_vertex_line(cur_pos, fov_upper, sf::Color::Blue, scale, window_height));
@@ -296,15 +283,15 @@ void RoverPathfinding::Simulator::draw(sf::RenderTarget &target, sf::RenderState
         target.draw(get_vertex_line(obst.p, obst.q, sf::Color::Green, scale, window_height), states);
 }
 
-std::list<sf::VertexArray> RoverPathfinding::Simulator::getCircleLines(float angular_pos, float radius, float angle_spread, RoverPathfinding::point pos, int maxpts) const
+std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, float radius, float angle_spread, RP::point pos, int maxpts) const
 {
-    std::vector<RoverPathfinding::point> points;
+    std::vector<RP::point> points;
     const float lower = deg_to_rad(angular_pos - angle_spread / 2.f);
     const float inc = deg_to_rad(angle_spread / (maxpts - 1));
     for (int i = 0; i < maxpts; ++i)
     {
         const float a = lower + i * inc;
-        points.push_back(RoverPathfinding::point{pos.x + radius * std::cos(a), pos.y + radius * std::sin(a)});
+        points.push_back(RP::point{pos.x + radius * std::cos(a), pos.y + radius * std::sin(a)});
     }
     std::list<sf::VertexArray> ret;
     for (uint i = 0; i < maxpts - 1; i++)
@@ -312,4 +299,9 @@ std::list<sf::VertexArray> RoverPathfinding::Simulator::getCircleLines(float ang
         ret.push_back(get_vertex_line(points.at(i), points.at(i + 1), sf::Color::Blue, scale, window_height));
     }
     return ret;
+}
+
+const RP::point& RP::Simulator::getpos()
+{
+    return cur_pos;
 }

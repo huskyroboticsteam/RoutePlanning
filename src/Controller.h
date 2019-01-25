@@ -2,6 +2,7 @@
 #include <vector>
 #include "Map.h"
 #include "Server.h"
+
 namespace RoverPathfinding 
 {
     class Controller
@@ -14,3 +15,4 @@ namespace RoverPathfinding
 			RoverPathfinding::Server* server;
     };
 }
+

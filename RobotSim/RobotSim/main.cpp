@@ -22,13 +22,20 @@
 #include <time.h>
 #include <string>
 
-// Here is a small helper for you! Have a look.
+// Imports resourcePath() for macos
+#include "ResourcePath.hpp"
+
 #include "grid.hpp"
 #include "Simulator.hpp"
+#include "Map.hpp"
 
-#define WINDOW_SCALE 0.5f
-
-const std::string RESOURCE_DIR = "./Resources/";
+#if defined(_WIN32) || defined(__linux__) || defined(__unix__)
+    const std::string RESOURCE_DIR = "./Resources/";
+    #define WINDOW_SCALE 0.5f
+#elif __APPLE__
+    const std::string RESOURCE_DIR = resourcePath();
+    #define WINDOW_SCALE 1.f
+#endif
 
 int main(int, char const **)
 {
@@ -40,7 +47,6 @@ int main(int, char const **)
     bool hasFocus = true;
 
     sf::Image icon;
-
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
     {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
@@ -48,8 +54,8 @@ int main(int, char const **)
 
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
-    RoverPathfinding::Simulator sim(grid.obstacleList, agent, RoverPathfinding::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
-    
+    RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
+    RP::Map map(sim.getpos(), grid.target, sim.visible_obstacles());
     while (window.isOpen())
     {
         sf::Event event;
@@ -92,7 +98,7 @@ int main(int, char const **)
                     }
                     case sf::Keyboard::O : {
                         grid.obstacleList.clear();
-                        grid.readObstaclesFromFile("./obstacles.txt");
+                        grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
                         grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;

@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "grid.hpp"
+#include "utils.hpp"
 
 // creates a grid that can have obstacles and agents that it moves around
 // !!! NOTE !!!
@@ -24,6 +25,7 @@ Grid::Grid (float w, float h, unsigned int s) {
     width = w;
     height = h;
     scale = s;
+    target = RP::point{-1, -1};
     
     // TOP_BORDER = {0.f, 0.f, width - 1, 0.f};
     // RIGHT_BORDER = {width - 1, 0.f, width - 1, height - 1};
@@ -80,6 +82,8 @@ void Grid::toggleClipping() {
 
 // reads obstacles from a file
 // expects four floats per line, corresponding to the (x, y) of the start and end points in that order
+// blank lines are ignored
+// any line starting with a non-number (ie. text) is considered a comment and ignored
 void Grid::readObstaclesFromFile(std::string fileName) {
     std::ifstream file;
     file.open(fileName);
@@ -89,8 +93,11 @@ void Grid::readObstaclesFromFile(std::string fileName) {
         float x1, y1, x2, y2;
         while (getline(file, line)) {
             std::istringstream in(line);
-            if (line.length() == 0) continue;
-            in >> x1 >> y1 >> x2 >> y2;
+            // text is ignored as a comment
+            if (!(in >> x1))
+                continue;
+            
+            in >> y1 >> x2 >> y2;
             
             placeObstacle(x1, y1, x2, y2);
         }
@@ -240,15 +247,19 @@ bool Grid::willCollide(Agent agent, float dx, float dy, float dr) {
     return flag;
 }
 
-void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+void Grid::draw(sf::RenderTarget& renderTarget, sf::RenderStates states) const {
     states.transform *= getTransform();
     
     if (showGrid)
-        target.draw(gridlines, states);
+        renderTarget.draw(gridlines, states);
     for (Obstacle o : obstacleList) {
-        target.draw(o, states);
+        renderTarget.draw(o, states);
     // target.draw(border, states);
     }
+     #define TARGET_SZ 5.f
+    renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
+    sf::Color::Magenta, scale, height), states);
+    #undef TARGET_SZ
 }
 
 void Grid::debugMsg(std::string msg) {

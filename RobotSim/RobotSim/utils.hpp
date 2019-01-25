@@ -3,8 +3,10 @@
 
 #include <utility>
 #include <vector>
+#include <SFML/Graphics.hpp>
+
 typedef unsigned int uint;
-namespace RoverPathfinding
+namespace RP
 {
 struct point
 {
@@ -62,11 +64,14 @@ point lat_long_offset(float lat1, float lon1, float brng, float dist);
 //Given pt in lat-long units, normalize it to be in cartesian coordinates (meters/km undecided) with origin provided
 point lat_long_to_meters(point pt, point origin); 
 
-std::vector<RoverPathfinding::point> generate_spiral();
+std::vector<RP::point> generate_spiral();
 bool within_angle(float ang, float lower, float upper);                         //Returns true if ang is within range of [lower, upper] (going counterclocwise).
 point polar_to_cartesian(point origin, float r, float theta);                   //Polar to cartesian relative to the given origin
 float relative_angle(point origin, point p);                                    //Find angle of p relative to origin, where positive x-axis is 0 radians.
 bool same_point(const point &p, const point &q, float tol);
-} // namespace RoverPathfinding
+
+} // namespace RP
+
+sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float scale, float window_height);
 
 #endif

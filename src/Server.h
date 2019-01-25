@@ -12,7 +12,7 @@ sending/receiving and encoding/decoding data packets, etc.
 #include <iostream>
 //#include "Controller.h"
 
-namespace RoverPathfinding
+namespace RP
 {
 class Server
 {
@@ -28,8 +28,8 @@ class Server
 	RoverPathfinding::Controller controller;
   private:
 	std::vector<unsigned char> current_time();	// Stores unix timestamp in 4 bytes
-    // RoverPathfinding::Controller controller;
+    // RP::Controller controller;
 };
-} // namespace RoverPathfinding
+} // namespace RP
 
 #endif

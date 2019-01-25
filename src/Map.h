@@ -5,7 +5,7 @@
 #include <vector>
 #include <utility>
 
-namespace RoverPathfinding
+namespace RP
 {
 
 struct node
@@ -41,6 +41,6 @@ private:
   std::vector<node> nodes;                                         //The nodes to the graph
   std::vector<obstacle> obstacles;                                 //The obstacles
 };
-} // namespace RoverPathfinding
+} // namespace RP
 
 #endif
