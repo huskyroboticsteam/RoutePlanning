@@ -216,23 +216,61 @@ std::vector<RoverPathfinding::point> RoverPathfinding::Map::shortest_path_to(flo
     return (result);
 }
 
+std::pair<float, float> heuristic_value(RoverPathfinding::node node, RoverPathfinding::point cur, RoverPathfinding::point tar) {
+	return std::make_pair(std::sqrt(dist_sq(node.coord, cur)), std::sqrt(dist_sq(node.coord, tar)));
+}
+
 std::vector<RoverPathfinding::point> RoverPathfinding::Map::a_star_algorithm(float cur_lat, float cur_lng, 
 																			float tar_lat, float tar_lng)
 {
 	auto cur = point{ cur_lat, cur_lng };
 	auto tar = point{ tar_lat, tar_lng };
 	std::vector<node> nodes = build_graph(cur, tar);
-	std::vector<node> path;
 
-	std::stack<node> stack;
-	stack.push(nodes[0]);
-	while (!stack.empty()) { // Iterate through the most efficient nodes
-		node n = stack.top();
-		stack.pop();
-		for (auto e : n.connection) {
+	// Assigns a heuristic value to all nodes and puts them in a new vector
+	using heuristicPair = std::pair<node, std::pair<float, float>>;
+	std::vector<heuristicPair*> heuristicNodes;
+	for (node node : nodes) {
+		heuristicNodes.push_back(&std::make_pair(node, heuristic_value(node, cur, tar)));
+	}
 
+	std::vector<heuristicPair*> closedNodes;
+	// Create and fill a priorityqueue of indexes, ordered on heuristic value
+	auto cmp = [&](heuristicPair* l, heuristicPair* r) { 
+		return l->second.first + l->second.second < r->second.first + r->second.second; 
+	};
+	std::priority_queue<heuristicPair*, std::vector<heuristicPair*>, decltype(cmp)> openNodes(cmp);
+	for (heuristicPair* heuristicNode : heuristicNodes) {
+		openNodes.push(heuristicNode);
+	}
+
+	// While we're not at tar, keep evaluating paths
+	while (openNodes.top()->first.coord != tar) { 
+		heuristicPair current = *openNodes.top();
+		openNodes.pop();
+		closedNodes.push_back(&current);
+
+		// For each neighbor of current
+		for (auto &index : current.first.connection) {
+			heuristicPair neighbor = *heuristicNodes[index.first];
+			float dist = index.second + current.second.first;
+			// If this is a more efficient path
+			if (neighbor.second.first > dist) {
+				// If neighbor is in closedNodes
+				int closedIndex = std::find(closedNodes.begin(), closedNodes.end(), &neighbor) - closedNodes.begin;
+				if (closedIndex < closedNodes.size) {
+					closedNodes.erase(closedNodes.begin + closedIndex);
+				}
+				// If neighbor is in openNodes
+				else {
+					neighbor.second.first = -INFINITY;
+					openNodes.pop();
+				}
+				neighbor.second.first = dist;
+				openNodes.push(&neighbor);
+				neighbor.first.prev = std::find(heuristicNodes.begin(), heuristicNodes.end(), &current) - heuristicNodes.begin;
+			}
 		}
-
 	}
 
 	std::vector<point> result;
@@ -244,5 +282,5 @@ std::vector<RoverPathfinding::point> RoverPathfinding::Map::a_star_algorithm(flo
 		i = n.prev;
 	}
 	std::reverse(result.begin(), result.end());
-	return result;
+	return (result);
 }
