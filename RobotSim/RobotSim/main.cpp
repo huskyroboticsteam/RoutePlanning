@@ -110,12 +110,14 @@ int main(int, char const **)
                     }
                     case sf::Keyboard::Num0 : {
                         agent.clearPath();
-                        std::cout << "Drawing path" << std::endl;
                         break;
                     }
                     case sf::Keyboard::Num8 : {
                         std::vector<RP::point> shortestPath = map.shortest_path_to();
-                        grid.drawPath(shortestPath);
+                        if (grid.drawPath(shortestPath))
+                            std::cout << "Drawing path" << std::endl;
+                        else
+                            std::cout << "No path" << std::endl;
                         break;
                     }
                     case sf::Keyboard::Up : {

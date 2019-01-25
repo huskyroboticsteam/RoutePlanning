@@ -82,7 +82,10 @@ void Grid::toggleClipping() {
     noclip = !noclip;
 }
 
-void Grid::drawPath(std::vector<RP::point> path) {
+bool Grid::drawPath(std::vector<RP::point> path) {
+    if (path.size() < 2)
+        return false;
+    
     currentPath.clear();
     
     for (int i = 0; i < path.size() - 1; i++) {
@@ -105,6 +108,8 @@ void Grid::drawPath(std::vector<RP::point> path) {
         currentPath.append(start);
         currentPath.append(end);
     }
+    
+    return true;
 }
 
 // reads obstacles from a file
