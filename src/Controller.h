@@ -12,6 +12,7 @@ namespace RP
 			void setDirection(float heading);
 			bool setSpeed(float speed);
 			void parsePacket(unsigned char packetID, unsigned char data[]);
+			float curr_lat, curr_long, curr_dir;
 			RP::Server* server;
     };
 }
