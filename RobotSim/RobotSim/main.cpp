@@ -125,10 +125,6 @@ int main(int, char const **)
                         agent.clearPath();
                         break;
                     }
-                    case sf::Keyboard::Num9 : {
-                        agent.rotateTowards(RP::point{20, 20});
-                        break;
-                    }
                     case sf::Keyboard::Num7 : {
                         zoom = !zoom;
                         break;
@@ -185,7 +181,8 @@ int main(int, char const **)
         sim.update_agent();
         if (clock.getElapsedTime() >= AUTO_INTERVAL) {
             clock.restart();
-            // move agent
+            RP::point st_target = map.compute_next_point();
+            agent.rotateTowards(st_target.x, st_target.y);
         }
         window.clear(sf::Color::White);
         window.draw(grid);

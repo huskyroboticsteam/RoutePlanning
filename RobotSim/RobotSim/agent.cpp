@@ -64,12 +64,9 @@ void Agent::move(float dx, float dy)
     path[path.getVertexCount() - 1].color = PATH_COLOR;
 }
 
-void Agent::rotateTowards(RP::point pt)
+void Agent::rotateTowards(float x, float y)
 {
-    float tx = pt.x;
-    float ty = pt.y;
-    
-    float tr = atan2(pt.y - yPos, pt.x - xPos) * 180 / PI;
+    float tr = atan2(y - yPos, x - xPos) * 180 / PI;
     
     std::cout << tr << std::endl;
     

@@ -88,7 +88,7 @@ void RP::Simulator::update_agent()
             }
             else
             {
-                assert(pts.size() == 0);
+                // assert(pts.size() == 0);
                 it = all_obstacles.erase(it);
                 continue; // don't increment it
                 // if (pts.size() != 0)

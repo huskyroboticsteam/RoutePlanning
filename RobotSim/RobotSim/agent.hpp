@@ -31,7 +31,7 @@ public:
     float getInternalRotation() const { return rotation; } 
     float getTSpeed() const { return transSpeed; }
     float getRSpeed() const { return rotSpeed; }
-    void rotateTowards(RP::point pt);
+    void rotateTowards(float x, float y);
     void drive(float speed = 1.f);
     
     std::array<std::pair<float, float>, 4> getHitBox() { return hitBox; }
