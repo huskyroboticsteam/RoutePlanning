@@ -16,11 +16,13 @@
 #include <math.h>
 #include <array>
 
+#include "utils.hpp"
+
 #define PI 3.141592654
 
 class Agent : public sf::Drawable, public sf::Transformable {
 public:
-    Agent(unsigned int mapScale, float mapW, float mapH, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f, float rSpeed = 1.f);
+    Agent(unsigned int mapScale, float mapW, float mapH, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f / 6.f, float rSpeed = 1.f);
     void move(float dx, float dy);
     void rotate(float dr);
     void clearPath();
@@ -28,7 +30,9 @@ public:
     float getY() const { return yPos; } 
     float getInternalRotation() const { return rotation; } 
     float getTSpeed() const { return transSpeed; }
-    float getRSpeed() const { return rotSpeed; } 
+    float getRSpeed() const { return rotSpeed; }
+    void rotateTowards(RP::point pt);
+    void drive(float speed = 1.f);
     
     std::array<std::pair<float, float>, 4> getHitBox() { return hitBox; }
     
