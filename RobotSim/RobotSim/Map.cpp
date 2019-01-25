@@ -15,6 +15,13 @@ void RP::Map::add_obstacle(point coord1, point coord2)
     obstacles.push_back(obstacle{false, coord1, coord2});
 }
 
+RP::point RP::Map::compute_next_point()
+{
+    auto points = shortest_path_to();
+    point next = points.front();
+    return point{next.x - cur.x, next.y - cur.y};
+}
+
 RP::line RP::Map::add_length_to_line_segment(point p, point q, float length)
 {
     std::pair<float, float> pq = std::make_pair(q.x - p.x, q.y - p.y); //vector

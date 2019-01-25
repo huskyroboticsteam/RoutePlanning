@@ -146,7 +146,7 @@ void RP::Simulator::update_agent()
                     {
                         drop_pt = true;
                         // if (same_point(p, point{5.f, 10.f}, 1e-7) && same_point(q, point{5.f, 5.f}, 1e-7))
-                        printf("dropping point (%f, %f)\n", p.x, p.y);
+                        // printf("dropping point (%f, %f)\n", p.x, p.y);
                         break;
                     }
                 }

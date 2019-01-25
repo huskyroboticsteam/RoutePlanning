@@ -53,8 +53,11 @@ int main(int, char const **)
     }
 
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
-    Agent agent(grid.retrieveScale(), grid.retrieveWidth(), grid.retrieveHeight(), 2.f, 2.f);
-    RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, grid.retrieveScale(), grid.retrieveHeight());
+    float gridScale = grid.retrieveScale();
+    float gridHeight = grid.retrieveHeight();
+    Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 2.f, 2.f);
+    grid.target = RP::point{35.f, 35.f};
+    RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Map map(sim.getpos(), grid.target, sim.visible_obstacles());
     while (window.isOpen())
     {
@@ -154,6 +157,9 @@ int main(int, char const **)
         window.draw(grid);
         window.draw(agent);
         window.draw(sim);
+        RP::point next = map.compute_next_point();
+        window.draw(get_vertex_line(sim.getpos(), map.compute_next_point(), sf::Color::Cyan, gridScale, gridHeight));
+        printf("%f, %f\n", next.x, next.y);
         window.display();
     }
 
