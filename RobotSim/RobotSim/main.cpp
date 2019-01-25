@@ -29,7 +29,7 @@
 #include "Simulator.hpp"
 #include "Map.hpp"
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__linux__) || defined(__unix__)
     const std::string RESOURCE_DIR = "./Resources/";
     #define WINDOW_SCALE 0.5f
 #elif __APPLE__
@@ -45,12 +45,16 @@ int main(int, char const **)
     window.setFramerateLimit(FRAMERATE);
 
     bool hasFocus = true;
+    bool robotAuto = false;
 
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
     {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     }
+
+    sf::Clock clock;
+    static const sf::Time AUTO_INTERVAL = sf::seconds(0.5);
 
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     float gridScale = grid.retrieveScale();
@@ -88,6 +92,7 @@ int main(int, char const **)
                         std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                         std::cout << "N   -- Toggle clipping" << std::endl;
                         std::cout << "0   -- Clear robot path" << std::endl;
+                        std::cout << "8   -- Draw algorithm path" << std::endl;
                         break;
                     }
                     case sf::Keyboard::P : {
@@ -110,8 +115,20 @@ int main(int, char const **)
                         grid.toggleClipping();
                         break;
                     }
+                    case sf::Keyboard::Tilde : {
+                        robotAuto = !robotAuto;
+                        break;
+                    }
                     case sf::Keyboard::Num0 : {
                         agent.clearPath();
+                        break;
+                    }
+                    case sf::Keyboard::Num8 : {
+                        std::vector<RP::point> shortestPath = map.shortest_path_to();
+                        if (grid.drawPath(shortestPath, agent))
+                            std::cout << "Drawing path" << std::endl;
+                        else
+                            std::cout << "No path" << std::endl;
                         break;
                     }
                     case sf::Keyboard::Up : {
@@ -153,13 +170,15 @@ int main(int, char const **)
         }
 
         sim.update_agent();
+        if (clock.getElapsedTime() >= AUTO_INTERVAL) {
+            clock.restart();
+            // move agent
+        }
         window.clear(sf::Color::White);
         window.draw(grid);
         window.draw(agent);
         window.draw(sim);
-        RP::point next = map.compute_next_point();
-        window.draw(get_vertex_line(sim.getpos(), map.compute_next_point(), sf::Color::Cyan, gridScale, gridHeight));
-        printf("%f, %f\n", next.x, next.y);
+        // printf("%f, %f\n", next.x, next.y);
         window.display();
     }
 

@@ -66,6 +66,8 @@ Grid::Grid(float w, float h, unsigned int s)
             gridlines[gridlines.getVertexCount() - 1].color = GRID_COLOR;
         }
     }
+    
+    currentPath.setPrimitiveType(sf::Lines);
 }
 
 // toggles whether or not gridlines are drawn every meter
@@ -83,6 +85,41 @@ void Grid::toggleClipping()
         debugMsg("Clipping toggled off");
 
     noclip = !noclip;
+}
+
+bool Grid::drawPath(std::vector<RP::point> path, Agent agent) {
+    if (path.size() < 1)
+        return false;
+    
+    currentPath.clear();
+    path.insert(path.begin(), RP::point{agent.getX(), agent.getY()});
+    
+    for (int i = 0; i < path.size() - 1; i++) {
+        
+        float x1 = path.at(i).x + 1;
+        float y1 = height - path.at(i).y;
+        float x2 = path.at(i + 1).x + 1;
+        float y2 = height - path.at(i + 1).y;
+        
+        std::cout << x1 << "," << y1 << std::endl;
+        std::cout << x2 << "," << y2 << std::endl;
+        
+        x1 *= scale;
+        y1 *= scale;
+        x2 *= scale;
+        y2 *= scale;
+        
+        sf::Vertex start(sf::Vector2f(x1, y1));
+        sf::Vertex end(sf::Vector2f(x2, y2));
+        
+        start.color = sf::Color::Blue;
+        end.color = sf::Color::Blue;
+        
+        currentPath.append(start);
+        currentPath.append(end);
+    }
+    
+    return true;
 }
 
 // reads obstacles from a file
@@ -278,7 +315,10 @@ void Grid::draw(sf::RenderTarget &renderTarget, sf::RenderStates states) const
         renderTarget.draw(o, states);
         // target.draw(border, states);
     }
-#define TARGET_SZ 1.f
+    
+    renderTarget.draw(currentPath, states);
+    
+     #define TARGET_SZ 1.f
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
                                       sf::Color::Magenta, scale, height), states);
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y + TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y - TARGET_SZ},
