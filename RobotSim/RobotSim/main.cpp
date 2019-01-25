@@ -47,6 +47,8 @@ int main(int, char const **)
     bool hasFocus = true;
     bool robotAuto = false;
 
+    bool zoom = false;
+    
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
     {
@@ -123,6 +125,14 @@ int main(int, char const **)
                         agent.clearPath();
                         break;
                     }
+                    case sf::Keyboard::Num9 : {
+                        agent.rotateTowards(RP::point{20, 20});
+                        break;
+                    }
+                    case sf::Keyboard::Num7 : {
+                        zoom = !zoom;
+                        break;
+                    }
                     case sf::Keyboard::Num8 : {
                         std::vector<RP::point> shortestPath = map.shortest_path_to();
                         if (grid.drawPath(shortestPath, agent))
@@ -168,6 +178,9 @@ int main(int, char const **)
                 grid.rotateAgent(agent, -200.f / FRAMERATE);
             }
         }
+        
+        if (zoom)
+            agent.drive();
 
         sim.update_agent();
         if (clock.getElapsedTime() >= AUTO_INTERVAL) {

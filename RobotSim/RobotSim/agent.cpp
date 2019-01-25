@@ -64,6 +64,25 @@ void Agent::move(float dx, float dy)
     path[path.getVertexCount() - 1].color = PATH_COLOR;
 }
 
+void Agent::rotateTowards(RP::point pt)
+{
+    float tx = pt.x;
+    float ty = pt.y;
+    
+    float tr = atan2(pt.y - yPos, pt.x - xPos) * 180 / PI;
+    
+    std::cout << tr << std::endl;
+    
+    rotate(tr - rotation);
+}
+
+void Agent::drive(float speed) {
+    float dx = transSpeed * speed * cos(rotation * PI / 180);
+    float dy = transSpeed * speed * sin(rotation * PI / 180);
+    
+    move(dx, dy);
+}
+
 // simply rotates the agent by a certain angle
 void Agent::rotate(float dr)
 {
