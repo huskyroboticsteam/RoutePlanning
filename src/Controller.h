@@ -5,6 +5,10 @@
 
 namespace RP 
 {
+	struct obstacle_vector {
+		float distance;
+		float angle;
+	};
     class Controller
     {
         public:
@@ -13,6 +17,7 @@ namespace RP
 			bool setSpeed(float speed);
 			void parsePacket(unsigned char packetID, unsigned char data[]);
 			float curr_lat, curr_long, curr_dir;
+			void addObstacles(std::vector<obstacle_vector> points);
 			RP::Server* server;
     };
 }

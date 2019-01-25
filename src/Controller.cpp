@@ -25,10 +25,7 @@ namespace RP {
 	
 	// Relative direction and distance from the robot
 	// of a point on an obstacle
-	struct obstacle_vector {
-		float distance;
-		float angle;
-	};
+	
 	
     // TODO: split packet into separate parts (timestamp, packetID, data)
     // TODO: Feed lat/long to map to find vector pointing to next destination
