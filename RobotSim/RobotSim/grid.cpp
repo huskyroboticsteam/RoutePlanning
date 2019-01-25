@@ -82,17 +82,22 @@ void Grid::toggleClipping() {
     noclip = !noclip;
 }
 
-bool Grid::drawPath(std::vector<RP::point> path) {
-    if (path.size() < 2)
+bool Grid::drawPath(std::vector<RP::point> path, Agent agent) {
+    if (path.size() < 1)
         return false;
     
     currentPath.clear();
+    path.insert(path.begin(), RP::point{agent.getX(), agent.getY()});
     
     for (int i = 0; i < path.size() - 1; i++) {
+        
         float x1 = path.at(i).x + 1;
         float y1 = height - path.at(i).y;
         float x2 = path.at(i + 1).x + 1;
         float y2 = height - path.at(i + 1).y;
+        
+        std::cout << x1 << "," << y1 << std::endl;
+        std::cout << x2 << "," << y2 << std::endl;
         
         x1 *= scale;
         y1 *= scale;

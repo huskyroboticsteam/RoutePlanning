@@ -114,7 +114,7 @@ int main(int, char const **)
                     }
                     case sf::Keyboard::Num8 : {
                         std::vector<RP::point> shortestPath = map.shortest_path_to();
-                        if (grid.drawPath(shortestPath))
+                        if (grid.drawPath(shortestPath, agent))
                             std::cout << "Drawing path" << std::endl;
                         else
                             std::cout << "No path" << std::endl;
