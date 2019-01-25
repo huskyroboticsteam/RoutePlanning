@@ -21,10 +21,10 @@
 #define DEGREES_METER_LNG 0.0001
 #define CONV_FACTOR_LAT 111319.9
 
-namespace RoverPathfinding {
-    RoverPathfinding::Map map;
-    RoverPathfinding::Server server;
-
+namespace RP {
+    RP::Map map;
+    RP::Server server;
+	
     // TODO: split packet into separate parts (timestamp, packetID, data)
     // TODO: Feed lat/long to map to find vector pointing to next destination
     // TODO: Feed x/y/z into ??? to find current orientation, then we can find how much to turn
