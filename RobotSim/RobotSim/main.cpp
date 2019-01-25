@@ -85,6 +85,7 @@ int main(int, char const **)
                         std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                         std::cout << "N   -- Toggle clipping" << std::endl;
                         std::cout << "0   -- Clear robot path" << std::endl;
+                        std::cout << "8   -- Draw algorithm path" << std::endl;
                         break;
                     }
                     case sf::Keyboard::P : {
@@ -109,6 +110,12 @@ int main(int, char const **)
                     }
                     case sf::Keyboard::Num0 : {
                         agent.clearPath();
+                        std::cout << "Drawing path" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::Num8 : {
+                        std::vector<RP::point> shortestPath = map.shortest_path_to();
+                        grid.drawPath(shortestPath);
                         break;
                     }
                     case sf::Keyboard::Up : {
