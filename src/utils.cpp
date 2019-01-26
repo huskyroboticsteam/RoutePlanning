@@ -194,8 +194,8 @@ std::vector<RP::point> RP::generate_spiral(float scale, int maxPoints, float xOf
     {
 		float angle = .1f * i;
 
-		float x = scale + scale * angle * cos(angle) + xOffset;
-		float y = scale + scale * angle * sin(angle) + yOffset;
+		float x = (scale + scale * angle) * cos(angle) + xOffset;
+		float y = (scale + scale * angle) * sin(angle) + yOffset;
         spiralPoints.push_back(point{x,y});
 #if 0
 		std::cout << i << ": (" << px << ", " << py << ")" << '\n';
