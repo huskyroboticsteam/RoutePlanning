@@ -63,14 +63,14 @@ namespace RP {
     }
 
     void Controller::addObstacle(float dist1, float dir1, float dist2, float dir2) {
-        point latlng1 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist1, dir1);
-        point latlng2 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist2, dir2);
+        point latlng1 = convertToLatLng(dist1, dir1);
+        point latlng2 = convertToLatLng(dist2, dir2);
         map.add_obstacle(latlng1, latlng2);
     }
 
 	
 	void Controller::foundTennisBall(float dist, float dir) {
-		
+		point new_target = convertToLatLng(dist, dir);
 	}
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math

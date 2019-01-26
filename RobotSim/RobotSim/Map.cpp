@@ -171,6 +171,10 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     return (nodes);
 }
 
+void RP::Map::set_target() {
+	//TODO(andrew): implement set_target for tennis ball
+}
+
 //TODO(sasha): Find heuristics and upgrade to A*
 std::vector<RP::point> RP::Map::shortest_path_to()
 {
