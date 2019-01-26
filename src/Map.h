@@ -32,7 +32,6 @@ public:
   void add_obstacle(point coord1, point coord2); //Adds an obstacle to the map. Obstacle is specified with 2 points
   point compute_goal();                          // find the shortest path to the goal and return a target direction vector.
   point compute_search();                        // search for the tennis ball once the goal is reached. Return a target direction vector.
-  std::pair<float,float> heuristic_value(node node, point cur, point tar); // Returns the distance between the node and cur, and between node and tar
   std::vector<point> shortest_path_to(float cur_lat, float cur_lng,
                                       float tar_lat, float tar_lng); //Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination (for debugging)
   std::vector<point> a_star_algorithm(float cur_lat, float cur_lng,
