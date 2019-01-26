@@ -186,14 +186,16 @@ RP::point RP::lat_long_to_meters(RP::point pt, RP::point origin)
 }
 
 // generates 100 points in spiral formation around origin and returns in vector
-std::vector<RP::point> RP::generate_spiral(float scaleFactor, int maxPoints, float xOffset, float yOffset)
+std::vector<RP::point> RP::generate_spiral(float scale, int maxPoints, float xOffset, float yOffset)
 {
     std::vector<point> spiralPoints;
 
     for (int i = 0; i < maxPoints; ++i)
     {
-		float x = scaleFactor * i * cos(i + (PI)) + xOffset;
-		float y = scaleFactor * i * sin(i + (PI)) + yOffset;
+		float angle = .1f * i;
+
+		float x = scale + scale * angle * cos(angle) + xOffset;
+		float y = scale + scale * angle * sin(angle) + yOffset;
         spiralPoints.push_back(point{x,y});
 #if 0
 		std::cout << i << ": (" << px << ", " << py << ")" << '\n';
