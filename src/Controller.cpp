@@ -44,6 +44,8 @@ namespace RP {
             std::memcpy(&lat, data, sizeof(float));
             float lng = 0.0;
             std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
+			curr_lat = lat;
+			curr_lng = lng;
 			//std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
 			std::vector<point> path;
 			point nextPoint = path[0];
@@ -67,7 +69,7 @@ namespace RP {
     }
 
 	
-	void Controller::foundTennisBall() {
+	void Controller::foundTennisBall(float dist, float dir) {
 		
 	}
     // angle must be in radians, dist in meters
