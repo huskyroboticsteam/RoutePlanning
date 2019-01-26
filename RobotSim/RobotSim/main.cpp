@@ -47,7 +47,10 @@ int main(int, char const **)
     bool hasFocus = true;
     bool robotAuto = false;
 
-    bool zoom = false;
+    // test bools
+    bool vroom = false;
+    bool spinny = false;
+    bool lazer = false;
     
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
@@ -94,7 +97,9 @@ int main(int, char const **)
                         std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                         std::cout << "N   -- Toggle clipping" << std::endl;
                         std::cout << "0   -- Clear robot path" << std::endl;
-                        std::cout << "8   -- Draw algorithm path" << std::endl;
+                        std::cout << "7   -- Drive forward at max speed" << std::endl;
+                        std::cout << "8   -- Turn towards the target" << std::endl;
+                        std::cout << "9   -- Draw algorithm path" << std::endl;
                         break;
                     }
                     case sf::Keyboard::P : {
@@ -121,20 +126,22 @@ int main(int, char const **)
                         robotAuto = !robotAuto;
                         break;
                     }
-                    case sf::Keyboard::Num0 : {
-                        agent.clearPath();
-                        break;
-                    }
                     case sf::Keyboard::Num7 : {
-                        zoom = !zoom;
+                        vroom = !vroom;
                         break;
                     }
                     case sf::Keyboard::Num8 : {
-                        std::vector<RP::point> shortestPath = map.shortest_path_to();
-                        if (grid.drawPath(shortestPath, agent))
-                            std::cout << "Drawing path" << std::endl;
-                        else
-                            std::cout << "No path" << std::endl;
+                        spinny = !spinny;
+                        break;
+                    }
+                    case sf::Keyboard::Num9 : {
+                        if (lazer)
+                            grid.drawPath();
+                        lazer = !lazer;
+                        break;
+                    }
+                    case sf::Keyboard::Num0 : {
+                        agent.clearPath();
                         break;
                     }
                     case sf::Keyboard::Up : {
@@ -175,15 +182,22 @@ int main(int, char const **)
             }
         }
         
-        if (zoom)
-            agent.drive();
-
-        sim.update_agent();
-        if (clock.getElapsedTime() >= AUTO_INTERVAL) {
-            clock.restart();
+        if (vroom)
+            grid.moveAgent(agent, agent.drive());
+        if (spinny) {
             RP::point st_target = map.compute_next_point();
-            agent.rotateTowards(st_target.x, st_target.y);
+            grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));
         }
+        if (lazer)
+            grid.drawPath(map.shortest_path_to(), agent);
+            
+        sim.update_agent();
+//        if (clock.getElapsedTime() >= AUTO_INTERVAL) {
+//            clock.restart();
+//            RP::point st_target = map.compute_next_point();
+//            agent.rotateTowards(st_target.x, st_target.y);
+//        }
+        
         window.clear(sf::Color::White);
         window.draw(grid);
         window.draw(agent);

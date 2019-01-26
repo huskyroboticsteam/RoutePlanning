@@ -87,6 +87,10 @@ void Grid::toggleClipping()
     noclip = !noclip;
 }
 
+bool Grid::drawPath() {
+    currentPath.clear();
+}
+
 bool Grid::drawPath(std::vector<RP::point> path, Agent agent) {
     if (path.size() < 1)
         return false;
