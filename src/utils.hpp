@@ -54,7 +54,9 @@ point lat_long_offset(float lat1, float lon1, float brng, float dist);
 //Given pt in lat-long units, normalize it to be in cartesian coordinates (meters/km undecided) with origin provided
 point lat_long_to_meters(point pt, point origin); 
 
-std::vector<RP::point> generate_spiral();
+// Generates a spiral with pointCount number of points in relation to the x and y offsets with scaleFactor distance between arms
+std::vector<RP::point> generate_spiral(float scaleFactor, int maxPoints, float xOffset, float yOffset);
+
 bool within_angle(float ang, float lower, float upper);                         //Returns true if ang is within range of [lower, upper] (going counterclocwise).
 point polar_to_cartesian(point origin, float r, float theta);                   //Polar to cartesian relative to the given origin
 float relative_angle(point origin, point p);                                    //Find angle of p relative to origin, where positive x-axis is 0 radians.
