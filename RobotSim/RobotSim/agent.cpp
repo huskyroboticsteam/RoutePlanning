@@ -64,20 +64,52 @@ void Agent::move(float dx, float dy)
     path[path.getVertexCount() - 1].color = PATH_COLOR;
 }
 
-void Agent::rotateTowards(float x, float y)
+float Agent::rotateTowards(float x, float y)
 {
     float tr = atan2(y - yPos, x - xPos) * 180 / PI;
     
-    // std::cout << tr << std::endl;
-    
-    rotate(tr - rotation);
+    //rotate(tr - rotation);
+    return tr - rotation;
 }
 
-void Agent::drive(float speed) {
+float Agent::drive(float speed) {
     float dx = transSpeed * speed * cos(rotation * PI / 180);
     float dy = transSpeed * speed * sin(rotation * PI / 180);
     
-    move(dx, dy);
+    //move(dx, dy);
+    return transSpeed * speed; // ds
+}
+
+float Agent::driveTowards(float targetX, float targetY) {
+    // TODO
+    return 0.f;
+}
+
+float Agent::turn(float speed) {
+    if (abs(speed) > 1)
+        speed = speed / abs(speed);
+    
+    //rotate(-rotSpeed * speed);
+    return -rotSpeed * speed;
+}
+
+float Agent::turnTowards(float targetX, float targetY) {
+    float targetR = atan2(targetY - yPos, targetX - xPos) * 180 / PI;
+    if (targetR < 0)
+        targetR += 360;
+    float rDiff = targetR - rotation;
+    
+    float speed = 1.f;
+    
+    if (abs(rDiff) < 60)
+        speed = abs(rDiff) / 60.f;
+    if (abs(rDiff) < 5)
+        speed = 5.f / 60.f;
+    
+    if (rDiff < -180 || (rDiff > 0 && rDiff < 180))
+        return turn(-speed);
+    else
+        return turn(speed);
 }
 
 // simply rotates the agent by a certain angle

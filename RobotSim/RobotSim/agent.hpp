@@ -22,7 +22,7 @@
 
 class Agent : public sf::Drawable, public sf::Transformable {
 public:
-    Agent(unsigned int mapScale, float mapW, float mapH, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f / 6.f, float rSpeed = 1.f);
+    Agent(unsigned int mapScale, float mapW, float mapH, float startX = 0.f, float startY = 0.f, float startR = 0.f, float tSpeed = 1.f / 6.f, float rSpeed = 20.f / 6.f);
     void move(float dx, float dy);
     void rotate(float dr);
     void clearPath();
@@ -31,8 +31,11 @@ public:
     float getInternalRotation() const { return rotation; } 
     float getTSpeed() const { return transSpeed; }
     float getRSpeed() const { return rotSpeed; }
-    void rotateTowards(float x, float y);
-    void drive(float speed = 1.f);
+    float rotateTowards(float x, float y);
+    float drive(float speed = 1.f);
+    float driveTowards(float targetX, float targetY);
+    float turn(float speed = 1.f);
+    float turnTowards(float targetX, float targetY);
     
     std::array<std::pair<float, float>, 4> getHitBox() { return hitBox; }
     
