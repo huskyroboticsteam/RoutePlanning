@@ -100,6 +100,8 @@ int main(int, char const **)
                         std::cout << "7   -- Drive forward at max speed" << std::endl;
                         std::cout << "8   -- Turn towards the target" << std::endl;
                         std::cout << "9   -- Draw algorithm path" << std::endl;
+                        std::cout << "Up/Down    -- Teleport robot 0.5m forward or back" << std::endl;
+                        std::cout << "Left/Right -- Teleport robot 15 degrees left or right" << std::endl;
                         break;
                     }
                     case sf::Keyboard::P : {
@@ -153,11 +155,11 @@ int main(int, char const **)
                         break;
                     }
                     case sf::Keyboard::Left : {
-                        grid.rotateAgent(agent, -15.f);
+                        grid.rotateAgent(agent, 15.f);
                         break;
                     }
                     case sf::Keyboard::Right : {
-                        grid.rotateAgent(agent, 15.f);
+                        grid.rotateAgent(agent, -15.f);
                         break;
                     }
                 }
