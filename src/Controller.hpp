@@ -2,13 +2,13 @@
 #include <vector>
 #include "Map.hpp"
 #include "Server.hpp"
-namespace RoverPathfinding 
+namespace RP
 {
     class Controller
     {
         public:
-            RoverPathfinding::Map map;
-			RoverPathfinding::Server server;
+			RP::Map map;
+			RP::Server server;
 			bool setDirection(float heading);
 			bool setSpeed(float speed);
 			void parsePacket(unsigned char packetID, unsigned char data[]);
