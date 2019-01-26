@@ -1,8 +1,8 @@
-#include "Controller.h"
+#include "Controller.hpp"
 #include <iostream>
 #include <cstring>
 #include <math.h>
-#include "Server.cpp"
+#include "Server.hpp"
 
 #define DATA_GPS 0xC0
 #define DATA_MAG 0xC1
@@ -13,32 +13,19 @@
 #define TARGET_LAT 123.0
 #define TARGET_LNG 321.0
 
-#define EARTH_RADIUS 6371000
-
 #define CONV_FACTOR_LNG 8.627
 #define DEGREES_METER_LNG 0.0001
 #define CONV_FACTOR_LAT 111319.9
 
-namespace RP {
-	
-	// Relative direction and distance from the robot
-	// of a point on an obstacle
-	
-	
+namespace RoverPathfinding {
+    RoverPathfinding::Map map;
+    RoverPathfinding::Server server;
+
     // TODO: split packet into separate parts (timestamp, packetID, data)
     // TODO: Feed lat/long to map to find vector pointing to next destination
     // TODO: Feed x/y/z into ??? to find current orientation, then we can find how much to turn
 
-   void Controller::addObstacles(std::vector<obstacle_vector> points) {
-	   for(int i = 0; i < points.size()-1; i++) {
-		   point start = convertToLatLng(points[i].distance, points[i].angle);
-		   point end = convertToLatLng(points[i+1].distance, points[i+1].angle);
-		   map.add_obstacle(start, end);
-	   }
-   }
-    
     // using given packet data and server send a packet containing either a direction or motor power
-	
 	bool Controller::setDirection(float delta_heading) {
         std::vector<unsigned char> data(4);
         std::memcpy(&data[0], &delta_heading, 4);
@@ -58,8 +45,6 @@ namespace RP {
             std::memcpy(&lat, data, sizeof(float));
             float lng = 0.0;
             std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
-			curr_lat = lat;
-			curr_lng = lng;
 			//std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
 			std::vector<point> path;
 			point nextPoint = path[0];
@@ -76,9 +61,15 @@ namespace RP {
         }
     }
 
+    void Controller::addObstacle(float curr_lat, float curr_lng, float curr_dir, float dist1, float dir1, float dist2, float dir2) {
+        point latlng1 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist1, dir1);
+        point latlng2 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist2, dir2);
+        map.add_obstacle(latlng1, latlng2);
+    }
+
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
-    point convertToLatLng(float dist, float angle) {
+    point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float angle) {
 		float delta_x = dist * cos(angle + curr_dir + M_PI/2);
 		float delta_y = dist * sin(angle + curr_dir + M_PI/2);
 		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
@@ -90,7 +81,5 @@ namespace RP {
 		p.y = delta_lng + curr_lng;
 		return p;
     }
-
-	
 }
 
