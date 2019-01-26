@@ -71,6 +71,7 @@ namespace RP {
 	
 	void Controller::foundTennisBall(float dist, float dir) {
 		point new_target = convertToLatLng(dist, dir);
+		map.set_target(point(curr_lat, curr_lng), new_target);
 	}
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
