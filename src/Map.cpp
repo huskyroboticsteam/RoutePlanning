@@ -216,7 +216,7 @@ std::vector<RP::point> RP::Map::shortest_path_to(float cur_lat, float cur_lng,
     return (result);
 }
 
-std::vector<RoverPathfinding::point> RoverPathfinding::Map::a_star_algorithm(float cur_lat, float cur_lng, 
+std::vector<RP::point> RP::Map::a_star_algorithm(float cur_lat, float cur_lng, 
 																			float tar_lat, float tar_lng)
 {
 	auto cur = point{ cur_lat, cur_lng };
