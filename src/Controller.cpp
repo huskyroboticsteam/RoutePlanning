@@ -18,8 +18,7 @@
 #define CONV_FACTOR_LAT 111319.9
 
 namespace RP {
-	RP::Map map;
-	RP::Server server;
+
 
     // TODO: split packet into separate parts (timestamp, packetID, data)
     // TODO: Feed lat/long to map to find vector pointing to next destination
@@ -61,15 +60,19 @@ namespace RP {
         }
     }
 
-    void Controller::addObstacle(float curr_lat, float curr_lng, float curr_dir, float dist1, float dir1, float dist2, float dir2) {
+    void Controller::addObstacle(float dist1, float dir1, float dist2, float dir2) {
         point latlng1 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist1, dir1);
         point latlng2 = convertToLatLng(curr_lat, curr_lng, curr_dir, dist2, dir2);
         map.add_obstacle(latlng1, latlng2);
     }
 
+	
+	void Controller::foundTennisBall() {
+		
+	}
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
-    point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float angle) {
+    point Controller::convertToLatLng(float dist, float angle) {
 		float delta_x = dist * cos(angle + curr_dir + M_PI/2);
 		float delta_y = dist * sin(angle + curr_dir + M_PI/2);
 		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";

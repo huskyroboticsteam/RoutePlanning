@@ -12,9 +12,11 @@ namespace RP
 			bool setDirection(float heading);
 			bool setSpeed(float speed);
 			void parsePacket(unsigned char packetID, unsigned char data[]);
-            void addObstacle(float curr_lat, float curr_lng, float curr_dir, float dist1, float dir1, float dist2, float dir2);
-        
+            void addObstacle(float dist1, float dir1, float dist2, float dir2);
+			void foundTennisBall(float dist, float dir);
+			
         private:
-            point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float dir);
+            point convertToLatLng(float dist, float dir);
+			float curr_lat, curr_lng, curr_dir;
     };
 }
