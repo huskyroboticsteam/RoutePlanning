@@ -1,4 +1,4 @@
-#include "Server.h"
+#include "Server.hpp"
 
 
 #ifdef _WIN32
@@ -17,6 +17,7 @@
 	#define SOCKET int
 	#define SOCKET_ERROR -1
 #endif
+
 
 const unsigned char WATCHDOG_ID = 0xF0;
 const std::string endpoint = "MainRover"; 
@@ -53,7 +54,7 @@ RP::Server::Server()
 	serverHint.sin_addr.s_addr = INADDR_ANY;
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(54000);
-
+	
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
 #ifdef _WIN32
@@ -89,13 +90,13 @@ void RP::Server::go() {
 
 		// Wait for message
 		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
-		if (bytesIn == ) 
+		if (bytesIn == SOCKET_ERROR) 
 		{
 #ifdef _WIN32
 			std::cout << "Error receiving from client" << WSAGetLastError();
 			continue;
 #else
-			std::cout << "That didn't work! " << hstrerror(errno);
+			std::cout << "That didn't work! " << strerror(errno);
 			continue;
 #endif
 		}
@@ -124,13 +125,13 @@ bool RP::Server::send_action(std::vector<unsigned char> dataBody, unsigned char 
 
 	// packet.data() first four bytes are the time stamp, fifth is the id, and the rest is the data
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&server, sizeof(server));
-	if (sendOk == )
+	if (sendOk == SOCKET_ERROR)
 	{
 #ifdef _WIN32
 		std::cout << "That didn't work! " << WSAGetLastError();
 		return false;
 #else
-		std::cout << "That didn't work! " << hstrerror(errno);
+		std::cout << "That didn't work! " << strerror(errno);
 		return false;
 #endif
 	}
@@ -176,7 +177,7 @@ bool RP::Server::send_action(unsigned char id) // same id format as in Scarlet
 		std::cout << "That didn't work! " << WSAGetLastError();
 		return false;
 #else
-		std::cout << "That didn't work! " << hstrerror(errno);
+		std::cout << "That didn't work! " << strerror(errno);
 		return false;
 #endif
 	}
