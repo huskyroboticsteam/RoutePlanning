@@ -3,12 +3,12 @@
 
 #include <list>
 #include <string>
-#include "../../src/utils.h"
-#include "../../src/Map.h"
+#include "obstacle.hpp"
+#include "agent.hpp"
 
 #define MAX_GRID_RESOLUTION 100 // max number of grid cells on each side of the map
 
-namespace RoverPathfinding
+namespace RP
 {
 struct simulator_config
 {
@@ -20,39 +20,50 @@ struct sim_obstacle
 {
   point p;
   point q;
-  std::list<RoverPathfinding::point> endpoints;
+  uint index; // index of corresponding "parent" obstacle
 };
 
-class Simulator
+struct proc_obstacle
+{
+  point p;
+  point q;
+  char sides; // 0 if neither is side, 1 if p, 2 if q, 3 if both
+  std::list<RP::point> endpoints;
+};
+
+class Simulator : public sf::Drawable
 {
 public:
-  Simulator(const std::string &map_path, float init_bearing, simulator_config conf);
-  Simulator();
-  void load_map(const std::string &path);
-  const std::list<line>& visible_obstacles() { return view_obstacles; };
-  const std::list<sim_obstacle>& all_obstacles() { return sim_obstacles; };
+  Simulator(const std::list<Obstacle> &obstacleList, const Agent &agent, simulator_config conf, float map_scale, float windowH);
+  const std::list<line> &visible_obstacles() { return view_obstacles; };
   void update_agent();
-  //getters
-  float get_bearing();
-  point get_pos();
-  //setters
-  void set_bearing(float brng);
-  void set_pos(float x, float y);
+  const point& getpos();
 
 private:
   std::vector<point> intersection_with_arc(const point &p, const point &q, const point &lower_point, const point &upper_point);
-  bool out_of_view(const point &pt);
+  bool within_view(const point &pt);
+  float scale;         // scale is only used when calling draw
+  float window_height; // only used when calling draw
+  const Agent &agent;
 
-  Map map;
-  point cur_pos;
-  float bearing;  //Bearing in degrees counterclockwise from the positive x-axis
+  // for computations; not actual attributes of the system
+  point cur_pos;   //updated every cal to update_agent()
+  float bearing;
   float lower_vis; //Bearing subtracted by half of vision_angle (lower bound of FoV) for caching
   float upper_vis; //Bearing added by half of vision_angle (upper bound of FoV)
+  float vision_dist_sq;
+  point fov_lower;
+  point fov_upper;
+
   point target_pos;
   simulator_config config;
-  std::list<sim_obstacle> sim_obstacles;
+  const std::list<Obstacle> &raw_obstacles;
+  std::list<sim_obstacle*> all_obstacles;
   std::list<line> view_obstacles;
+
+  virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+  std::list<sf::VertexArray> getCircleLines(float angular_pos, float radius, float angle_spread, point pos, int maxpts=10) const;
 };
-} // namespace RoverPathfinding
+} // namespace RP
 
 #endif

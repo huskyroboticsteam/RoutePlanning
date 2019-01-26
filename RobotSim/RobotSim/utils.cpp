@@ -3,6 +3,8 @@
 #include "utils.hpp"
 
 #define PI 3.14159265359
+#define FLOAT_TOL -1e-4 // floating point error tolerance. Set to high value for now
+                        // since we don't need too much precision
 
 bool RP::point::operator==(const point &p) const
 {
@@ -130,6 +132,26 @@ bool RP::segments_intersect(point p1, point p2, point q1, point q2)
     return (false);
 }
 
+// returns the intersection between two points. returned point is at {inf, inf} if
+// no intersection exists
+RP::point RP::segments_intersection(point a, point b, point c, point d)
+{
+    point x = intersection(a, b, c, d);
+    if (x.x == INFINITY)
+        return x;
+    if (!within_segment(a, b, x) || !within_segment(c, d, x))
+        return point{INFINITY, INFINITY};
+    return x;
+}
+
+//returns whether c is on ab assuming that abc is a line
+bool RP::within_segment(point a, point b, point c)
+{
+    // dot product of ab and ac
+    float dotprod = ((b.y - a.y) * (c.y - a.y) + (b.x - a.x) * (c.x - a.x));
+    return dotprod >= FLOAT_TOL && dotprod <= dist_sq(a, b) + FLOAT_TOL;
+}
+
 //Returns a point in the center of segment pq and then moves it R towards cur
 RP::point RP::center_point_with_radius(RP::point cur, RP::point p, RP::point q, float R)
 {
@@ -209,9 +231,16 @@ bool RP::within_angle(float ang, float lower, float upper)
 {
     if (upper < lower)
     {
-        upper += 2 * PI;
+        return ang >= lower || ang <= upper;
     }
+    // printf("Angle: %.2f; Lower: %.2f; Upper: %.2f\n", ang, lower, upper);
     return ang >= lower && ang <= upper;
+}
+
+// return if ab and ac are in the same direction, assuming abc is a line
+bool RP::same_dir(point a, point b, point c)
+{
+    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) >= FLOAT_TOL;
 }
 
 RP::point RP::polar_to_cartesian(point origin, float r, float theta)
@@ -224,7 +253,19 @@ float RP::relative_angle(point o, point p)
     return std::atan((p.y - o.y) / (p.x - o.x));
 }
 
-bool RP::same_point(const point &p, const point &q, float tol)
+bool RP::same_point(const point &p, const point &q, float tol = 1e-6)
 {
-    return std::sqrt(dist_sq(p, q)) <= tol;
+    return dist_sq(p, q) <= tol;
+}
+
+sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float scale, float window_height)
+{
+    sf::VertexArray line;
+    line.setPrimitiveType(sf::Lines);
+    line.resize(2);
+    line[0] = sf::Vertex(sf::Vector2f((p.x + 1) * scale, (window_height - p.y) * scale));
+    line[0].color = c;
+    line[1] = sf::Vertex(sf::Vector2f((q.x + 1) * scale, (window_height - q.y) * scale));
+    line[1].color = c;
+    return line;
 }
