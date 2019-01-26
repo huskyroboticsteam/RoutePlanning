@@ -3,7 +3,7 @@
 #include "utils.hpp"
 
 #define PI 3.14159265359
-#define FLOAT_TOL -1e-4 // floating point error tolerance. Set to high value for now
+#define FLOAT_TOL 1e-4 // floating point error tolerance. Set to high value for now
                         // since we don't need too much precision
 
 bool RP::point::operator==(const point &p) const
@@ -149,7 +149,7 @@ bool RP::within_segment(point a, point b, point c)
 {
     // dot product of ab and ac
     float dotprod = ((b.y - a.y) * (c.y - a.y) + (b.x - a.x) * (c.x - a.x));
-    return dotprod >= FLOAT_TOL && dotprod <= dist_sq(a, b) + FLOAT_TOL;
+    return dotprod >= -FLOAT_TOL && dotprod <= dist_sq(a, b) + FLOAT_TOL;
 }
 
 //Returns a point in the center of segment pq and then moves it R towards cur
@@ -240,7 +240,7 @@ bool RP::within_angle(float ang, float lower, float upper)
 // return if ab and ac are in the same direction, assuming abc is a line
 bool RP::same_dir(point a, point b, point c)
 {
-    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) >= FLOAT_TOL;
+    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) >= -FLOAT_TOL;
 }
 
 RP::point RP::polar_to_cartesian(point origin, float r, float theta)

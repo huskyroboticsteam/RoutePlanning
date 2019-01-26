@@ -101,8 +101,8 @@ bool Grid::drawPath(std::vector<RP::point> path, Agent agent) {
         float x2 = path.at(i + 1).x + 1;
         float y2 = height - path.at(i + 1).y;
         
-        std::cout << x1 << "," << y1 << std::endl;
-        std::cout << x2 << "," << y2 << std::endl;
+        // std::cout << x1 << "," << y1 << std::endl;
+        // std::cout << x2 << "," << y2 << std::endl;
         
         x1 *= scale;
         y1 *= scale;

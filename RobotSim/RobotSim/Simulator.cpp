@@ -6,17 +6,16 @@
 #include <assert.h>
 #include "Simulator.hpp"
 #include "grid.hpp"
-#include <cstdio>
 
 #define DEBUG_MSG 0
 
 void debugmsg(const char *);
 
 RP::Simulator::Simulator(const std::list<Obstacle> &obstacleList, const Agent &agt,
-                                       simulator_config conf, float map_scale, float windowH) : raw_obstacles(obstacleList),
-                                                                                                agent(agt), config(conf), scale(map_scale),
-                                                                                                window_height(windowH),
-                                                                                                vision_dist_sq(std::pow(conf.vision_dist, 2))
+                         simulator_config conf, float map_scale, float windowH) : raw_obstacles(obstacleList),
+                                                                                  agent(agt), config(conf), scale(map_scale),
+                                                                                  window_height(windowH),
+                                                                                  vision_dist_sq(std::pow(conf.vision_dist, 2))
 {
     // std::cout << vision_dist_sq;
 }
@@ -123,8 +122,9 @@ void RP::Simulator::update_agent()
             {
                 if (aop->index == i) // same one
                     continue;
-                
+
                 point s = intersection(cur_pos, p, aop->p, aop->q);
+                // test if there is intersection
                 if (s.x == INFINITY || !same_dir(cur_pos, p, s) || !within_segment(aop->p, aop->q, s))
                 {
                     // if (same_point(p, point{5.f, 5.f}, 1e-7) && same_point(aop->p, point{5.f, 5.f}, 1e-7))
@@ -138,11 +138,16 @@ void RP::Simulator::update_agent()
                     // where q is the other side point (from p). If the intersect
                     // is in the same direction as q relative to cur_pos, then
                     // this p should be discarded
-                    point inter = intersection(aop->p, aop->q, cur_pos, q);
+                    point contending_point;
+                    if (same_point(p, aop->p, 1e-5))
+                        contending_point = aop->q;
+                    else
+                        contending_point = aop->p;
+                    point inter = intersection(p, contending_point, cur_pos, q);
                     // i.e. there is an intersection, the intersection is not the shared vertex, and
                     // the intersection falls on the contending obstacle. This means that p is a shared
                     // vertex and is blocked
-                    if (inter.x != INFINITY && !same_point(inter, p, 1e-5) && within_segment(aop->p, aop->q, inter) && within_segment(cur_pos, q, inter))
+                    if (inter.x != INFINITY && !same_point(inter, p, 1e-5) && same_dir(p, aop->q, inter) && within_segment(cur_pos, q, inter))
                     {
                         drop_pt = true;
                         // if (same_point(p, point{5.f, 10.f}, 1e-7) && same_point(q, point{5.f, 5.f}, 1e-7))
@@ -187,7 +192,7 @@ void RP::Simulator::update_agent()
             point a = *it;
             if (++it == obs.endpoints.end())
                 break;
-            view_obstacles.push_back(line{a, *it});
+            view_obstacles.push_back(obstacle{false, a, *it});
         }
     }
     // for (auto & obs : view_obstacles)
@@ -208,7 +213,7 @@ void debugmsg(const char *line)
 // Find the intersection of a line with the field of view arc (https://stackoverflow.com/a/30012445)
 std::vector<RP::point>
 RP::Simulator::intersection_with_arc(const point &p1, const point &p2,
-                                                   const point &lower_point, const point &upper_point)
+                                     const point &lower_point, const point &upper_point)
 {
     std::vector<point> ret;
     // check the two extreme rays
@@ -280,7 +285,7 @@ void RP::Simulator::draw(sf::RenderTarget &target, sf::RenderStates states) cons
     for (auto seg : circleLines)
         target.draw(seg);
     for (auto obst : view_obstacles)
-        target.draw(get_vertex_line(obst.p, obst.q, sf::Color::Green, scale, window_height), states);
+        target.draw(get_vertex_line(obst.coord1, obst.coord2, sf::Color::Green, scale, window_height), states);
 }
 
 std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, float radius, float angle_spread, RP::point pos, int maxpts) const
@@ -301,7 +306,7 @@ std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, floa
     return ret;
 }
 
-const RP::point& RP::Simulator::getpos()
+const RP::point &RP::Simulator::getpos()
 {
     return cur_pos;
 }

@@ -27,9 +27,10 @@ struct obstacle
 class Map
 {
 public:
-  Map(const point& cur_pos, const point& target, const std::list<line>& obstacles);
+  Map(const point& cur_pos, const point& target);
   point compute_next_point();                    // return coordinate for next point to go to
   point compute_search();                        // search for the tennis ball once the goal is reached. Return a target direction vector.
+  void update(const std::list<obstacle>& new_obstacles);
   std::vector<point> shortest_path_to(); //Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination (for debugging)
   // void reassign_target(const point& target) { tar = target; }
   
@@ -43,7 +44,7 @@ private:
   std::vector<obstacle> obstacles;                                 //The obstacles
   const point& cur;
   const point& tar;
-  const std::list<line>& view_obstacles;
+  std::list<obstacle> view_obstacles;
 };
 } // namespace RP
 

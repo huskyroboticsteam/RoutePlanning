@@ -5,6 +5,7 @@
 #include <string>
 #include "obstacle.hpp"
 #include "agent.hpp"
+#include "Map.hpp"
 
 #define MAX_GRID_RESOLUTION 100 // max number of grid cells on each side of the map
 
@@ -35,7 +36,7 @@ class Simulator : public sf::Drawable
 {
 public:
   Simulator(const std::list<Obstacle> &obstacleList, const Agent &agent, simulator_config conf, float map_scale, float windowH);
-  const std::list<line> &visible_obstacles() { return view_obstacles; };
+  const std::list<obstacle> &visible_obstacles() { return view_obstacles; };
   void update_agent();
   const point& getpos();
 
@@ -59,7 +60,7 @@ private:
   simulator_config config;
   const std::list<Obstacle> &raw_obstacles;
   std::list<sim_obstacle*> all_obstacles;
-  std::list<line> view_obstacles;
+  std::list<obstacle> view_obstacles;
 
   virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
   std::list<sf::VertexArray> getCircleLines(float angular_pos, float radius, float angle_spread, point pos, int maxpts=10) const;

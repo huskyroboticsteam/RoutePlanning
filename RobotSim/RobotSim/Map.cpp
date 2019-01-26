@@ -5,7 +5,7 @@
 #include "Map.hpp"
 #include "utils.hpp"
 
-RP::Map::Map(const point &cpos, const point &tget, const std::list<line> &vobs) : cur(cpos), tar(tget), view_obstacles(vobs)
+RP::Map::Map(const point &cpos, const point &tget) : cur(cpos), tar(tget)
 {
 }
 
@@ -67,7 +67,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     obstacles.clear();
     obstacles.reserve(view_obstacles.size());
     for (const auto& vo : view_obstacles)
-        obstacles.emplace_back(obstacle{false, vo.p, vo.q});
+        obstacles.emplace_back(obstacle{false, vo.coord1, vo.coord2});
     node start;
     for (auto &n : nodes)
     {
@@ -174,6 +174,18 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         }
     }
     return (nodes);
+}
+
+void RP::Map::update(const std::list<obstacle>& new_obstacles)
+{
+    for (const obstacle& newobs : new_obstacles)
+    {
+        for (auto const &vobs : view_obstacles) {
+            // if intersect/overlap
+            // merge obstacles, remove vobs and don't add newobs, and add merged obstacles
+        }
+        view_obstacles.emplace_back(newobs);
+    }
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*

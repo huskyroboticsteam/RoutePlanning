@@ -68,7 +68,7 @@ void Agent::rotateTowards(float x, float y)
 {
     float tr = atan2(y - yPos, x - xPos) * 180 / PI;
     
-    std::cout << tr << std::endl;
+    // std::cout << tr << std::endl;
     
     rotate(tr - rotation);
 }

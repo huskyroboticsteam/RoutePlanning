@@ -64,7 +64,7 @@ int main(int, char const **)
     Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 2.f, 2.f);
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-    RP::Map map(sim.getpos(), grid.target, sim.visible_obstacles());
+    RP::Map map(sim.getpos(), grid.target);
     while (window.isOpen())
     {
         sf::Event event;
@@ -179,8 +179,9 @@ int main(int, char const **)
             agent.drive();
 
         sim.update_agent();
-        if (clock.getElapsedTime() >= AUTO_INTERVAL) {
+        if (robotAuto && clock.getElapsedTime() >= AUTO_INTERVAL) {
             clock.restart();
+            map.update(sim.visible_obstacles());
             RP::point st_target = map.compute_next_point();
             agent.rotateTowards(st_target.x, st_target.y);
         }
