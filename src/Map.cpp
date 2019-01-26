@@ -257,6 +257,13 @@ std::vector<RP::point> RP::Map::a_star_algorithm(float cur_lat, float cur_lng,
 				if (closedIndex < closedNodes.size) {
 					closedNodes.erase(closedNodes.begin + closedIndex);
 				}
+				// Check if neighbor is in openNodes and remove it
+				else {
+					neighbor.second.first = -INFINITY;
+					if (openNodes.top() == &neighbor) {
+						openNodes.pop();
+					}
+				}
 				// Add neighbor to openNodes and set its previous to the current node
 				neighbor.second.first = distFromStart;
 				openNodes.push(&neighbor);
