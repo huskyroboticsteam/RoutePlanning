@@ -40,8 +40,13 @@ class Grid : public sf::Drawable, public sf::Transformable
     bool drawPath();
     bool drawPath(std::vector<RP::point> path, Agent agent);
     
+#if THEME == 0
     sf::Color BORDER_COLOR = sf::Color::Black;
     sf::Color GRID_COLOR = sf::Color(128, 128, 128);
+#else
+    sf::Color BORDER_COLOR = sf::Color(0, 255, 0);
+    sf::Color GRID_COLOR = sf::Color(0, 255, 0);
+#endif
 
     std::list<Obstacle> obstacleList; // using list for fast add/removal
 
