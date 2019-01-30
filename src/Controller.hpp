@@ -17,5 +17,6 @@ namespace RP
         private:
             RP::point convertToLatLng(float dist, float dir);
 			float curr_lat, curr_lng, curr_dir;
+			RP::point target;
     };
 }

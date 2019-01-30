@@ -34,7 +34,6 @@ namespace RP {
 		std::memcpy(&data[0], &speed, 4);
 		return server.send_action(data, SET_SPEED);
 	}
-
     void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
         // GPS has latitude and lng
         if (packetID == DATA_GPS) {
@@ -68,8 +67,8 @@ namespace RP {
 
 	
 	void Controller::foundTennisBall(float dist, float dir) {
-		RP::point new_target = convertToLatLng(dist - 1, dir);
-		//TODO(Andrew): Implement target changing
+		target = convertToLatLng(dist - 1, dir);
+		map.shortest_path_to();
 	}
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
