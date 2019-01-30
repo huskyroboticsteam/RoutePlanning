@@ -253,7 +253,7 @@ float RP::relative_angle(point o, point p)
     return std::atan((p.y - o.y) / (p.x - o.x));
 }
 
-bool RP::same_point(const point &p, const point &q, float tol = 1e-6)
+bool RP::same_point(const point &p, const point &q, float tol)
 {
     return dist_sq(p, q) <= tol;
 }
@@ -269,3 +269,4 @@ sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float sca
     line[1].color = c;
     return line;
 }
+

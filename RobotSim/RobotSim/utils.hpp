@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include <SFML/Graphics.hpp>
+// #include "Map.hpp"
 
 typedef unsigned int uint;
 namespace RP
@@ -65,10 +66,17 @@ point lat_long_offset(float lat1, float lon1, float brng, float dist);
 point lat_long_to_meters(point pt, point origin); 
 
 std::vector<RP::point> generate_spiral();
-bool within_angle(float ang, float lower, float upper);                         //Returns true if ang is within range of [lower, upper] (going counterclocwise).
-point polar_to_cartesian(point origin, float r, float theta);                   //Polar to cartesian relative to the given origin
-float relative_angle(point origin, point p);                                    //Find angle of p relative to origin, where positive x-axis is 0 radians.
-bool same_point(const point &p, const point &q, float tol);
+//Returns true if ang is within range of [lower, upper] (going counterclocwise).
+bool within_angle(float ang, float lower, float upper);      
+//Polar to cartesian relative to the given origin                   
+point polar_to_cartesian(point origin, float r, float theta); 
+//Find angle of p relative to origin, where positive x-axis is 0 radians.                  
+float relative_angle(point origin, point p);                                    
+bool same_point(const point &p, const point &q, float = 1e-6);
+
+//Find if o and p are parallel AND overlap. If they do, can merge is set to true and
+// return a merged obstacle; else, can_merge is set to false
+                       
 
 } // namespace RP
 

@@ -194,6 +194,7 @@ int main(int, char const **)
             grid.drawPath(map.shortest_path_to(), agent);
             
         sim.update_agent();
+        map.update(sim.visible_obstacles());
 //        if (clock.getElapsedTime() >= AUTO_INTERVAL) {
 //            clock.restart();
 //            RP::point st_target = map.compute_next_point();

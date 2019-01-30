@@ -44,8 +44,10 @@ private:
   std::vector<obstacle> obstacles;                                 //The obstacles
   const point& cur;
   const point& tar;
-  std::list<obstacle> view_obstacles;
+  std::list<obstacle> mem_obstacles;
 };
+
+obstacle merge(const obstacle&o, const obstacle& p, bool& can_merge);  
 } // namespace RP
 
 #endif

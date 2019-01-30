@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <list>
 #include "Map.hpp"
-#include "utils.hpp"
 
 RP::Map::Map(const point &cpos, const point &tget) : cur(cpos), tar(tget)
 {
@@ -65,8 +64,8 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 #undef R_METERS
     //</hack>
     obstacles.clear();
-    obstacles.reserve(view_obstacles.size());
-    for (const auto& vo : view_obstacles)
+    obstacles.reserve(mem_obstacles.size());
+    for (const auto &vo : mem_obstacles)
         obstacles.emplace_back(obstacle{false, vo.coord1, vo.coord2});
     node start;
     for (auto &n : nodes)
@@ -176,16 +175,66 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     return (nodes);
 }
 
-void RP::Map::update(const std::list<obstacle>& new_obstacles)
+// return true if original and challenger are sufficiently different
+// so that they should be merged
+bool should_merge(RP::obstacle original, RP::obstacle challenger)
 {
-    for (const obstacle& newobs : new_obstacles)
+    return !RP::same_point(original.coord1, challenger.coord1) &&
+           !RP::same_point(original.coord2, challenger.coord2);
+}
+
+void RP::Map::update(const std::list<obstacle> &new_obstacles)
+{
+    obstacle merged;
+    // printf("%d\n", new_obstacles.size());
+    for (const obstacle &newobs : new_obstacles)
     {
-        for (auto const &vobs : view_obstacles) {
+        merged = newobs;
+        static bool should_add = true;
+        for (auto const &mobs : mem_obstacles)
+        {
+            static bool can_merge = false;
             // if intersect/overlap
             // merge obstacles, remove vobs and don't add newobs, and add merged obstacles
+            obstacle temp = merge(newobs, mobs, can_merge);
+            if (can_merge)
+            {
+                if (should_merge(merged, temp))
+                {
+                    merged = temp;
+                }
+                else
+                {
+                    // if !should_merge() then just skip this obs
+                    should_add = false;
+                }                
+            }
+            else
+            {
+                mem_obstacles.emplace_back(newobs);
+            }
         }
-        view_obstacles.emplace_back(newobs);
+        if (should_add) {
+                            printf("Adding.\n");
+            mem_obstacles.emplace_back(merged);
+        }
+        
     }
+}
+
+RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
+{
+    bool colinear = orientation(o.coord1, o.coord2, p.coord1) == 0 &&
+                    orientation(o.coord1, o.coord2, p.coord2) == 0;
+    if (!colinear)
+    {
+        can_merge = false;
+        return o;
+    }
+    can_merge = true;
+    point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
+    std::sort(points, points + 4, [](const point &p1, const point &p2) { return p1.x - p2.x; });
+    return obstacle{false, points[0], points[3]};
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
