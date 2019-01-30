@@ -216,7 +216,3 @@ std::vector<RP::point> RP::Map::shortest_path_to()
     std::reverse(result.begin(), result.end());
     return (result);
 }
-
-void Rp::Map::set_target(RP::point curr, RP::point target) {
-	
-}
