@@ -185,21 +185,15 @@ RP::point RP::lat_long_to_meters(RP::point pt, RP::point origin)
     return point{(pt.x - origin.x) * 87029, (pt.y - origin.y) * 111111};
 }
 
-// generates 100 points in spiral formation around origin and returns in vector
-std::vector<RP::point> RP::generate_spiral(float scale, int maxPoints, float xOffset, float yOffset)
+// generates maxpoints points in spiral formation in relation to the offset with armDist (m) between arms and returns in vector
+std::vector<RP::point> RP::generate_spiral(float armDist, int maxPoints, float xOffset, float yOffset)
 {
     std::vector<point> spiralPoints;
 
     for (int i = 0; i < maxPoints; ++i)
     {
-		float angle = .1f * i;
-
-		float x = (scale + scale * angle) * cos(angle) + xOffset;
-		float y = (scale + scale * angle) * sin(angle) + yOffset;
-        spiralPoints.push_back(point{x,y});
-#if 0
-		std::cout << i << ": (" << px << ", " << py << ")" << '\n';
-#endif
+		float angle = (PI / 5) * i;
+		spiralPoints.push_back(convertToLatLng(xOffset, yOffset, 0, armDist, angle));
     }
 
     return spiralPoints;
