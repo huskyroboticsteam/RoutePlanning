@@ -6,6 +6,8 @@
 #include <SFML/Graphics.hpp>
 // #include "Map.hpp"
 
+#define THEME 0 // 0 is normal, 1 is HACKERMODE
+
 typedef unsigned int uint;
 namespace RP
 {

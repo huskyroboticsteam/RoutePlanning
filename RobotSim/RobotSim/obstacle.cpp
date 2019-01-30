@@ -18,8 +18,8 @@ Obstacle::Obstacle(float p1x, float p1y, float p2x, float p2y, float mapScale, f
     line.resize(2);
     line[0] = sf::Vertex(sf::Vector2f((x1 + 1) * scale, (mapHeight - y1) * scale));
     line[1] = sf::Vertex(sf::Vector2f((x2 + 1) * scale, (mapHeight - y2) * scale));
-    line[0].color = sf::Color::Red;
-    line[1].color = sf::Color::Red;
+    line[0].color = color;
+    line[1].color = color;
 }
 
 // changes the obstacle color to the given new color

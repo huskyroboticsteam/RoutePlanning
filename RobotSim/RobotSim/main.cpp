@@ -37,6 +37,12 @@
     #define WINDOW_SCALE 1.f
 #endif
 
+#if THEME == 0
+    const sf::Color bgColor = sf::Color(255, 255, 255);
+#else
+    const sf::Color bgColor = sf::Color(0, 0, 0);
+#endif
+
 int main(int, char const **)
 {
     const unsigned int FRAMERATE = 60;
@@ -194,14 +200,8 @@ int main(int, char const **)
             grid.drawPath(map.shortest_path_to(), agent);
             
         sim.update_agent();
-        map.update(sim.visible_obstacles());
-//        if (clock.getElapsedTime() >= AUTO_INTERVAL) {
-//            clock.restart();
-//            RP::point st_target = map.compute_next_point();
-//            agent.rotateTowards(st_target.x, st_target.y);
-//        }
         
-        window.clear(sf::Color::White);
+        window.clear(bgColor);
         window.draw(grid);
         window.draw(agent);
         window.draw(sim);
