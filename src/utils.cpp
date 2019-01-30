@@ -229,3 +229,16 @@ bool RP::same_point(const point &p, const point &q, float tol)
 {
     return std::sqrt(dist_sq(p, q)) <= tol;
 }
+
+point RP::convertToLatLng(float lat, float lng, float dir, float dist, float angle) {
+		float delta_x = dist * cos(angle + dir + M_PI/2);
+		float delta_y = dist * sin(angle + dir + M_PI/2);
+		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
+		float delta_lng = delta_x / CONV_FACTOR_LNG * DEGREES_METER_LNG;
+		float delta_lat = delta_y / CONV_FACTOR_LAT;
+		//std::cout << "delta_lat: " << delta_lat << " delta_lng: " << delta_lng << "\n";
+		point p;
+		p.x = delta_lat + lat;
+		p.y = delta_lng + lng;
+		return p;
+}

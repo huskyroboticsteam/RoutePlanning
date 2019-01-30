@@ -61,6 +61,7 @@ bool within_angle(float ang, float lower, float upper);                         
 point polar_to_cartesian(point origin, float r, float theta);                   //Polar to cartesian relative to the given origin
 float relative_angle(point origin, point p);                                    //Find angle of p relative to origin, where positive x-axis is 0 radians.
 bool same_point(const point &p, const point &q, float tol);
+point convertToLatLng(float lat, float lng, float dir, float dist, float angle);
 } // namespace RP
 
 #endif
