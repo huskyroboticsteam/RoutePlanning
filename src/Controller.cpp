@@ -15,6 +15,11 @@
 
 
 
+int main() {
+	
+}
+
+
 namespace RP {
 
 
@@ -44,8 +49,6 @@ namespace RP {
 			curr_lat = lat;
 			curr_lng = lng;
 			//std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
-			std::vector<RP::point> path;
-			RP::point nextPoint = path[0];
 			float delta_heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
 			//float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
 			setDirection(delta_heading);
@@ -57,6 +60,9 @@ namespace RP {
             std::memcpy(&y, &data[sizeof(float)], sizeof(float));
             std::memcpy(&z, &data[2 * sizeof(float)], sizeof(float));
         }
+		
+		nextPoint = map.shortest_path_to()[0];
+		
     }
 
     void Controller::addObstacle(float dist1, float dir1, float dist2, float dir2) {
@@ -77,5 +83,4 @@ namespace RP {
     }
 
 }
-
 
