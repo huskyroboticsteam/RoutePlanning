@@ -70,7 +70,7 @@ namespace RP {
 
 	
 	void Controller::foundTennisBall(float dist, float dir) {
-		point new_target = convertToLatLng(dist, dir);
+		point new_target = convertToLatLng(dist - 1, dir);
 		map.set_target(point(curr_lat, curr_lng), new_target);
 	}
     // angle must be in radians, dist in meters
@@ -80,7 +80,7 @@ namespace RP {
 		float delta_y = dist * sin(angle + curr_dir + M_PI/2);
 		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
 		float delta_lng = delta_x / CONV_FACTOR_LNG * DEGREES_METER_LNG;
-		float delta_lat = delta_y / CONV_FACTOR_LNG;
+		float delta_lat = delta_y / CONV_FACTOR_LAT;
 		//std::cout << "delta_lat: " << delta_lat << " delta_lng: " << delta_lng << "\n";
 		point p;
 		p.x = delta_lat + curr_lat;
