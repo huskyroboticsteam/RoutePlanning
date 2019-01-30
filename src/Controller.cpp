@@ -69,12 +69,12 @@ namespace RP {
 	
 	void Controller::foundTennisBall(float dist, float dir) {
 		RP::point new_target = convertToLatLng(dist - 1, dir);
-		map.set_target(RP::point(curr_lat, curr_lng), new_target);
+		//TODO(Andrew): Implement target changing
 	}
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
     RP::point Controller::convertToLatLng(float dist, float angle) {
-		return RP::converToLatLng(curr_lat, curr_lng, curr_dir, dist, angle); 
+		return RP::convertToLatLng(curr_lat, curr_lng, curr_dir, dist, angle); 
     }
 
 }

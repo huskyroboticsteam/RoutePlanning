@@ -1,14 +1,18 @@
 #include <queue>
 #include <cmath>
-#include <algorithm>    
+#include <algorithm>
+#include <list>
 #include "Map.hpp"
 #include "utils.hpp"
+
+RP::Map::Map(const point &cpos, const point &tget, const std::list<line> &vobs) : cur(cpos), tar(tget), view_obstacles(vobs)
+{
+}
 
 void RP::Map::add_obstacle(point coord1, point coord2)
 {
     // obstacle o{};
-    std::pair<int, int> pair = std::make_pair(-1, -1);
-    obstacles.push_back(obstacle{false, coord1, coord2, pair});
+    obstacles.push_back(obstacle{false, coord1, coord2});
 }
 
 RP::line RP::Map::add_length_to_line_segment(point p, point q, float length)
@@ -55,19 +59,20 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     float TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
 #undef R_METERS
     //</hack>
-
+    obstacles.clear();
+    obstacles.reserve(view_obstacles.size());
+    for (const auto& vo : view_obstacles)
+        obstacles.emplace_back(obstacle{false, vo.p, vo.q});
     node start;
     for (auto &n : nodes)
     {
         n.dist_to = INFINITY;
         n.connection.clear();
     }
-
-    nodes[0].prev = -1;
+    nodes.clear();
+    create_node(cur);
     nodes[0].dist_to = 0.0f;
-    nodes[0].coord = cur;
-
-    nodes[1].coord = tar;
+    create_node(tar);
 
     if (obstacles.empty())
     {
@@ -107,8 +112,8 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
             if (!obst.marked)
             {
                 obst.marked = true;
-                // TODO we might need to handle edge cases where we cannot circumvent the obstacle because we might be   of bounds
-                auto obstacle_side_pts = add_length_to_line_segment(obst.coord1, obst.coord2, TOLERANCE);  // Add tolerance 
+                // TODO we might need to handle edge cases where we cannot circumvent the obstacle because we might be out of bounds
+                auto obstacle_side_pts = add_length_to_line_segment(obst.coord1, obst.coord2, TOLERANCE); // Add tolerance
 
                 bool create_n1 = true;
                 bool create_n2 = true;
@@ -167,13 +172,9 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
-std::vector<RP::point> RP::Map::shortest_path_to(float cur_lat, float cur_lng,
-                                                                           float tar_lat, float tar_lng)
+std::vector<RP::point> RP::Map::shortest_path_to()
 {
-    auto cur = point{cur_lat, cur_lng};
-    auto tar = point{tar_lat, tar_lng};
     std::vector<node> nodes = build_graph(cur, tar);
-
 #if 0
     for(int i = 0; i < nodes.size(); i++)
     {
@@ -214,4 +215,8 @@ std::vector<RP::point> RP::Map::shortest_path_to(float cur_lat, float cur_lng,
     }
     std::reverse(result.begin(), result.end());
     return (result);
+}
+
+void Rp::Map::set_target(RP::point curr, RP::point target) {
+	
 }

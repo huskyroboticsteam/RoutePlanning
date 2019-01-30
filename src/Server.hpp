@@ -10,7 +10,6 @@ sending/receiving and encoding/decoding data packets, etc.
 #include <vector>
 #include <ctime>
 #include <iostream>
-//#include "Controller.h"
 
 namespace RP
 {
@@ -25,7 +24,7 @@ class Server
 	bool send_action(unsigned char id);    // Sends action to client without data body, returns whether action was successful or not
 	void send_watchdog(); // Sends watchdog so this client isn't kicked out
 	void stop(); // Stops socket and cleans up
-	RoverPathfinding::Controller controller;
+	//RP::Controller controller;
   private:
 	std::vector<unsigned char> current_time();	// Stores unix timestamp in 4 bytes
     // RP::Controller controller;
