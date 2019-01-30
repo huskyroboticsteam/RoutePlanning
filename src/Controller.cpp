@@ -13,9 +13,7 @@
 #define TARGET_LAT 123.0
 #define TARGET_LNG 321.0
 
-#define CONV_FACTOR_LNG 8.627
-#define DEGREES_METER_LNG 0.0001
-#define CONV_FACTOR_LAT 111319.9
+
 
 namespace RP {
 
@@ -47,8 +45,8 @@ namespace RP {
 			curr_lat = lat;
 			curr_lng = lng;
 			//std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
-			std::vector<point> path;
-			point nextPoint = path[0];
+			std::vector<RP::point> path;
+			RP::point nextPoint = path[0];
 			float delta_heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
 			//float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
 			setDirection(delta_heading);
@@ -63,19 +61,19 @@ namespace RP {
     }
 
     void Controller::addObstacle(float dist1, float dir1, float dist2, float dir2) {
-        point latlng1 = convertToLatLng(dist1, dir1);
-        point latlng2 = convertToLatLng(dist2, dir2);
+        RP::point latlng1 = convertToLatLng(dist1, dir1);
+        RP::point latlng2 = convertToLatLng(dist2, dir2);
         map.add_obstacle(latlng1, latlng2);
     }
 
 	
 	void Controller::foundTennisBall(float dist, float dir) {
-		point new_target = convertToLatLng(dist - 1, dir);
-		map.set_target(point(curr_lat, curr_lng), new_target);
+		RP::point new_target = convertToLatLng(dist - 1, dir);
+		map.set_target(RP::point(curr_lat, curr_lng), new_target);
 	}
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
-    point Controller::convertToLatLng(float dist, float angle) {
+    RP::point Controller::convertToLatLng(float dist, float angle) {
 		return RP::converToLatLng(curr_lat, curr_lng, curr_dir, dist, angle); 
     }
 

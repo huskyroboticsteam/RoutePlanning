@@ -15,7 +15,7 @@ namespace RP
             void addObstacle(float dist1, float dir1, float dist2, float dir2);
 			void foundTennisBall(float dist, float dir);
         private:
-            point convertToLatLng(float dist, float dir);
+            RP::point convertToLatLng(float dist, float dir);
 			float curr_lat, curr_lng, curr_dir;
     };
 }

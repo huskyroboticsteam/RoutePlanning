@@ -4,6 +4,10 @@
 
 #define PI 3.14159265359
 
+#define CONV_FACTOR_LNG 8.627
+#define DEGREES_METER_LNG 0.0001
+#define CONV_FACTOR_LAT 111319.9
+
 bool RP::point::operator==(const point &p) const
 {
     return x == p.x && y == p.y;
@@ -224,7 +228,7 @@ bool RP::same_point(const point &p, const point &q, float tol)
     return std::sqrt(dist_sq(p, q)) <= tol;
 }
 
-point RP::convertToLatLng(float lat, float lng, float dir, float dist, float angle) {
+RP::point RP::convertToLatLng(float lat, float lng, float dir, float dist, float angle) {
 		float delta_x = dist * cos(angle + dir + M_PI/2);
 		float delta_y = dist * sin(angle + dir + M_PI/2);
 		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
