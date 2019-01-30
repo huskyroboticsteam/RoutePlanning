@@ -76,16 +76,20 @@ namespace RP {
     // angle must be in radians, dist in meters
     // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
     point Controller::convertToLatLng(float dist, float angle) {
-		float delta_x = dist * cos(angle + curr_dir + M_PI/2);
-		float delta_y = dist * sin(angle + curr_dir + M_PI/2);
+		return RP::Controller::converToLatLng(curr_lat, curr_lng, curr_dir, dist, angle); 
+    }
+	point Controller::convertToLatLng(float lat, float lng, float dir,float dist, float angle) {
+		float delta_x = dist * cos(angle + dir + M_PI/2);
+		float delta_y = dist * sin(angle + dir + M_PI/2);
 		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
 		float delta_lng = delta_x / CONV_FACTOR_LNG * DEGREES_METER_LNG;
 		float delta_lat = delta_y / CONV_FACTOR_LAT;
 		//std::cout << "delta_lat: " << delta_lat << " delta_lng: " << delta_lng << "\n";
 		point p;
-		p.x = delta_lat + curr_lat;
-		p.y = delta_lng + curr_lng;
+		p.x = delta_lat + lat;
+		p.y = delta_lng + lng;
 		return p;
-    }
+	}
 }
+
 
