@@ -9,6 +9,7 @@ namespace RP
         public:
 			RP::Map map;
 			RP::Server server;
+			Controller(const point& cur_pos, std::vector<point> targetSites);
 			bool setDirection(float heading);
 			bool setSpeed(float speed);
 			void parsePacket(unsigned char packetID, unsigned char data[]);
@@ -16,6 +17,7 @@ namespace RP
 			void foundTennisBall(float dist, float dir);
         private:
             RP::point convertToLatLng(float dist, float dir);
+			std::vector<point> targetSites;
 			float curr_lat, curr_lng, curr_dir;
 			RP::point target;
 			RP::point nextPoint;
