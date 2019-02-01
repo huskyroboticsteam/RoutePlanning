@@ -15,13 +15,27 @@
 #define TARGET_LNG 321.0
 
 int main() {
+	std::vector<RP::point> targetSites(0);
 	std::cout << "Enter coordinates: " << std::endl;
 	float lat = 0;
 	float lng = 0;
-	while(lat != -1) {
-		std::cin >> lat;
-		std::cin >> lng;
+	RP::point p;
+	std::cin >> p.x;
+	std::cin >> p.y;
+	while(p.x != -1) {
+		targetSites.push_back(p);
+		std::cin >> p.x;
+		std::cin >> p.y;
+		
 	}
+	for(int i = 0; i < targetSites.size(); i++) {
+		std::cout << targetSites[i].x << ", " << targetSites[i].y << std::endl;
+	}
+	std::cout << "Enter Current Position: " << std::flush;
+	std::cin >> p.x;
+	std::cin >> p.y;
+	RP::Controller controller(p, targetSites);
+	
 }
 
 
