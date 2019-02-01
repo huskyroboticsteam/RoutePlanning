@@ -3,6 +3,7 @@
 #include <cstring>
 #include <math.h>
 #include "Server.hpp"
+#include "Map.hpp"
 
 #define DATA_GPS 0xC0
 #define DATA_MAG 0xC1
@@ -13,16 +14,28 @@
 #define TARGET_LAT 123.0
 #define TARGET_LNG 321.0
 
-
-
 int main() {
-	
+	std::cout << "Enter coordinates: " << std::endl;
+	float lat = 0;
+	float lng = 0;
+	while(lat != -1) {
+		std::cin >> lat;
+		std::cin >> lng;
+	}
 }
 
 
 namespace RP {
 
 
+	Controller::Controller(const point& cur_pos, std::vector<point> targetSites)
+      : map(cur_pos, targetSites[0], std::list<RP::line>())	{
+		this->targetSites = targetSites;
+		
+		curr_lat = cur_pos.x;
+		curr_lng = cur_pos.y;
+		server = Server();
+	}
     // TODO: split packet into separate parts (timestamp, packetID, data)
     // TODO: Feed lat/long to map to find vector pointing to next destination
     // TODO: Feed x/y/z into ??? to find current orientation, then we can find how much to turn
