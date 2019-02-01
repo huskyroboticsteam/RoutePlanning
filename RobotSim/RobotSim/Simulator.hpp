@@ -3,6 +3,7 @@
 
 #include <list>
 #include <string>
+#include <memory>
 #include "obstacle.hpp"
 #include "agent.hpp"
 #include "Map.hpp"
@@ -31,6 +32,7 @@ struct proc_obstacle
   char sides; // 0 if neither is side, 1 if p, 2 if q, 3 if both
   std::list<RP::point> endpoints;
 };
+typedef std::shared_ptr<sim_obstacle> pobst;
 
 class Simulator : public sf::Drawable
 {
@@ -59,7 +61,7 @@ private:
   point target_pos;
   simulator_config config;
   const std::list<Obstacle> &raw_obstacles;
-  std::list<sim_obstacle*> all_obstacles;
+  std::list<pobst> all_obstacles;
   std::list<obstacle> view_obstacles;
 
   virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;

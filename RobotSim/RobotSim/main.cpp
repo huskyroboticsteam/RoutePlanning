@@ -205,6 +205,8 @@ int main(int, char const **)
         window.clear(bgColor);
         window.draw(grid);
         window.draw(agent);
+        for (auto obst : map.memo_obstacles()) 
+            window.draw(get_vertex_line(obst.coord1, obst.coord2, sf::Color::Green, gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
         window.display();

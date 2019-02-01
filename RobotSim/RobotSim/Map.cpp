@@ -177,48 +177,47 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 
 // return true if original and challenger are sufficiently different
 // so that they should be merged
-bool should_merge(RP::obstacle original, RP::obstacle challenger)
+bool same_obstacle(RP::obstacle original, RP::obstacle challenger)
 {
-    return !RP::same_point(original.coord1, challenger.coord1) &&
-           !RP::same_point(original.coord2, challenger.coord2);
+    return RP::same_point(original.coord1, challenger.coord1) &&
+           RP::same_point(original.coord2, challenger.coord2);
 }
 
 void RP::Map::update(const std::list<obstacle> &new_obstacles)
 {
+    for (auto const &mobs : mem_obstacles)
+        printf("(%f, %f), (%f, %f)\n", mobs.coord1.x, mobs.coord1.y, mobs.coord2.x, mobs.coord2.y);
     obstacle merged;
     // printf("%d\n", new_obstacles.size());
     for (const obstacle &newobs : new_obstacles)
     {
+        // printf("(%f, %f), (%f, %f)\n", newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y);
         merged = newobs;
-        static bool should_add = true;
+        bool should_add = true;
         for (auto const &mobs : mem_obstacles)
         {
-            static bool can_merge = false;
+            bool can_merge = false;
             // if intersect/overlap
             // merge obstacles, remove vobs and don't add newobs, and add merged obstacles
             obstacle temp = merge(newobs, mobs, can_merge);
             if (can_merge)
             {
-                if (should_merge(merged, temp))
+                if (!same_obstacle(merged, temp))
                 {
+                    // printf("Merging.\n");
                     merged = temp;
                 }
-                else
+                else if (same_obstacle(merged, mobs))
                 {
-                    // if !should_merge() then just skip this obs
                     should_add = false;
-                }                
-            }
-            else
-            {
-                mem_obstacles.emplace_back(newobs);
+                    break;
+                }
             }
         }
         if (should_add) {
-                            printf("Adding.\n");
+            // printf("Adding");
             mem_obstacles.emplace_back(merged);
         }
-        
     }
 }
 
@@ -234,6 +233,12 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     can_merge = true;
     point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
     std::sort(points, points + 4, [](const point &p1, const point &p2) { return p1.x - p2.x; });
+    if (abs(points[3].x - points[0].x) - 1e-5 > abs(o.coord2.x - o.coord1.x) + abs(p.coord2.x - p.coord1.x)
+    && abs(points[3].y - points[0].y) - 1e-5 > abs(o.coord2.y - o.coord1.y) + abs(p.coord2.y - p.coord1.y))
+    {
+        can_merge = false;
+        return o;
+    }
     return obstacle{false, points[0], points[3]};
 }
 

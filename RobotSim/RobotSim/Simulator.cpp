@@ -24,7 +24,7 @@ void RP::Simulator::update_agent()
 {
     for (auto const &obst : raw_obstacles)
     {
-        all_obstacles.push_back(new sim_obstacle{point{obst.x1, obst.y1}, point{obst.x2, obst.y2}});
+        all_obstacles.push_back(pobst(new sim_obstacle{point{obst.x1, obst.y1}, point{obst.x2, obst.y2}}));
     }
     cur_pos = point{agent.getX(), agent.getY()};
     bearing = agent.getInternalRotation();
@@ -116,7 +116,7 @@ void RP::Simulator::update_agent()
             // find intersection
             float closest_dist = INFINITY;
             point closest;
-            sim_obstacle *closest_obstacle;
+            pobst closest_obstacle;
             bool drop_pt = false;
             for (auto aop : all_obstacles)
             {
@@ -285,7 +285,7 @@ void RP::Simulator::draw(sf::RenderTarget &target, sf::RenderStates states) cons
     for (auto seg : circleLines)
         target.draw(seg);
     for (auto obst : view_obstacles)
-        target.draw(get_vertex_line(obst.coord1, obst.coord2, sf::Color::Green, scale, window_height), states);
+        target.draw(get_vertex_line(obst.coord1, obst.coord2, sf::Color::Red, scale, window_height), states);
 }
 
 std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, float radius, float angle_spread, RP::point pos, int maxpts) const

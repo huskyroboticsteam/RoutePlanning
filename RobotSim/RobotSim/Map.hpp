@@ -33,6 +33,7 @@ public:
   void update(const std::list<obstacle>& new_obstacles);
   std::vector<point> shortest_path_to(); //Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination (for debugging)
   // void reassign_target(const point& target) { tar = target; }
+  const std::list<obstacle>& memo_obstacles() { return mem_obstacles; }
   
 private:
   void add_obstacle(point coord1, point coord2); //Adds an obstacle to the map. Obstacle is specified with 2 points

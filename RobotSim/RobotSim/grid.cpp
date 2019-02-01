@@ -158,9 +158,9 @@ void Grid::readObstaclesFromFile(std::string fileName)
 
 void Grid::addBorderObstacles()
 {
-    placeObstacle(0.f, 0.f, width - 1, 0.f);
-    placeObstacle(width - 1, 0.f, width - 1, height - 1);
-    placeObstacle(0.f, height - 1, width - 1, height - 1);
+    // placeObstacle(0.f, 0.f, width - 1, 0.f);
+    // placeObstacle(width - 1, 0.f, width - 1, height - 1);
+    // placeObstacle(0.f, height - 1, width - 1, height - 1);
     placeObstacle(0.f, 0.f, 0.f, height - 1);
 }
 
