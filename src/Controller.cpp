@@ -66,6 +66,16 @@ namespace RP {
 		std::memcpy(&data[0], &speed, 4);
 		return server.send_action(data, SET_SPEED);
 	}
+
+    void update() {
+        // get obstacle data from camera
+        // wait for server to give current location
+        // use map to get next location
+        // use current location and obstacle data to update map
+        // get next point from map pathing algorithm
+        // use next point to send packets specifying new direction and speed to proceed
+    }
+
     void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
         // GPS has latitude and lng
         if (packetID == DATA_GPS) {

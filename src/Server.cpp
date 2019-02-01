@@ -80,39 +80,36 @@ void RP::Server::go() {
 	memset(buf,0, 256);
 #endif
 	
-	while (true) 
+#ifdef _WIN32
+	ZeroMemory(buf, 256);
+#else
+	memset(buf, 0, 256);
+#endif
+
+	// Wait for message
+	int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
+	if (bytesIn == SOCKET_ERROR) 
 	{
 #ifdef _WIN32
-		ZeroMemory(buf, 256);
+		std::cout << "Error receiving from client" << WSAGetLastError();
+		continue;
 #else
-		memset(buf, 0, 256);
+		std::cout << "That didn't work! " << strerror(errno);
+		continue;
 #endif
-
-		// Wait for message
-		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
-		if (bytesIn == SOCKET_ERROR) 
-		{
-#ifdef _WIN32
-			std::cout << "Error receiving from client" << WSAGetLastError();
-			continue;
-#else
-			std::cout << "That didn't work! " << strerror(errno);
-			continue;
-#endif
-		}
-
-		// Display message and client 
-		char clientIp[256];
-#ifdef _WIN32
-		ZeroMemory(clientIp, 256);
-#else
-		memset(clientIp, 0, 256);
-#endif
-		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
-
-		std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
-		
 	}
+
+	// Display message and client 
+	char clientIp[256];
+#ifdef _WIN32
+	ZeroMemory(clientIp, 256);
+#else
+	memset(clientIp, 0, 256);
+#endif
+	inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
+
+	std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
+		
 }
 
 bool RP::Server::send_action(std::vector<unsigned char> dataBody, unsigned char id) // same data and id format as in Scarlet
