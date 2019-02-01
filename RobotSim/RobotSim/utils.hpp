@@ -7,6 +7,7 @@
 // #include "Map.hpp"
 
 #define THEME 0 // 0 is normal, 1 is HACKERMODE
+//#define float double // YOU ARE GOING TO HELL
 
 typedef unsigned int uint;
 namespace RP

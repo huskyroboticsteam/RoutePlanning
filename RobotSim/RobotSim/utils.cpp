@@ -93,7 +93,10 @@ bool RP::segment_intersects_circle(point start,
 int RP::orientation(point p, point q, point r)
 {
     float v = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-    if (-1e-7 <= v && v <= 1e-7)
+    
+    printf("%f\n", v);
+    
+    if (-1e-4 <= v && v <= 1e-4)
         return COLINEAR;
 
     return ((v > 0.0f) ? CLOCKWISE : COUNTERCLOCKWISE);

@@ -185,10 +185,9 @@ bool same_obstacle(RP::obstacle original, RP::obstacle challenger)
 
 void RP::Map::update(const std::list<obstacle> &new_obstacles)
 {
-    for (auto const &mobs : mem_obstacles)
-        printf("(%f, %f), (%f, %f)\n", mobs.coord1.x, mobs.coord1.y, mobs.coord2.x, mobs.coord2.y);
+    printf("Mem Count: %d\n", mem_obstacles.size());
     obstacle merged;
-    // printf("%d\n", new_obstacles.size());
+    printf("New Count: %d\n", new_obstacles.size());
     for (const obstacle &newobs : new_obstacles)
     {
         // printf("(%f, %f), (%f, %f)\n", newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y);
@@ -228,6 +227,7 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     if (!colinear)
     {
         can_merge = false;
+        //printf("Not colinear\n");
         return o;
     }
     can_merge = true;
@@ -237,8 +237,10 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     && abs(points[3].y - points[0].y) - 1e-5 > abs(o.coord2.y - o.coord1.y) + abs(p.coord2.y - p.coord1.y))
     {
         can_merge = false;
+        printf("Colinear but not mergable\n");
         return o;
     }
+    printf("Merging\n");
     return obstacle{false, points[0], points[3]};
 }
 
