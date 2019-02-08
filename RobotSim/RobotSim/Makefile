@@ -1,8 +1,7 @@
 CC = g++
 SDIR = .
 ODIR = obj
-# don't think this does anything
-SOURCES = main.cpp agent.cpp grid.cpp obstacle.cpp utils.cpp Simulator.cpp Map.cpp
+SOURCES = main.cpp agent.cpp grid.cpp obstacle.cpp utils.cpp Simulator.cpp Map.cpp timer.cpp
 _OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS = $(patsubst %,$(ODIR)/%,$(_OBJECTS))
 SFML = C:/SFML-2.5.1/
@@ -13,8 +12,9 @@ OUT = build/simulator.exe
 
 all: $(OUT)
 
-$(ODIR)/%.o: $(SDIR)/%.cpp 
+$(ODIR)/%.o: $(SDIR)/%.cpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS) 
+
 
 $(OUT): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) $(LINK) -o $(OUT)

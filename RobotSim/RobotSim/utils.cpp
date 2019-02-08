@@ -94,8 +94,6 @@ int RP::orientation(point p, point q, point r)
 {
     float v = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
     
-    printf("%f\n", v);
-    
     if (-1e-4 <= v && v <= 1e-4)
         return COLINEAR;
 
@@ -258,7 +256,7 @@ float RP::relative_angle(point o, point p)
 
 bool RP::same_point(const point &p, const point &q, float tol)
 {
-    return dist_sq(p, q) <= tol;
+    return fabs(p.x - q.x) + fabs(p.y - q.y) <= tol;
 }
 
 sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float scale, float window_height)

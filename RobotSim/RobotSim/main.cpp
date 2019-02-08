@@ -122,7 +122,7 @@ int main(int, char const **)
                     case sf::Keyboard::O : {
                         grid.obstacleList.clear();
                         grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
-                        grid.addBorderObstacles();
+                        // grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }
@@ -167,6 +167,9 @@ int main(int, char const **)
                     case sf::Keyboard::Right : {
                         grid.rotateAgent(agent, -15.f);
                         break;
+                    }
+                    case sf::Keyboard::B : {
+                        map.breakpoint(); // temp; used for debug only
                     }
                 }
             }
