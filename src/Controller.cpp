@@ -43,12 +43,12 @@ namespace RP {
 
 
 	Controller::Controller(const point& cur_pos, std::vector<point> targetSites)
-      : map(cur_pos, targetSites[0], std::list<RP::line>())	{
+      : map(cur_pos, targetSites[0], std::list<RP::line>()), server()	{
 		this->targetSites = targetSites;
 		
 		curr_lat = cur_pos.x;
 		curr_lng = cur_pos.y;
-		server = Server();
+		
 	}
     // TODO: split packet into separate parts (timestamp, packetID, data)
     // TODO: Feed lat/long to map to find vector pointing to next destination

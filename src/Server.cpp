@@ -51,8 +51,8 @@ RP::Server::Server()
 	
 	// Bind socket to ip address and port
 	sockaddr_in serverHint;
-	//serverHint.sin_addr.s_addr = INADDR_ANY;
-	inet_pton(AF_INET, "10.19.161.242", &serverHint.sin_addr.s_addr);
+	serverHint.sin_addr.s_addr = INADDR_ANY;
+	//inet_pton(AF_INET, "10.19.161.242", &serverHint.sin_addr.s_addr);
 	serverHint.sin_family = AF_INET;
 	serverHint.sin_port = htons(54111);
 	
