@@ -1,0 +1,5 @@
+Path splitting algorithm:
+* Find paths recursively and go for the shortest path
+* if endpoint is blocked, go to the obstacle that
+blocks it and add the other endpoint of that obstacle
+as target

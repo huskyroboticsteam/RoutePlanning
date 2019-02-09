@@ -195,7 +195,7 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
         printf("Mem Count: %d\n", mem_obstacles.size());
         for (const obstacle& o : mem_obstacles) printf("mem (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
         printf("New Count: %d\n", new_obstacles.size());
-        for (const obstacle& o : new_obstacles) printf("new (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
+        // for (const obstacle& o : new_obstacles) printf("new (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
     }
     for (const obstacle &newobs : new_obstacles)
     {
@@ -240,6 +240,7 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
         }
         if (should_add)
         {
+            // if (debug) printf("added\n");
             mem_obstacles.emplace_back(merged);
         }
         if (debug) timer.reset();
@@ -253,17 +254,22 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     if (!colinear)
     {
         can_merge = false;
-        // printf("Not colinear\n");
+        printf("Not colinear\n");
         return o;
     }
     can_merge = true;
     point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
-    std::sort(points, points + 4, [](const point &p1, const point &p2) { return (fabs(p1.x) + fabs(p1.y) - (fabs(p2.x) + fabs(p2.y))) > 0; });
+    std::sort(points, points + 4, [](const point &p1, const point &p2) { 
+        if (p1.x != p2.x)
+            return fabs(p1.x) > fabs(p2.x);
+        else
+            return fabs(p1.y) > fabs(p2.y);
+    });
     if (fabs(points[3].x - points[0].x) - 1e-5 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x)
         || fabs(points[3].y - points[0].y) - 1e-5 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
     {
         can_merge = false;
-        // printf("Colinear but not mergable\n");
+        // printf("Colinear but not overlapping\n");
         return o;
     }
     // printf("Merging\n");
