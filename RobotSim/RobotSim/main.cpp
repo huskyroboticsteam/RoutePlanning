@@ -29,6 +29,8 @@
 #include "Simulator.hpp"
 #include "Map.hpp"
 
+#include "gui.hpp"
+
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
     const std::string RESOURCE_DIR = "./Resources/";
     #define WINDOW_SCALE 0.5f
@@ -47,7 +49,7 @@ int main(int, char const **)
 {
     const unsigned int FRAMERATE = 60;
 
-    sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
+    sf::RenderWindow window(sf::VideoMode(2076 * WINDOW_SCALE, 1476 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(FRAMERATE);
 
     bool hasFocus = true;
@@ -63,6 +65,10 @@ int main(int, char const **)
     {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     }
+    
+    sf::Font font;
+    if (!font.loadFromFile(RESOURCE_DIR + "DejaVuSans.ttf"))
+        std::cout << "Error loading font" << std::endl;
 
     sf::Clock clock;
     static const sf::Time AUTO_INTERVAL = sf::seconds(0.5);
@@ -74,6 +80,12 @@ int main(int, char const **)
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Map map(sim.getpos(), grid.target);
+    
+    Gui interface(1576, 100, WINDOW_SCALE, &font);
+    
+    interface.addSettingToggle("zoom", 14, 0);
+    //interface.addSettingToggle("lazer", 2, 1);
+    
     while (window.isOpen())
     {
         sf::Event event;
@@ -91,6 +103,12 @@ int main(int, char const **)
             else if (event.type == sf::Event::LostFocus)
             {
                 hasFocus = false;
+            }
+            else if (event.type == sf::Event::MouseButtonPressed) {
+                std::cout << "Click detected" << std::endl;
+                sf::Vector2f mousePos(sf::Mouse::getPosition(window));
+                std::cout << "Mouse: " << mousePos.x << "," << mousePos.y << std::endl;
+                std::cout << interface.getEntry(mousePos) << std::endl;
             }
             else if (event.type == sf::Event::KeyPressed && hasFocus) {
                 switch (event.key.code) {
@@ -205,6 +223,7 @@ int main(int, char const **)
         window.draw(grid);
         window.draw(agent);
         window.draw(sim);
+        window.draw(interface);
         // printf("%f, %f\n", next.x, next.y);
         window.display();
     }

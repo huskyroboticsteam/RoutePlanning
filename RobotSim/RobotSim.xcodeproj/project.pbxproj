@@ -10,6 +10,8 @@
 		932B1010220159A000A8F0C5 /* gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 932B100E220159A000A8F0C5 /* gui.cpp */; };
 		933E520C21B76B8700CE6194 /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 933E520B21B76B8700CE6194 /* grid.cpp */; };
 		933E520E21B76D2800CE6194 /* obstacle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 933E520D21B76D2800CE6194 /* obstacle.cpp */; };
+		93525D672213812300ED9151 /* guielement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93525D652213812300ED9151 /* guielement.cpp */; };
+		93525D69221394BF00ED9151 /* DejaVuSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93525D68221394BF00ED9151 /* DejaVuSans.ttf */; };
 		937650562197AA50000897B2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937650552197AA50000897B2 /* main.cpp */; };
 		9386DF2F21BC41F1008C3C07 /* agent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9386DF2E21BC41F1008C3C07 /* agent.cpp */; };
 		9393454B21E5A9D9005CF43C /* Simulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9393454A21E5A9D9005CF43C /* Simulator.cpp */; };
@@ -26,6 +28,9 @@
 		932B100F220159A000A8F0C5 /* gui.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = gui.hpp; sourceTree = "<group>"; };
 		933E520B21B76B8700CE6194 /* grid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = grid.cpp; sourceTree = "<group>"; };
 		933E520D21B76D2800CE6194 /* obstacle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = obstacle.cpp; sourceTree = "<group>"; };
+		93525D652213812300ED9151 /* guielement.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = guielement.cpp; sourceTree = "<group>"; };
+		93525D662213812300ED9151 /* guielement.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = guielement.hpp; sourceTree = "<group>"; };
+		93525D68221394BF00ED9151 /* DejaVuSans.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = DejaVuSans.ttf; path = Resources/DejaVuSans.ttf; sourceTree = "<group>"; };
 		9376504D2197AA50000897B2 /* RobotSim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RobotSim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		937650512197AA50000897B2 /* RobotSim-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "RobotSim-Info.plist"; sourceTree = "<group>"; };
 		937650552197AA50000897B2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -78,10 +83,12 @@
 			children = (
 				9393454521E5A9C8005CF43C /* agent.hpp */,
 				9386DF2E21BC41F1008C3C07 /* agent.cpp */,
-				932B100F220159A000A8F0C5 /* gui.hpp */,
-				932B100E220159A000A8F0C5 /* gui.cpp */,
 				9393454621E5A9D8005CF43C /* grid.hpp */,
 				933E520B21B76B8700CE6194 /* grid.cpp */,
+				932B100F220159A000A8F0C5 /* gui.hpp */,
+				932B100E220159A000A8F0C5 /* gui.cpp */,
+				93525D662213812300ED9151 /* guielement.hpp */,
+				93525D652213812300ED9151 /* guielement.cpp */,
 				937650552197AA50000897B2 /* main.cpp */,
 				93FAC77E21F80E4F00C5E20C /* ResourcePath.hpp */,
 				93FAC78121F80EBD00C5E20C /* ResourcePath.mm */,
@@ -110,6 +117,7 @@
 		937650572197AA50000897B2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				93525D68221394BF00ED9151 /* DejaVuSans.ttf */,
 				93FAC78421F8143000C5E20C /* obstacles.txt */,
 				93FAC78321F8143000C5E20C /* temp_obstacles.txt */,
 				93FAC75A21F80BA800C5E20C /* HuskyRoboticsLogo.png */,
@@ -176,6 +184,7 @@
 			files = (
 				93FAC75B21F80BA800C5E20C /* HuskyRoboticsLogo.png in Resources */,
 				93FAC78521F8143000C5E20C /* temp_obstacles.txt in Resources */,
+				93525D69221394BF00ED9151 /* DejaVuSans.ttf in Resources */,
 				93FAC78621F8143000C5E20C /* obstacles.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -214,6 +223,7 @@
 				93FAC75721F80AB900C5E20C /* utils.cpp in Sources */,
 				937650562197AA50000897B2 /* main.cpp in Sources */,
 				93FAC75921F80AB900C5E20C /* Map.cpp in Sources */,
+				93525D672213812300ED9151 /* guielement.cpp in Sources */,
 				93FAC78221F80EBD00C5E20C /* ResourcePath.mm in Sources */,
 				933E520C21B76B8700CE6194 /* grid.cpp in Sources */,
 			);
