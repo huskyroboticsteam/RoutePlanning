@@ -83,9 +83,19 @@ namespace RP {
 		unsigned char* secondPacket = server.go();
 		parsePacket(secondPacket[1], &secondPacket[2]);
 
-        // use map to get next location
-        // use current location and obstacle data to update map
-        // get next point from map pathing algorithm
+        // step 3: use current location and obstacle data to update map
+		for (int i = 1; i < obstacles.size(); i++) {
+			obstacleVector left = obstacles.at(i-1);
+			point a{ (curr_lng + cos(left.angle)*left.distance), (curr_lat + sin(left.angle)*left.distance) };
+			obstacleVector right = obstacles.at(i);
+			point b{ (curr_lng + cos(right.angle)*right.distance), (curr_lat + sin(right.angle)*right.distance) };
+
+			map.add_obstacle(a, b);
+		}
+
+		// step 4: use map to get next location
+		point nextLocation = map.compute_goal();
+
         // use next point to send packets specifying new direction and speed to proceed
     }
 
