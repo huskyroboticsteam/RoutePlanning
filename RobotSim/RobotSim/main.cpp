@@ -193,8 +193,11 @@ int main(int, char const **)
             }
         }
         
-        if (vroom)
-            grid.moveAgent(agent, agent.drive());
+        if (vroom) {
+            //grid.moveAgent(agent, agent.drive());
+            RP::point st_target = map.compute_next_point();
+            grid.moveAgent(agent, agent.driveTowards(st_target.x, st_target.y));
+        }
         if (spinny) {
             RP::point st_target = map.compute_next_point();
             grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));

@@ -81,8 +81,15 @@ float Agent::drive(float speed) {
 }
 
 float Agent::driveTowards(float targetX, float targetY) {
-    // TODO
-    return 0.f;
+    float xDiff = xPos - targetX;
+    float yDiff = yPos - targetY;
+    
+    float dist = sqrt(xDiff * xDiff + yDiff * yDiff);
+    
+    if (dist > 3)
+        return drive(1.f);
+    else
+        return drive(dist / 3.f);
 }
 
 float Agent::turn(float speed) {

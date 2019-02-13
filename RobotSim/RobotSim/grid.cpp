@@ -89,6 +89,7 @@ void Grid::toggleClipping()
 
 bool Grid::drawPath() {
     currentPath.clear();
+    return true;
 }
 
 bool Grid::drawPath(std::vector<RP::point> path, Agent agent) {
