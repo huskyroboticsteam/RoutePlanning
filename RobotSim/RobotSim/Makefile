@@ -1,7 +1,7 @@
 CC = g++
 SDIR = .
 ODIR = obj
-SOURCES = main.cpp agent.cpp grid.cpp obstacle.cpp utils.cpp Simulator.cpp Map.cpp timer.cpp
+SOURCES = main.cpp agent.cpp grid.cpp obstacle.cpp utils.cpp Simulator.cpp Map.cpp timer.cpp autoController.cpp
 _OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS = $(patsubst %,$(ODIR)/%,$(_OBJECTS))
 SFML = C:/SFML-2.5.1/

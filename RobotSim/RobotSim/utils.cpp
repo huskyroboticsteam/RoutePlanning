@@ -133,8 +133,9 @@ bool RP::segments_intersect(point p1, point p2, point q1, point q2)
     return (false);
 }
 
-// returns the intersection between two points. returned point is at {inf, inf} if
-// no intersection exists
+// returns the intersection between ab and cd (I know it's confusing since
+// it's ordered differently from segments_intersect() and I won't attempt to
+// defend it). returned point is at {inf, inf} if no intersection exists
 RP::point RP::segments_intersection(point a, point b, point c, point d)
 {
     point x = intersection(a, b, c, d);
@@ -271,3 +272,7 @@ sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float sca
     return line;
 }
 
+bool RP::closeEnough(float a, float b, float tol)
+{
+    return fabs(a - b) <= tol;
+}

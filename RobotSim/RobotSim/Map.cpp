@@ -14,7 +14,7 @@ void RP::Map::add_obstacle(point coord1, point coord2)
     obstacles.push_back(obstacle{false, coord1, coord2});
 }
 
-RP::point RP::Map::compute_next_point()
+RP::point RP::Map::compute_next_point() 
 {
     return shortest_path_to().front();
 }
@@ -57,27 +57,28 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     //TODO(sasha): make R a constant - the following few lines are just a hack
     //             to get R to be in lat/lng units
     //<hack>
-#define R_METERS 0.5f
-    auto offset = RP::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
-    auto diff = std::make_pair(offset.x - cur.x, offset.y - cur.y);
-    float TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
-#undef R_METERS
+    #define SIDE_TOLERANCE 1.f
+    #define CENTER_TOLERANCE 2.f
+    // shouldn't need this since we're passing meters
+// #define R_METERS 0.5f
+//     auto offset = RP::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
+//     auto diff = std::make_pair(offset.x - cur.x, offset.y - cur.y);
+//     float SIDE_TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
+// #undef R_METERS
     //</hack>
     obstacles.clear();
     obstacles.reserve(mem_obstacles.size());
-    for (const auto &vo : mem_obstacles)
-        obstacles.emplace_back(obstacle{false, vo.coord1, vo.coord2});
-    node start;
-    for (auto &n : nodes)
-    {
-        n.dist_to = INFINITY;
-        n.connection.clear();
-    }
+    for (const auto &o : mem_obstacles)
+        obstacles.emplace_back(obstacle{false, o.coord1, o.coord2});
+    // for (auto &n : nodes)
+    // {
+    //     n.dist_to = INFINITY;
+    //     n.connection.clear();
+    // }
     nodes.clear();
     create_node(cur);
     nodes[0].dist_to = 0.0f;
     create_node(tar);
-
     if (obstacles.empty())
     {
         add_edge(0, 1); // probably start (origin or current?) and target nodes
@@ -94,6 +95,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         bool destination_blocked = false;
         int closest_obst;
         float min_dist = INFINITY;
+        // find closest intersection
         for (int i = 0; i < obstacles.size(); i++)
         {
             auto &obst = obstacles[i];
@@ -116,23 +118,25 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
             if (!obst.marked)
             {
                 obst.marked = true;
-                // TODO we might need to handle edge cases where we cannot circumvent the obstacle because we might be out of bounds
-                auto obstacle_side_pts = add_length_to_line_segment(obst.coord1, obst.coord2, TOLERANCE); // Add tolerance
+                // really move around the side points
+                auto side_points = add_length_to_line_segment(obst.coord1, obst.coord2, SIDE_TOLERANCE);
 
                 bool create_n1 = true;
                 bool create_n2 = true;
 
                 //TODO(sasha): if this is too slow, use a partitioning scheme to only check against
                 //             nodes in the vicinity
-                for (int safety = 2; safety < nodes.size(); safety++) // possibly to check whether nodes are safe or not
+                for (int safety = 2; safety < nodes.size(); safety++)
                 {
+                    // if n1/n2 too closest to another endpoint, set n1/n2 to that
+                    // endpoint instead
                     node &n = nodes[safety];
-                    if (RP::within_radius(n.coord, obstacle_side_pts.p, TOLERANCE))
+                    if (RP::within_radius(n.coord, side_points.p, SIDE_TOLERANCE))
                     {
                         create_n1 = false;
                         n1 = safety;
                     }
-                    if (RP::within_radius(n.coord, obstacle_side_pts.q, TOLERANCE))
+                    if (RP::within_radius(n.coord, side_points.q, SIDE_TOLERANCE))
                     {
                         create_n2 = false;
                         n2 = safety;
@@ -140,15 +144,17 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 }
 
                 if (create_n1)
-                    n1 = create_node(obstacle_side_pts.p);
+                    n1 = create_node(side_points.p);
 
                 if (create_n2)
-                    n2 = create_node(obstacle_side_pts.q);
+                    n2 = create_node(side_points.q);
 
                 obst.side_safety_nodes.first = n1;
                 obst.side_safety_nodes.second = n2;
 
-                point center_coord = RP::center_point_with_radius(nodes[curr_node].coord, obstacle_side_pts.p, obstacle_side_pts.q, TOLERANCE);
+                // make robot move to somewhere near the center of the obstacle first,
+                // and then move it to one of the side safety nodes
+                point center_coord = RP::center_point_with_radius(nodes[curr_node].coord, side_points.p, side_points.q, CENTER_TOLERANCE);
                 obst.center_safety_node = create_node(center_coord);
                 add_edge(curr_node, obst.center_safety_node);
                 add_edge(n1, obst.center_safety_node);
@@ -192,9 +198,9 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
     // bool debug = timer.elapsed() > 1;
     bool debug = false;
     if (debug) {
-        printf("Mem Count: %d\n", mem_obstacles.size());
-        for (const obstacle& o : mem_obstacles) printf("mem (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
-        printf("New Count: %d\n", new_obstacles.size());
+        // printf("Mem Count: %d\n", mem_obstacles.size());
+        // for (const obstacle& o : mem_obstacles) printf("mem (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
+        // printf("New Count: %d\n", new_obstacles.size());
         // for (const obstacle& o : new_obstacles) printf("new (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
     }
     for (const obstacle &newobs : new_obstacles)
@@ -254,7 +260,7 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     if (!colinear)
     {
         can_merge = false;
-        printf("Not colinear\n");
+        // printf("Not colinear\n");
         return o;
     }
     can_merge = true;
@@ -294,7 +300,6 @@ std::vector<RP::point> RP::Map::shortest_path_to()
 	std::cout << std::endl;
     }
 #endif
-
     auto cmp = [nodes](int l, int r) { return nodes[l].dist_to < nodes[r].dist_to; };
     std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
     q.push(0);

@@ -76,6 +76,7 @@ point polar_to_cartesian(point origin, float r, float theta);
 //Find angle of p relative to origin, where positive x-axis is 0 radians.                  
 float relative_angle(point origin, point p);                                    
 bool same_point(const point &p, const point &q, float = 1e-6);
+bool closeEnough(float a, float b, float tol=1e-6);
 
 //Find if o and p are parallel AND overlap. If they do, can merge is set to true and
 // return a merged obstacle; else, can_merge is set to false

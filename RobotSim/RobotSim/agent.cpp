@@ -1,6 +1,6 @@
 #include "agent.hpp"
 
-Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float startY, float startR, float tSpeed, float rSpeed)
+Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float startY, float startR, float tSpeed, float rSpeed) : speedScale(1.f)
 {
     // internal position stored in meters
     xPos = startX;
@@ -75,6 +75,7 @@ float Agent::rotateTowards(float x, float y)
 float Agent::drive(float speed) {
     float dx = transSpeed * speed * cos(rotation * PI / 180);
     float dy = transSpeed * speed * sin(rotation * PI / 180);
+    speed *= speedScale;
     
     //move(dx, dy);
     return transSpeed * speed; // ds
@@ -103,7 +104,7 @@ float Agent::turn(float speed) {
 float Agent::turnTowards(float targetAngle) {
     float rDiff = targetAngle - rotation;
     
-    float speed = 1.f;
+    float speed = 1.f * speedScale;
     
     if (fabs(rDiff) < 60)
         speed = fabs(rDiff) / 60.f;
@@ -137,6 +138,11 @@ void Agent::rotate(float dr)
     // SFML rotation (clockwise) is opposite of internal rotation (counter-clockwise)
     shapeBase.rotate(-dr);
     shapeTop.rotate(-dr);
+}
+
+void Agent::scaleSpeed(float ss)
+{
+    speedScale = ss;
 }
 
 // erases the path drawn so far
