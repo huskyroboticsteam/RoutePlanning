@@ -35,6 +35,7 @@ public:
     float drive(float speed = 1.f);
     float driveTowards(float targetX, float targetY);
     float turn(float speed = 1.f);
+    float turnTowards(float targetAngle);
     float turnTowards(float targetX, float targetY);
     
     std::array<std::pair<float, float>, 4> getHitBox() { return hitBox; }
