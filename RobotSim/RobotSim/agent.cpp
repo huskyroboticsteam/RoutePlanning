@@ -104,8 +104,7 @@ float Agent::turn(float speed) {
 float Agent::turnTowards(float targetAngle) {
     if (targetAngle < 0)
         targetAngle += 360;
-    else if (targetAngle > 360)
-        targetAngle -= 360;
+    targetAngle = fmod(targetAngle, 360);
     
     float rDiff = targetAngle - rotation;
     
