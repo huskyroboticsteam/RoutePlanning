@@ -21,6 +21,7 @@
 
 const unsigned char WATCHDOG_ID = 0xF0;
 const std::string endpoint = "MainRover"; 
+unsigned char buf[256];
 sockaddr_in server;
 SOCKET out;
 SOCKET in;
@@ -66,7 +67,7 @@ RP::Server::Server()
 	}
 }
 
-void RP::Server::go() {
+unsigned char* RP::Server::go() {
 	sockaddr_in client;
 #ifdef _WIN32
 	ZeroMemory(&client, sizeof(client));
@@ -74,7 +75,6 @@ void RP::Server::go() {
 	memset(&client, 0, sizeof(client));
 #endif
 	unsigned int clientLength = sizeof(client);
-	char buf[256];
 #ifdef _WIN32
 	ZeroMemory(buf, 256);
 #else
@@ -111,6 +111,7 @@ void RP::Server::go() {
 
 	std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
 		
+	return buf; 
 }
 
 bool RP::Server::send_action(std::vector<unsigned char> dataBody, unsigned char id) // same data and id format as in Scarlet

@@ -13,6 +13,11 @@ struct point
     bool operator==(const point& p) const;
     bool operator!=(const point& p) const;
 };
+struct obstacleVector
+{
+	float distance;
+	float angle;
+};
 struct line
 {
   point p;

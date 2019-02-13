@@ -17,7 +17,7 @@ class Server
 {
   public:
     Server();
-	void go();
+	unsigned char* go();
     // TODO add parameters that encapsulate the action
 	bool send_action(std::vector<unsigned char> data, unsigned char id);    // Sends action to client with data body, returns whether action was successful or not
 	bool send_action(unsigned char data, unsigned char id);    // Sends action to client with data body, returns whether action was successful or not

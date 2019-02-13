@@ -67,9 +67,22 @@ namespace RP {
 		return server.send_action(data, SET_SPEED);
 	}
 
-    void update() {
-        // get obstacle data from camera
-        // wait for server to give current location
+    void Controller::update() {
+        // step 1: get obstacle data from camera
+
+		// TODO: actually get obstacle data from camera
+			// std:vector<obstacleVector> obstacles = METHOD_GOES_HERE
+		// Bogus obstacle data for testing
+		std::vector<obstacleVector> obstacles{ 
+			obstacleVector{1,2}, obstacleVector{3,4}, obstacleVector{5,6} 
+		};  
+
+        // step 2: wait for server to give current location
+		unsigned char* firstPacket = server.go();
+		parsePacket(firstPacket[1], &firstPacket[2]);
+		unsigned char* secondPacket = server.go();
+		parsePacket(secondPacket[1], &secondPacket[2]);
+
         // use map to get next location
         // use current location and obstacle data to update map
         // get next point from map pathing algorithm
