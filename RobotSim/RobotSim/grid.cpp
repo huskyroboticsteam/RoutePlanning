@@ -79,6 +79,7 @@ void Grid::toggleGrid()
 // toggles whether or not the agent collides with obstacles and borders
 void Grid::toggleClipping()
 {
+    printf("toggling noclip\n");
     if (noclip)
         debugMsg("Clipping toggled on");
     else
@@ -182,7 +183,9 @@ sf::Vertex Grid::moveAgent(Agent &agent, float ds)
     float yOffset = -ds * sin(curR * PI / 180);
 
     if (!willCollide(agent, xOffset, yOffset, 0))
+    {
         agent.move(xOffset, yOffset);
+    }
     return agent.getPosition();
 }
 
