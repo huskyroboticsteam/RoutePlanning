@@ -26,17 +26,27 @@ void Gui::addElement(GuiElement e, unsigned int row, unsigned int col) {
     elements.push_back(e);
 }
 
-void Gui::addSettingToggle(std::string text, int code, unsigned int row) {
-    GuiElement label(text, -1, 0, font);
+void Gui::addSettingToggle(std::string text, int code, int initValue, unsigned int row) {
+    GuiElement label(0, text, -1, font);
     label.move(0, row * (50 + paddingBottom));
     
-    // todo determine setting from setting code
+    int val = 1;
+    val += initValue;
+        
+    GuiElement button(val, "", code, font);
     
-    GuiElement button("On", code, 1, font);
     button.move(200 + paddingRight, row * (50 + paddingBottom));
     
     elements.push_back(label);
     elements.push_back(button);
+}
+
+void Gui::addLiveInfoPanel(std::string label, int id, Agent* agent, unsigned int row) {
+    GuiElement left(0, label, -1, font);
+    left.move(0, row * (50 + paddingBottom));
+    
+    
+    elements.push_back(left);
 }
 
 // returns the action code of the button the mouse is over

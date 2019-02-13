@@ -52,6 +52,9 @@ int main(int, char const **)
     sf::RenderWindow window(sf::VideoMode(2076 * WINDOW_SCALE, 1476 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(FRAMERATE);
 
+    // obstacles are present
+    bool obstaclesLoaded = false;
+    
     bool hasFocus = true;
     bool robotAuto = false;
 
@@ -83,8 +86,10 @@ int main(int, char const **)
     
     Gui interface(1576, 100, WINDOW_SCALE, &font);
     
-    interface.addSettingToggle("zoom", 14, 0);
-    //interface.addSettingToggle("lazer", 2, 1);
+    interface.addLiveInfoPanel("Position:", "Who knows?",   0);
+    interface.addSettingToggle("Grid Lines", 1, 0,          1);
+    interface.addSettingToggle("Collisions", 2, 1,          2);
+    interface.addSettingToggle("Obstacles", 3, 2,           3);
     
     while (window.isOpen())
     {
@@ -105,10 +110,34 @@ int main(int, char const **)
                 hasFocus = false;
             }
             else if (event.type == sf::Event::MouseButtonPressed) {
-                std::cout << "Click detected" << std::endl;
-                sf::Vector2f mousePos(sf::Mouse::getPosition(window));
-                std::cout << "Mouse: " << mousePos.x << "," << mousePos.y << std::endl;
-                std::cout << interface.getEntry(mousePos) << std::endl;
+                int clickCode = interface.getEntry(sf::Vector2f(sf::Mouse::getPosition(window)));
+                
+                switch (clickCode) {
+                    case 1 : {
+                        grid.toggleGrid();
+                        break;
+                    }
+                    case 2 : {
+                        grid.toggleClipping();
+                        break;
+                    }
+                    case 3 : {
+                        if (obstaclesLoaded) {
+                            grid.obstacleList.clear();
+                            std::cout << "Obstacles cleared" << std::endl;
+                        }
+                        else {
+                            grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
+                            grid.addBorderObstacles();
+                            std::cout << "Added obstacles" << std::endl;
+                        }
+                        obstaclesLoaded = !obstaclesLoaded;
+                        break;
+                    }
+                    case -1 : {
+                        std::cout << "Clicked nothing" << std::endl;
+                    }
+                }
             }
             else if (event.type == sf::Event::KeyPressed && hasFocus) {
                 switch (event.key.code) {
@@ -138,6 +167,7 @@ int main(int, char const **)
                         break;
                     }
                     case sf::Keyboard::O : {
+                        obstaclesLoaded = true;
                         grid.obstacleList.clear();
                         grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
                         grid.addBorderObstacles();

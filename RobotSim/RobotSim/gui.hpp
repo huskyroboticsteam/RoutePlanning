@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "SFML/Graphics.hpp"
 #include "guielement.hpp"
+#include "agent.hpp"
 
 class Gui : public sf::Transformable, public sf::Drawable
 {
@@ -20,7 +21,9 @@ public:
     
     void addElement(GuiElement e, unsigned int row, unsigned int col);
     
-    void addSettingToggle(std::string text, int code, unsigned int row);
+    void addSettingToggle(std::string text, int code, int initValue, unsigned int row);
+    
+    void addLiveInfoPanel(std::string label, int id, Agent* agent, unsigned int row);
     
     int getEntry(const sf::Vector2f mousePos);
     

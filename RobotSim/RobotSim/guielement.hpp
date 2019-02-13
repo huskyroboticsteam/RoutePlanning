@@ -24,12 +24,15 @@ public:
     
     GuiElement(std::string text, int actionCode, sf::RectangleShape shape, sf::Font* font);
     
-    GuiElement(std::string text, int actionCode, int shapeCode, sf::Font* font);
+    GuiElement(int type, std::string text, int actionCode, sf::Font* font);
     
     void wasPressed();
     
 private:
     virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+    
+    int type; // 0 is text, 1 is on/off, 2 is load/clear
+    bool toggleIsOn;
 };
 
 #endif /* guibutton_hpp */
