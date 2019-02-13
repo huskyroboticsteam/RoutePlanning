@@ -94,9 +94,12 @@ namespace RP {
 		}
 
 		// step 4: use map to get next location
-		point nextLocation = map.compute_goal();
+		nextPoint = map.compute_goal();
 
-        // use next point to send packets specifying new direction and speed to proceed
+        // step 5: use next point to send packets specifying new direction and speed to proceed
+		float delta_heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
+		setDirection(delta_heading);
+		setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
     }
 
     void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
@@ -108,11 +111,6 @@ namespace RP {
             std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
 			curr_lat = lat;
 			curr_lng = lng;
-			//std::vector<point> path = map.shortest_path_to(lat, lng, TARGET_LAT, TARGET_LNG);
-			float delta_heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
-			//float heading = atan2(nextPoint.y - longitude, nextPoint.x - lat);
-			setDirection(delta_heading);
-			setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
 	    // Magnometer has x, y, z values
         } else if (packetID == DATA_MAG) {
             float x = 0.0, y = 0.0, z = 0.0;
@@ -120,8 +118,6 @@ namespace RP {
             std::memcpy(&y, &data[sizeof(float)], sizeof(float));
             std::memcpy(&z, &data[2 * sizeof(float)], sizeof(float));
         }
-		
-		nextPoint = map.shortest_path_to()[0];
 		
     }
 
