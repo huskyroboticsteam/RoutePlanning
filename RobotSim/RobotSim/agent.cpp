@@ -102,6 +102,11 @@ float Agent::turn(float speed) {
 }
 
 float Agent::turnTowards(float targetAngle) {
+    if (targetAngle < 0)
+        targetAngle += 360;
+    else if (targetAngle > 360)
+        targetAngle -= 360;
+    
     float rDiff = targetAngle - rotation;
     
     float speed = 1.f * speedScale;
@@ -119,8 +124,6 @@ float Agent::turnTowards(float targetAngle) {
 
 float Agent::turnTowards(float targetX, float targetY) {
     float targetR = atan2(targetY - yPos, targetX - xPos) * 180 / PI;
-    if (targetR < 0)
-        targetR += 360;
     
     return turnTowards(targetR);
 }
