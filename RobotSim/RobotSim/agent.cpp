@@ -94,8 +94,9 @@ float Agent::driveTowards(float targetX, float targetY) {
 }
 
 float Agent::turn(float speed) {
-    if (fabs(speed) > 1)
-        speed = speed / fabs(speed);
+    static float CAP = 2.f;
+    if (fabs(speed) > CAP)
+        speed = speed / fabs(speed) * CAP;
     
     //rotate(-rotSpeed * speed);
     return -rotSpeed * speed;
@@ -109,7 +110,7 @@ float Agent::turnTowards(float targetAngle) {
     
     float rDiff = targetAngle - rotation;
     
-    float speed = 1.f * speedScale;
+    float speed = 1.f * speedScale * 1000;
     
     if (fabs(rDiff) < 60)
         speed = fabs(rDiff) / 60.f;

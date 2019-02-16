@@ -52,13 +52,15 @@ int RP::Map::create_node(point coord)
     return (nodes.size() - 1);
 }
 
+void move_line_toward_point(RP::line& side_points, RP::point cur, float dist);
+
 std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 {
     //TODO(sasha): make R a constant - the following few lines are just a hack
     //             to get R to be in lat/lng units
     //<hack>
-    #define SIDE_TOLERANCE 1.f
-    #define CENTER_TOLERANCE 2.f
+    #define SIDE_TOLERANCE 1.7f
+    #define CENTER_TOLERANCE 1.5f
     // shouldn't need this since we're passing meters
 // #define R_METERS 0.5f
 //     auto offset = RP::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
@@ -70,6 +72,8 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     obstacles.reserve(mem_obstacles.size());
     for (const auto &o : mem_obstacles)
         obstacles.emplace_back(obstacle{false, o.coord1, o.coord2});
+
+    // printf("%d\n", obstacles.size());
     // for (auto &n : nodes)
     // {
     //     n.dist_to = INFINITY;
@@ -120,6 +124,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 obst.marked = true;
                 // really move around the side points
                 auto side_points = add_length_to_line_segment(obst.coord1, obst.coord2, SIDE_TOLERANCE);
+                move_line_toward_point(side_points, cur, 0.6f);
 
                 bool create_n1 = true;
                 bool create_n2 = true;
@@ -330,4 +335,27 @@ std::vector<RP::point> RP::Map::shortest_path_to()
     }
     std::reverse(result.begin(), result.end());
     return (result);
+}
+
+void move_line_toward_point(RP::line& side_points, RP::point pt, float d)
+{
+    int orient = RP::orientation(side_points.p, side_points.q, pt);
+    if (orient == 0) return;
+    RP::point along{side_points.q.x - side_points.p.x, side_points.q.y - side_points.p.y};
+    RP::point dir;
+    if (orient == 1)
+    {
+        dir.x = along.y;
+        dir.y = -along.x;
+    }
+    else
+    {
+        dir.x = -along.y;
+        dir.y = along.x;
+    }
+    float norm = sqrt(dir.x * dir.x + dir.y * dir.y);
+    dir.x *= d / norm;
+    dir.y *= d / norm;
+    side_points.p.x += dir.x; side_points.p.y += dir.y;
+    side_points.q.x += dir.x; side_points.q.y += dir.y;
 }

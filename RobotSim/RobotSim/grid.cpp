@@ -327,10 +327,11 @@ void Grid::draw(sf::RenderTarget &renderTarget, sf::RenderStates states) const
     renderTarget.draw(currentPath, states);
     
      #define TARGET_SZ 1.f
+     sf::Color targetColor = THEME ? sf::Color::Red : sf::Color::Magenta;
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
-                                      sf::Color::Magenta, scale, height), states);
+                                      targetColor, scale, height), states);
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y + TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y - TARGET_SZ},
-                                      sf::Color::Magenta, scale, height), states);
+                                      targetColor, scale, height), states);
 #undef TARGET_SZ
 }
 

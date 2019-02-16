@@ -74,7 +74,7 @@ int main(int, char const **)
     float gridScale = grid.retrieveScale();
     float gridHeight = grid.retrieveHeight();
     Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 2.f, 2.f);
-    agent.scaleSpeed(1.f);
+    agent.scaleSpeed(2.f);
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Map map(sim.getpos(), grid.target);
@@ -266,7 +266,7 @@ int main(int, char const **)
         window.draw(grid);
         window.draw(agent);
         for (auto obst : map.memo_obstacles())
-            window.draw(get_vertex_line(obst.coord1, obst.coord2, sf::Color::Green, gridScale, gridHeight));
+            window.draw(get_vertex_line(obst.coord1, obst.coord2, sf::Color::Yellow, gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
         window.display();

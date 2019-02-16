@@ -48,7 +48,7 @@ public:
 #else
     const sf::Color BASE_COLOR = sf::Color(0, 255, 0);
     const sf::Color TOP_COLOR = sf::Color(0, 0, 0);
-    const sf::Color PATH_COLOR = sf::Color(0, 255, 0);
+    const sf::Color PATH_COLOR = sf::Color(32, 193, 0);
 #endif
     
 private:

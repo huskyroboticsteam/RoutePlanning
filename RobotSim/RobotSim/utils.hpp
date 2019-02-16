@@ -6,9 +6,9 @@
 #include <SFML/Graphics.hpp>
 // #include "Map.hpp"
 
-#define THEME 0 // 0 is normal, 1 is HACKERMODE
+#define THEME 1 // 0 is normal, 1 is HACKERMODE
 //#define float double // YOU ARE GOING TO HELL
-
+ 
 typedef unsigned int uint;
 namespace RP
 {
@@ -27,6 +27,7 @@ struct line
 
 // normalize angle (in radians) to between 0 and 2PI
 float normalize_angle(float rad);
+float normalize_angle_deg(float deg);
 float deg_to_rad(float deg);
 float rad_to_deg(float rad);
 
@@ -77,6 +78,7 @@ point polar_to_cartesian(point origin, float r, float theta);
 float relative_angle(point origin, point p);                                    
 bool same_point(const point &p, const point &q, float = 1e-6);
 bool closeEnough(float a, float b, float tol=1e-6);
+bool angleCloseEnough(float deg1, float deg2, float degtol=0.5f);
 
 //Find if o and p are parallel AND overlap. If they do, can merge is set to true and
 // return a merged obstacle; else, can_merge is set to false

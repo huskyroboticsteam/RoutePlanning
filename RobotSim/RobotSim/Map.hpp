@@ -15,6 +15,10 @@ struct node
   float dist_to;
   point coord;
   std::vector<std::pair<int, float>> connection;
+  // ~node()
+  // {
+  //   connection.clear();
+  // }
 };
 
 struct obstacle

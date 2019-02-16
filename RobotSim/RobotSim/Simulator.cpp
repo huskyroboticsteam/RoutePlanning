@@ -279,13 +279,14 @@ bool RP::Simulator::within_view(const point &pt)
 
 void RP::Simulator::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    target.draw(get_vertex_line(cur_pos, fov_lower, sf::Color::Blue, scale, window_height));
-    target.draw(get_vertex_line(cur_pos, fov_upper, sf::Color::Blue, scale, window_height));
+    sf::Color visColor = THEME ? sf::Color::White : sf::Color::Blue;
+    target.draw(get_vertex_line(cur_pos, fov_lower, visColor, scale, window_height));
+    target.draw(get_vertex_line(cur_pos, fov_upper, visColor, scale, window_height));
     std::list<sf::VertexArray> circleLines = getCircleLines(bearing, config.vision_dist, config.vision_angle, cur_pos);
     for (auto seg : circleLines)
         target.draw(seg);
     for (auto obst : view_obstacles)
-        target.draw(get_vertex_line(obst.coord1, obst.coord2, sf::Color::Red, scale, window_height), states);
+        target.draw(get_vertex_line(obst.coord1, obst.coord2, THEME ? sf::Color::White : sf::Color::Red, scale, window_height), states);
 }
 
 std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, float radius, float angle_spread, RP::point pos, int maxpts) const
@@ -301,7 +302,7 @@ std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, floa
     std::list<sf::VertexArray> ret;
     for (uint i = 0; i < maxpts - 1; i++)
     {
-        ret.push_back(get_vertex_line(points.at(i), points.at(i + 1), sf::Color::Blue, scale, window_height));
+        ret.push_back(get_vertex_line(points.at(i), points.at(i + 1), sf::Color::White, scale, window_height));
     }
     return ret;
 }

@@ -28,10 +28,17 @@ float RP::rad_to_deg(float rad)
 
 float RP::normalize_angle(float rad)
 {
-    rad = std::fmod(rad, 2 * PI);
+    rad = fmod(rad, 2 * PI);
     if (rad < 0)
         rad += 2 * PI;
     return rad;
+}
+
+float RP::normalize_angle_deg(float deg)
+{
+    deg = fmod(deg, 360);
+    if (deg < 0) deg += 360;
+    return deg;
 }
 
 RP::point RP::intersection(point A, point B, point C, point D)
@@ -275,4 +282,9 @@ sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float sca
 bool RP::closeEnough(float a, float b, float tol)
 {
     return fabs(a - b) <= tol;
+}
+
+bool RP::angleCloseEnough(float deg1, float deg2, float degtol)
+{
+    return closeEnough(normalize_angle_deg(deg1), normalize_angle_deg(deg2), degtol);
 }
