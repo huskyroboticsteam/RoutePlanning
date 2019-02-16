@@ -26,3 +26,4 @@ Debug/TestMap.obj
 Debug/utils.obj
 Debug/vc141.pdb
 RobotSim/RobotSim/obj
+RobotSim/Robotsim/Resources/obstacles.txt

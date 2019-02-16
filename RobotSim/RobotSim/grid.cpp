@@ -66,6 +66,8 @@ Grid::Grid(float w, float h, unsigned int s)
             gridlines[gridlines.getVertexCount() - 1].color = GRID_COLOR;
         }
     }
+    
+    currentPath.setPrimitiveType(sf::Lines);
 }
 
 // toggles whether or not gridlines are drawn every meter
@@ -77,12 +79,53 @@ void Grid::toggleGrid()
 // toggles whether or not the agent collides with obstacles and borders
 void Grid::toggleClipping()
 {
+    printf("toggling noclip\n");
     if (noclip)
         debugMsg("Clipping toggled on");
     else
         debugMsg("Clipping toggled off");
 
     noclip = !noclip;
+}
+
+bool Grid::drawPath() {
+    currentPath.clear();
+    return true;
+}
+
+bool Grid::drawPath(std::vector<RP::point> path, Agent agent) {
+    if (path.size() < 1)
+        return false;
+    
+    currentPath.clear();
+    path.insert(path.begin(), RP::point{agent.getX(), agent.getY()});
+    
+    for (int i = 0; i < path.size() - 1; i++) {
+        
+        float x1 = path.at(i).x + 1;
+        float y1 = height - path.at(i).y;
+        float x2 = path.at(i + 1).x + 1;
+        float y2 = height - path.at(i + 1).y;
+        
+        // std::cout << x1 << "," << y1 << std::endl;
+        // std::cout << x2 << "," << y2 << std::endl;
+        
+        x1 *= scale;
+        y1 *= scale;
+        x2 *= scale;
+        y2 *= scale;
+        
+        sf::Vertex start(sf::Vector2f(x1, y1));
+        sf::Vertex end(sf::Vector2f(x2, y2));
+        
+        start.color = sf::Color::Blue;
+        end.color = sf::Color::Blue;
+        
+        currentPath.append(start);
+        currentPath.append(end);
+    }
+    
+    return true;
 }
 
 // reads obstacles from a file
@@ -118,9 +161,9 @@ void Grid::readObstaclesFromFile(std::string fileName)
 void Grid::addBorderObstacles()
 {
     placeObstacle(0.f, 0.f, width - 1, 0.f);
-    placeObstacle(width - 1, 0.f, width - 1, height - 1);
-    placeObstacle(0.f, height - 1, width - 1, height - 1);
-    placeObstacle(0.f, 0.f, 0.f, height - 1);
+    // placeObstacle(width - 1, 0.f, width - 1, height - 1);
+    // placeObstacle(0.f, height - 1, width - 1, height - 1);
+    // placeObstacle(0.f, 0.f, 0.f, height - 1);
 }
 
 // creates a new obstacle from (x1, y1) to (x2, y2)
@@ -141,7 +184,9 @@ sf::Vertex Grid::moveAgent(Agent &agent, float ds)
     float yOffset = -ds * sin(curR * PI / 180);
 
     if (!willCollide(agent, xOffset, yOffset, 0))
+    {
         agent.move(xOffset, yOffset);
+    }
     return agent.getPosition();
 }
 
@@ -278,11 +323,15 @@ void Grid::draw(sf::RenderTarget &renderTarget, sf::RenderStates states) const
         renderTarget.draw(o, states);
         // target.draw(border, states);
     }
-#define TARGET_SZ 1.f
+    
+    renderTarget.draw(currentPath, states);
+    
+     #define TARGET_SZ 1.f
+     sf::Color targetColor = THEME ? sf::Color::Red : sf::Color::Magenta;
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
-                                      sf::Color::Magenta, scale, height), states);
+                                      targetColor, scale, height), states);
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y + TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y - TARGET_SZ},
-                                      sf::Color::Magenta, scale, height), states);
+                                      targetColor, scale, height), states);
 #undef TARGET_SZ
 }
 

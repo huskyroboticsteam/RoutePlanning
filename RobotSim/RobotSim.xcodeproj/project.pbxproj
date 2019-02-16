@@ -12,6 +12,7 @@
 		937650562197AA50000897B2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937650552197AA50000897B2 /* main.cpp */; };
 		9386DF2F21BC41F1008C3C07 /* agent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9386DF2E21BC41F1008C3C07 /* agent.cpp */; };
 		9393454B21E5A9D9005CF43C /* Simulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9393454A21E5A9D9005CF43C /* Simulator.cpp */; };
+		93C749132213CCEB003F3A91 /* autoController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93C749122213CCEB003F3A91 /* autoController.cpp */; };
 		93FAC75721F80AB900C5E20C /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93FAC75221F80AB900C5E20C /* utils.cpp */; };
 		93FAC75921F80AB900C5E20C /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93FAC75421F80AB900C5E20C /* Map.cpp */; };
 		93FAC75B21F80BA800C5E20C /* HuskyRoboticsLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 93FAC75A21F80BA800C5E20C /* HuskyRoboticsLogo.png */; };
@@ -32,6 +33,8 @@
 		9393454721E5A9D8005CF43C /* Simulator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Simulator.hpp; sourceTree = "<group>"; };
 		9393454921E5A9D8005CF43C /* obstacle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = obstacle.hpp; sourceTree = "<group>"; };
 		9393454A21E5A9D9005CF43C /* Simulator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Simulator.cpp; sourceTree = "<group>"; };
+		93C749112213CCEB003F3A91 /* autoController.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = autoController.hpp; sourceTree = "<group>"; };
+		93C749122213CCEB003F3A91 /* autoController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = autoController.cpp; sourceTree = "<group>"; };
 		93FAC75221F80AB900C5E20C /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
 		93FAC75421F80AB900C5E20C /* Map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = "<group>"; };
 		93FAC75521F80AB900C5E20C /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = utils.hpp; sourceTree = "<group>"; };
@@ -75,6 +78,8 @@
 			children = (
 				9393454521E5A9C8005CF43C /* agent.hpp */,
 				9386DF2E21BC41F1008C3C07 /* agent.cpp */,
+				93C749122213CCEB003F3A91 /* autoController.cpp */,
+				93C749112213CCEB003F3A91 /* autoController.hpp */,
 				9393454621E5A9D8005CF43C /* grid.hpp */,
 				933E520B21B76B8700CE6194 /* grid.cpp */,
 				937650552197AA50000897B2 /* main.cpp */,
@@ -202,6 +207,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				93C749132213CCEB003F3A91 /* autoController.cpp in Sources */,
 				933E520E21B76D2800CE6194 /* obstacle.cpp in Sources */,
 				9386DF2F21BC41F1008C3C07 /* agent.cpp in Sources */,
 				9393454B21E5A9D9005CF43C /* Simulator.cpp in Sources */,

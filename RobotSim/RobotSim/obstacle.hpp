@@ -25,6 +25,13 @@ public:
     float y2;
     
     std::vector<std::pair<int, int>> quadrants;
+    
+#if THEME == 0
+    const sf::Color color = sf::Color(0, 0, 0);
+#else
+    const sf::Color color = sf::Color(0, 255, 0);
+#endif
+    
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
     
