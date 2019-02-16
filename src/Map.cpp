@@ -223,22 +223,27 @@ std::vector<RP::point> RP::Map::a_star_algorithm(float cur_lat, float cur_lng,
 	auto tar = point{ tar_lat, tar_lng };
 	std::vector<node> nodes = build_graph(cur, tar);
 
-	// Assigns a heuristic value to all nodes and puts them in a new vector
+	// Assigns a heuristic value to all nodes and puts their pointers in a new vector (necessary to find neighbor nodes)
 	using heuristicPair = std::pair<node, std::pair<float, float>>;
-	heuristicPair start = { nodes[0], std::make_pair(0, std::sqrt(dist_sq(nodes[0].coord, tar))) };
 	std::vector<heuristicPair*> heuristicNodes;
+	heuristicPair start = { nodes[0], std::make_pair(0, std::sqrt(dist_sq(nodes[0].coord, tar))) };
+	heuristicNodes.push_back(&start);
 	for (node node : nodes) {
-		heuristicNodes.push_back(&std::make_pair(node, std::make_pair(INFINITY, std::sqrt(dist_sq(node.coord, tar)))));
+		heuristicPair neighbor = std::make_pair(node, std::make_pair(INFINITY, std::sqrt(dist_sq(node.coord, tar))));
+		heuristicNodes.push_back(&neighbor);
 	}
-	heuristicNodes[0] = &start;
+	// Remove duplicate start node
+	heuristicNodes.erase(heuristicNodes.begin() + 1); 
 
-	std::vector<heuristicPair*> closedNodes;
-	// Create and fill a priorityqueue of indexes, ordered on heuristic value
+	// Create and fill a priorityqueue of heuristic pointers, ordered on heuristic value
 	auto cmp = [&](heuristicPair* l, heuristicPair* r) { 
 		return l->second.first + l->second.second < r->second.first + r->second.second; 
 	};
 	std::priority_queue<heuristicPair*, std::vector<heuristicPair*>, decltype(cmp)> openNodes(cmp);
 	openNodes.push(&start);
+
+	// Create a vector to be filled with searched nodes
+	std::vector<heuristicPair*> closedNodes;
 
 	// While we're not at tar, keep evaluating paths
 	while (!openNodes.empty() && (openNodes.top()->first.coord != tar)) { 
@@ -257,7 +262,7 @@ std::vector<RP::point> RP::Map::a_star_algorithm(float cur_lat, float cur_lng,
 				if (closedIndex < closedNodes.size) {
 					closedNodes.erase(closedNodes.begin + closedIndex);
 				}
-				// Check if neighbor is in openNodes and remove it
+				// If neighbor is in openNodes, remove it
 				else {
 					neighbor.second.first = -INFINITY;
 					if (openNodes.top() == &neighbor) {
