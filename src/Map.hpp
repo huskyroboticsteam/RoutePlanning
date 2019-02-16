@@ -1,7 +1,7 @@
 #ifndef ROVERPATHFINDING_Map_H
 #define ROVERPATHFINDING_Map_H
 
-#include "utils.h" // TODO include this outside as this shouldn't be in here
+#include "utils.hpp" // TODO include this outside as this shouldn't be in here
 #include <vector>
 #include <utility>
 
