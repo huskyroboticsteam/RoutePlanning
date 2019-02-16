@@ -14,6 +14,9 @@
 #define TARGET_LAT 123.0
 #define TARGET_LNG 321.0
 
+#define FOLLOW_PATH 0
+#define SPIRAL 1
+
 int main() {
 	std::vector<RP::point> targetSites(0);
 	std::cout << "Enter coordinates: " << std::endl;
@@ -45,7 +48,7 @@ namespace RP {
 	Controller::Controller(const point& cur_pos, std::vector<point> targetSites)
       : map(cur_pos, targetSites[0], std::list<RP::line>()), server()	{
 		this->targetSites = targetSites;
-		
+		state = FOLLOW_PATH;
 		curr_lat = cur_pos.x;
 		curr_lng = cur_pos.y;
 		
@@ -73,33 +76,34 @@ namespace RP {
 		// TODO: actually get obstacle data from camera
 			// std:vector<obstacleVector> obstacles = METHOD_GOES_HERE
 		// Bogus obstacle data for testing
-		std::vector<obstacleVector> obstacles{ 
-			obstacleVector{1,2}, obstacleVector{3,4}, obstacleVector{5,6} 
-		};  
+        std::vector<obstacleVector> obstacles{ 
+            obstacleVector{1,2}, obstacleVector{3,4}, obstacleVector{5,6} 
+        };  
 
         // step 2: wait for server to give current location
-		unsigned char* firstPacket = server.go();
-		parsePacket(firstPacket[1], &firstPacket[2]);
-		unsigned char* secondPacket = server.go();
-		parsePacket(secondPacket[1], &secondPacket[2]);
+        unsigned char* firstPacket = server.go();
+        parsePacket(firstPacket[1], &firstPacket[2]);
+        unsigned char* secondPacket = server.go();
+        parsePacket(secondPacket[1], &secondPacket[2]);
 
         // step 3: use current location and obstacle data to update map
-		for (int i = 1; i < obstacles.size(); i++) {
-			obstacleVector left = obstacles.at(i-1);
-			point a{ (curr_lng + cos(left.angle)*left.distance), (curr_lat + sin(left.angle)*left.distance) };
-			obstacleVector right = obstacles.at(i);
-			point b{ (curr_lng + cos(right.angle)*right.distance), (curr_lat + sin(right.angle)*right.distance) };
+        for (int i = 1; i < obstacles.size(); i++) {
+            obstacleVector left = obstacles.at(i-1);
+            point a{ (curr_lng + cos(left.angle)*left.distance), (curr_lat + sin(left.angle)*left.distance) };
+            obstacleVector right = obstacles.at(i);
+            point b{ (curr_lng + cos(right.angle)*right.distance), (curr_lat + sin(right.angle)*right.distance) };
 
-			map.add_obstacle(a, b);
-		}
+            map.add_obstacle(a, b);
+        }
 
-		// step 4: use map to get next location
-		nextPoint = map.compute_goal();
+        // step 4: use map to get next location
+        // if far away from target location, use map to get next point on path
+        nextPoint = map.compute_goal();
 
         // step 5: use next point to send packets specifying new direction and speed to proceed
-		float delta_heading = atan2(nextPoint.y - lng, nextPoint.x - lat);
-		setDirection(delta_heading);
-		setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
+        float delta_heading = atan2(nextPoint.y - curr_lng, nextPoint.x - curr_lat);
+        setDirection(delta_heading);
+        setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
     }
 
     void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
@@ -133,7 +137,6 @@ namespace RP {
 		map.shortest_path_to();
 	}
     // angle must be in radians, dist in meters
-    // formula source: stackoverflow q 53182179 (convert lat/long to XY); I simply did the reverse math
     RP::point Controller::convertToLatLng(float dist, float angle) {
 		return RP::convertToLatLng(curr_lat, curr_lng, curr_dir, dist, angle); 
     }
