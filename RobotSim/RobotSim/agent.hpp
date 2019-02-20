@@ -44,11 +44,11 @@ public:
 #if THEME == 0
     const sf::Color BASE_COLOR = sf::Color(55, 22, 126);
     const sf::Color TOP_COLOR =  sf::Color(233, 213, 163);
-    const sf::Color PATH_COLOR = sf::Color(55, 22, 126);
+    // const sf::Color PATH_COLOR = sf::Color(55, 22, 126);
 #else
     const sf::Color BASE_COLOR = sf::Color(0, 255, 0);
     const sf::Color TOP_COLOR = sf::Color(0, 0, 0);
-    const sf::Color PATH_COLOR = sf::Color(32, 193, 0);
+    // const sf::Color PATH_COLOR = sf::Color(32, 193, 0);
 #endif
     
 private:
