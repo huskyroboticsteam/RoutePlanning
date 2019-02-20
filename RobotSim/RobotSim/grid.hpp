@@ -37,8 +37,16 @@ class Grid : public sf::Drawable, public sf::Transformable
     bool boxCollision(std::array<std::array<float, 4>, 4> box, std::array<float, 4> line);
     bool willCollide(Agent agent, float dx, float dy, float dr);
 
+    bool drawPath();
+    bool drawPath(std::vector<RP::point> path, Agent agent);
+    
+#if THEME == 0
     sf::Color BORDER_COLOR = sf::Color::Black;
     sf::Color GRID_COLOR = sf::Color(128, 128, 128);
+#else
+    sf::Color BORDER_COLOR = sf::Color(0, 255, 0);
+    sf::Color GRID_COLOR = sf::Color(0, 255, 0);
+#endif
 
     std::list<Obstacle> obstacleList; // using list for fast add/removal
 
@@ -48,6 +56,8 @@ class Grid : public sf::Drawable, public sf::Transformable
 
     sf::VertexArray border;
     sf::VertexArray gridlines;
+    
+    sf::VertexArray currentPath;
 
     bool showGrid;
     bool noclip;

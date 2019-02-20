@@ -1,6 +1,6 @@
 #include "agent.hpp"
 
-Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float startY, float startR, float tSpeed, float rSpeed)
+Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float startY, float startR, float tSpeed, float rSpeed) : speedScale(1.f)
 {
     // internal position stored in meters
     xPos = startX;
@@ -64,6 +64,70 @@ void Agent::move(float dx, float dy)
     path[path.getVertexCount() - 1].color = PATH_COLOR;
 }
 
+float Agent::rotateTowards(float x, float y)
+{
+    float tr = atan2(y - yPos, x - xPos) * 180 / PI;
+    
+    //rotate(tr - rotation);
+    return tr - rotation;
+}
+
+float Agent::drive(float speed) {
+    float dx = transSpeed * speed * cos(rotation * PI / 180);
+    float dy = transSpeed * speed * sin(rotation * PI / 180);
+    speed *= speedScale;
+    
+    //move(dx, dy);
+    return transSpeed * speed; // ds
+}
+
+float Agent::driveTowards(float targetX, float targetY) {
+    float xDiff = xPos - targetX;
+    float yDiff = yPos - targetY;
+    
+    float dist = sqrt(xDiff * xDiff + yDiff * yDiff);
+    
+    if (dist > 3)
+        return drive(1.f);
+    else
+        return drive(dist / 3.f);
+}
+
+float Agent::turn(float speed) {
+    static float CAP = 2.f;
+    if (fabs(speed) > CAP)
+        speed = speed / fabs(speed) * CAP;
+    
+    //rotate(-rotSpeed * speed);
+    return -rotSpeed * speed;
+}
+
+float Agent::turnTowards(float targetAngle) {
+    if (targetAngle < 0)
+        targetAngle += 360;
+    targetAngle = fmod(targetAngle, 360);
+    
+    float rDiff = targetAngle - rotation;
+    
+    float speed = 1.f * speedScale * 1000;
+    
+    if (fabs(rDiff) < 60)
+        speed = fabs(rDiff) / 60.f;
+    if (fabs(rDiff) < 5)
+        speed = 5.f / 60.f;
+    
+    if (rDiff < -180 || (rDiff > 0 && rDiff < 180))
+        return turn(-speed);
+    else
+        return turn(speed);
+}
+
+float Agent::turnTowards(float targetX, float targetY) {
+    float targetR = atan2(targetY - yPos, targetX - xPos) * 180 / PI;
+    
+    return turnTowards(targetR);
+}
+
 // simply rotates the agent by a certain angle
 void Agent::rotate(float dr)
 {
@@ -77,6 +141,11 @@ void Agent::rotate(float dr)
     // SFML rotation (clockwise) is opposite of internal rotation (counter-clockwise)
     shapeBase.rotate(-dr);
     shapeTop.rotate(-dr);
+}
+
+void Agent::scaleSpeed(float ss)
+{
+    speedScale = ss;
 }
 
 // erases the path drawn so far
