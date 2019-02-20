@@ -6,7 +6,7 @@
 #include <SFML/Graphics.hpp>
 // #include "Map.hpp"
 
-#define THEME 1 // 0 is normal, 1 is HACKERMODE
+#define THEME 0 // 0 is normal, 1 is HACKERMODE
 //#define float double // YOU ARE GOING TO HELL
  
 typedef unsigned int uint;
