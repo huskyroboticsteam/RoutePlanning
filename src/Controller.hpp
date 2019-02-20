@@ -18,6 +18,7 @@ namespace RP
 			void foundTennisBall(float dist, float dir);
         private:
             int state;
+            point dst;
             RP::point convertToLatLng(float dist, float dir);
 			std::vector<point> targetSites;
             std::vector<point> spiralPts;

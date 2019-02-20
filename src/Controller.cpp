@@ -96,6 +96,8 @@ namespace RP {
             map.add_obstacle(a, b);
         }
 
+                
+
         // step 4: use map to get next location
         // if far away from target location, use map to get next point on path
         nextPoint = map.compute_goal();
