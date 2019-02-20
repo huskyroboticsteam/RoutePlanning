@@ -3,7 +3,7 @@
 #include "utils.hpp"
 
 #define PI 3.14159265359
-#define FLOAT_TOL -1e-4 // floating point error tolerance. Set to high value for now
+#define FLOAT_TOL 1e-4 // floating point error tolerance. Set to high value for now
                         // since we don't need too much precision
 
 bool RP::point::operator==(const point &p) const
@@ -28,10 +28,17 @@ float RP::rad_to_deg(float rad)
 
 float RP::normalize_angle(float rad)
 {
-    rad = std::fmod(rad, 2 * PI);
+    rad = fmod(rad, 2 * PI);
     if (rad < 0)
         rad += 2 * PI;
     return rad;
+}
+
+float RP::normalize_angle_deg(float deg)
+{
+    deg = fmod(deg, 360);
+    if (deg < 0) deg += 360;
+    return deg;
 }
 
 RP::point RP::intersection(point A, point B, point C, point D)
@@ -93,7 +100,8 @@ bool RP::segment_intersects_circle(point start,
 int RP::orientation(point p, point q, point r)
 {
     float v = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-    if (-1e-7 <= v && v <= 1e-7)
+    
+    if (-1e-4 <= v && v <= 1e-4)
         return COLINEAR;
 
     return ((v > 0.0f) ? CLOCKWISE : COUNTERCLOCKWISE);
@@ -132,8 +140,9 @@ bool RP::segments_intersect(point p1, point p2, point q1, point q2)
     return (false);
 }
 
-// returns the intersection between two points. returned point is at {inf, inf} if
-// no intersection exists
+// returns the intersection between ab and cd (I know it's confusing since
+// it's ordered differently from segments_intersect() and I won't attempt to
+// defend it). returned point is at {inf, inf} if no intersection exists
 RP::point RP::segments_intersection(point a, point b, point c, point d)
 {
     point x = intersection(a, b, c, d);
@@ -149,7 +158,7 @@ bool RP::within_segment(point a, point b, point c)
 {
     // dot product of ab and ac
     float dotprod = ((b.y - a.y) * (c.y - a.y) + (b.x - a.x) * (c.x - a.x));
-    return dotprod >= FLOAT_TOL && dotprod <= dist_sq(a, b) + FLOAT_TOL;
+    return dotprod >= -FLOAT_TOL && dotprod <= dist_sq(a, b) + FLOAT_TOL;
 }
 
 //Returns a point in the center of segment pq and then moves it R towards cur
@@ -240,7 +249,7 @@ bool RP::within_angle(float ang, float lower, float upper)
 // return if ab and ac are in the same direction, assuming abc is a line
 bool RP::same_dir(point a, point b, point c)
 {
-    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) >= FLOAT_TOL;
+    return ((b.x - a.x) * (c.x - a.x) + (b.y - a.y) * (c.y - a.y)) >= -FLOAT_TOL;
 }
 
 RP::point RP::polar_to_cartesian(point origin, float r, float theta)
@@ -253,9 +262,9 @@ float RP::relative_angle(point o, point p)
     return std::atan((p.y - o.y) / (p.x - o.x));
 }
 
-bool RP::same_point(const point &p, const point &q, float tol = 1e-6)
+bool RP::same_point(const point &p, const point &q, float tol)
 {
-    return dist_sq(p, q) <= tol;
+    return fabs(p.x - q.x) + fabs(p.y - q.y) <= tol;
 }
 
 sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float scale, float window_height)
@@ -268,4 +277,14 @@ sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float sca
     line[1] = sf::Vertex(sf::Vector2f((q.x + 1) * scale, (window_height - q.y) * scale));
     line[1].color = c;
     return line;
+}
+
+bool RP::closeEnough(float a, float b, float tol)
+{
+    return fabs(a - b) <= tol;
+}
+
+bool RP::angleCloseEnough(float deg1, float deg2, float degtol)
+{
+    return closeEnough(normalize_angle_deg(deg1), normalize_angle_deg(deg2), degtol);
 }
