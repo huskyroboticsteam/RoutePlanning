@@ -19,11 +19,14 @@ namespace RP
         private:
             int state;
             point dst;
+			point target;
+			float curr_lat; 
+            float curr_lng; 
+            float curr_dir;
+            bool in_spiral_radius();
+            bool found_ball();
             RP::point convertToLatLng(float dist, float dir);
 			std::vector<point> targetSites;
             std::vector<point> spiralPts;
-			float curr_lat, curr_lng, curr_dir;
-			RP::point target;
-			RP::point nextPoint;
     };
 }

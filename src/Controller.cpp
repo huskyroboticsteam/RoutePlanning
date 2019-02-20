@@ -16,6 +16,7 @@
 
 #define FOLLOW_PATH 0
 #define SPIRAL 1
+#define FOUND_BALL 2
 
 int main() {
 	std::vector<RP::point> targetSites(0);
@@ -86,26 +87,50 @@ namespace RP {
         unsigned char* secondPacket = server.go();
         parsePacket(secondPacket[1], &secondPacket[2]);
 
+        point nextPoint {0.0, 0.0};
+        if (state == FOLLOW_PATH) {
+            if (in_spiral_radius()) {
+                state = SPIRAL;
+                spiralPts = RP::generate_spiral(0.1, 100, curr_lng, curr_lat);
+            } else {
+                nextPoint = map.compute_goal();
+            }
+        } else if (state == SPIRAL) {
+            if (found_ball()) {
+                state = FOUND_BALL;
+            } else {
+                // get and remove first element of spiralPts
+                dst = spiralPts[0];
+                nextPoint = map.compute_goal();
+            }
+        } else { // if state is FOUND_BALL 
+            if (targetSites.size() > 0) {
+                // get and remove first element of targetSites
+                dst = targetSites[0];
+            }
+        }
+
         // step 3: use current location and obstacle data to update map
         for (int i = 1; i < obstacles.size(); i++) {
             obstacleVector left = obstacles.at(i-1);
             point a{ (curr_lng + cos(left.angle)*left.distance), (curr_lat + sin(left.angle)*left.distance) };
             obstacleVector right = obstacles.at(i);
             point b{ (curr_lng + cos(right.angle)*right.distance), (curr_lat + sin(right.angle)*right.distance) };
-
             map.add_obstacle(a, b);
         }
-
-                
-
-        // step 4: use map to get next location
-        // if far away from target location, use map to get next point on path
-        nextPoint = map.compute_goal();
 
         // step 5: use next point to send packets specifying new direction and speed to proceed
         float delta_heading = atan2(nextPoint.y - curr_lng, nextPoint.x - curr_lat);
         setDirection(delta_heading);
         setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
+    }
+
+    bool in_spiral_radius() {
+        return true;
+    }
+
+    bool found_ball() {
+        return true;
     }
 
     void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
