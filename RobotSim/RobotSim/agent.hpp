@@ -26,6 +26,7 @@ public:
     void move(float dx, float dy);
     void rotate(float dr);
     void clearPath();
+    void togglePath();
     float getX() const { return xPos; }
     float getY() const { return yPos; } 
     float getInternalRotation() const { return rotation; } 
@@ -71,5 +72,7 @@ private:
     unsigned int scale;
     float mapWidth;
     float mapHeight;
+    
+    bool breadcrumb;
 };
 #endif

@@ -38,11 +38,7 @@ const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
 #endif
 
-#if THEME == 0
 const sf::Color bgColor = sf::Color(255, 255, 255);
-#else
-const sf::Color bgColor = sf::Color(0, 0, 0);
-#endif
 
 int main(int, char const **)
 {
@@ -51,13 +47,9 @@ int main(int, char const **)
     sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(FRAMERATE);
 
-    bool hasFocus = true;
-    bool robotAuto = false;
-
-    // test bools
-    bool vroom = false;
-    bool spinny = false;
+    // setting toggles
     bool lazer = false;
+    bool breadcrumb = false;
 
     // autonomous
     bool auton = false;
@@ -81,67 +73,44 @@ int main(int, char const **)
 
     RP::AutoController control(grid, agent, map);
 
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)) {
             // Close window on X or Cmd+W
             if (event.type == sf::Event::Closed)
-            {
                 window.close();
-            }
-            else if (event.type == sf::Event::GainedFocus)
+            
+            else if (event.type == sf::Event::KeyPressed)
             {
-                hasFocus = true;
-            }
-            else if (event.type == sf::Event::LostFocus)
-            {
-                hasFocus = false;
-            }
-            else if (event.type == sf::Event::KeyPressed && hasFocus)
-            {
-                switch (event.key.code)
-                {
-                case sf::Keyboard::H:
-                {
+                switch (event.key.code) {
+                case sf::Keyboard::H : {
                     std::cout << "Help Menu: " << std::endl;
-                    std::cout << "W/S -- Drive robot forward or back" << std::endl;
-                    std::cout << "A/D -- Rotate robot left or right" << std::endl;
                     std::cout << "P   -- Returns the internal position of the robot" << std::endl;
                     std::cout << "G   -- Toggle grid" << std::endl;
                     std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                     std::cout << "U   -- Complete autonomous mode" << std::endl;
                     std::cout << "N   -- Toggle clipping" << std::endl;
-                    std::cout << "0   -- Clear robot path" << std::endl;
-                    std::cout << "7   -- Drive forward at max speed" << std::endl;
-                    std::cout << "8   -- Turn towards the target" << std::endl;
+                    std::cout << "0   -- Toggle robot path" << std::endl;
                     std::cout << "9   -- Draw algorithm path" << std::endl;
-                    std::cout << "Up/Down    -- Teleport robot 0.5m forward or back" << std::endl;
-                    std::cout << "Left/Right -- Teleport robot 15 degrees left or right" << std::endl;
                     break;
                 }
-                case sf::Keyboard::P:
-                {
+                case sf::Keyboard::P : {
                     std::cout << "Internal Position: (" << agent.getX() << "," << agent.getY()
                               << ") at " << agent.getInternalRotation() << " degrees" << std::endl;
                     break;
                 }
-                case sf::Keyboard::G:
-                {
+                case sf::Keyboard::G : {
                     grid.toggleGrid();
                     break;
                 }
-                case sf::Keyboard::O:
-                {
+                case sf::Keyboard::O : {
                     grid.obstacleList.clear();
                     grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
                     // grid.addBorderObstacles();
                     std::cout << "Added obstacles" << std::endl;
                     break;
                 }
-                case sf::Keyboard::U:
-                {
+                case sf::Keyboard::U : {
                     auton = !auton;
                     if (auton)
                         control.start_auto();
@@ -149,116 +118,32 @@ int main(int, char const **)
                         control.stop_auto();
                     break;
                 }
-                case sf::Keyboard::N:
-                {
+                case sf::Keyboard::N : {
                     grid.toggleClipping();
                     break;
                 }
-                case sf::Keyboard::Tilde:
-                {
-                    robotAuto = !robotAuto;
-                    break;
-                }
-                case sf::Keyboard::Num7:
-                {
-                    vroom = !vroom;
-                    break;
-                }
-                case sf::Keyboard::Num8:
-                {
-                    spinny = !spinny;
-                    break;
-                }
-                case sf::Keyboard::Num9:
-                {
+                case sf::Keyboard::Num9 : {
                     if (lazer)
                         grid.drawPath();
                     lazer = !lazer;
                     break;
                 }
-                case sf::Keyboard::Num0:
-                {
-                    agent.clearPath();
+                case sf::Keyboard::Num0 : {
+                    agent.togglePath();
                     break;
                 }
-                case sf::Keyboard::Up:
-                {
-                    grid.moveAgent(agent, .5f);
-                    break;
-                }
-                case sf::Keyboard::Down:
-                {
-                    grid.moveAgent(agent, -.5f);
-                    break;
-                }
-                case sf::Keyboard::Left:
-                {
-                    grid.rotateAgent(agent, 15.f);
-                    break;
-                }
-                case sf::Keyboard::Right:
-                {
-                    grid.rotateAgent(agent, -15.f);
-                    break;
-                }
-                case sf::Keyboard::B:
-                {
+                case sf::Keyboard::B : {
                     map.breakpoint(); // temp; used for debug only
                 }
                 }
             }
         }
-
-        if (hasFocus)
-        {
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-            {
-                grid.moveAgent(agent, 10.f / FRAMERATE);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-            {
-                grid.moveAgent(agent, -10.f / FRAMERATE);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-            {
-                grid.rotateAgent(agent, 200.f / FRAMERATE);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-            {
-                grid.rotateAgent(agent, -200.f / FRAMERATE);
-            }
-        }
+        
         if (auton)
-        {
             control.tic();
-            if (lazer)
-                grid.drawPath(map.shortest_path_to(), agent);
-        }
-        else
-        {
-            if (vroom) {
-                //grid.moveAgent(agent, agent.drive());
-                RP::point st_target = map.compute_next_point();
-                grid.moveAgent(agent, agent.driveTowards(st_target.x, st_target.y));
-            }
-            // don't want to compute path twice
-            if (spinny && lazer)
-            {
-                auto path = map.shortest_path_to();
-                grid.rotateAgent(agent, agent.turnTowards(path.front().x, path.front().y));
-                grid.drawPath(map.shortest_path_to(), agent);
-            }
-            else
-            {
-                if (spinny)
-                {
-                    RP::point st_target = map.compute_next_point();
-                    grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));
-                }
-                if (lazer)
-                    grid.drawPath(map.shortest_path_to(), agent);
-            }
-        }
+        if (lazer)
+            grid.drawPath(map.shortest_path_to(), agent);
+        
         sim.update_agent();
         map.update(sim.visible_obstacles());
 
@@ -274,3 +159,9 @@ int main(int, char const **)
 
     return EXIT_SUCCESS;
 }
+
+static void move(float x, float y);
+static void turn(float rotation);
+static RP::point currentPosition();
+static float currentRotation();
+static std::vector<RP::line> currentObstaclesInView();

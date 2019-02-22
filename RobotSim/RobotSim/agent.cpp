@@ -41,6 +41,9 @@ Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float 
     hitBox[2] = {.9f, atan2(-.75f, .5f)};
     hitBox[3] = {.9f, atan2(-.75f, -.5f)};
 
+    // whether to draw path or not
+    breadcrumb = false;
+    
     // draws the path the agent has taken
     path.setPrimitiveType(sf::Lines);
 }
@@ -151,11 +154,18 @@ void Agent::scaleSpeed(float ss)
 // erases the path drawn so far
 void Agent::clearPath() { path.clear(); }
 
+// toggles drawing of path
+void Agent::togglePath() {
+    breadcrumb = !breadcrumb;
+    clearPath();
+}
+
 void Agent::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     states.transform *= getTransform();
 
-    target.draw(path, states);
+    if (breadcrumb)
+        target.draw(path, states);
     target.draw(shapeBase, states);
     target.draw(shapeTop, states);
 }
