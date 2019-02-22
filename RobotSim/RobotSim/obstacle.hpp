@@ -25,6 +25,9 @@ public:
     float y2;
     
     std::vector<std::pair<int, int>> quadrants;
+    
+    const sf::Color color = OBST_COLOR;
+    
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
     

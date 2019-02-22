@@ -1,0 +1,4 @@
+TODOs for path splitting algorithm
+* change SIDE_TOLERANCE AND CENTER_TOLERANCE based on how far robot is from safety node
+* look around before turning or simply calculate once and turn blindly to avoid 
+  manic head shaking
