@@ -190,9 +190,9 @@ RP::point RP::lat_long_to_meters(RP::point pt, RP::point origin)
 }
 
 // generates maxpoints points in spiral formation in relation to the offset with armDist (m) between arms and returns in vector
-std::vector<RP::point> RP::generate_spiral(float armDist, int maxPoints, float xOffset, float yOffset)
+std::deque<RP::point> RP::generate_spiral(float armDist, int maxPoints, float xOffset, float yOffset)
 {
-    std::vector<point> spiralPoints;
+    std::deque<point> spiralPoints;
 
     for (int i = 0; i < maxPoints; ++i)
     {

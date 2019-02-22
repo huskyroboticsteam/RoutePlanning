@@ -19,7 +19,7 @@
 #define FOUND_BALL 2
 
 int main() {
-	std::vector<RP::point> targetSites(0);
+	std::deque<RP::point> targetSites(0);
 	std::cout << "Enter coordinates: " << std::endl;
 	float lat = 0;
 	float lng = 0;
@@ -46,7 +46,7 @@ int main() {
 namespace RP {
 
 
-	Controller::Controller(const point& cur_pos, std::vector<point> targetSites)
+	Controller::Controller(const point& cur_pos, std::deque<point> targetSites)
       : map(cur_pos, targetSites[0], std::list<RP::line>()), server()	{
 		this->targetSites = targetSites;
 		state = FOLLOW_PATH;
@@ -54,9 +54,6 @@ namespace RP {
 		curr_lng = cur_pos.y;
 		
 	}
-    // TODO: split packet into separate parts (timestamp, packetID, data)
-    // TODO: Feed lat/long to map to find vector pointing to next destination
-    // TODO: Feed x/y/z into ??? to find current orientation, then we can find how much to turn
 
     // using given packet data and server send a packet containing either a direction or motor power
 	bool Controller::setDirection(float delta_heading) {
@@ -73,56 +70,61 @@ namespace RP {
 
     void Controller::update() {
         // step 1: get obstacle data from camera
-
-		// TODO: actually get obstacle data from camera
+        while (!targetSites.empty()) {
+    		// TODO: actually get obstacle data from camera
 			// std:vector<obstacleVector> obstacles = METHOD_GOES_HERE
-		// Bogus obstacle data for testing
-        std::vector<obstacleVector> obstacles{ 
-            obstacleVector{1,2}, obstacleVector{3,4}, obstacleVector{5,6} 
-        };  
+	    	// Bogus obstacle data for testing
+            std::vector<obstacleVector> obstacles{ 
+                obstacleVector{1,2}, obstacleVector{3,4}, obstacleVector{5,6} 
+            };  
 
-        // step 2: wait for server to give current location
-        unsigned char* firstPacket = server.go();
-        parsePacket(firstPacket[1], &firstPacket[2]);
-        unsigned char* secondPacket = server.go();
-        parsePacket(secondPacket[1], &secondPacket[2]);
+            // step 2: wait for server to give current location
+            unsigned char* firstPacket = server.go();
+            parsePacket(firstPacket[1], &firstPacket[2]);
+            unsigned char* secondPacket = server.go();
+            parsePacket(secondPacket[1], &secondPacket[2]);
 
-        point nextPoint {0.0, 0.0};
-        if (state == FOLLOW_PATH) {
-            if (in_spiral_radius()) {
-                state = SPIRAL;
-                spiralPts = RP::generate_spiral(0.1, 100, curr_lng, curr_lat);
-            } else {
-                nextPoint = map.compute_goal();
+            point nextPoint {0.0, 0.0};
+            if (state == FOLLOW_PATH) {
+                if (in_spiral_radius()) {
+                    state = SPIRAL;
+                    spiralPts = RP::generate_spiral(0.1, 100, curr_lng, curr_lat);
+                }else if (found_ball()) {
+                    dst = targetSites.front();
+                    targetSites.pop_front();
+                }else {
+                    nextPoint = map.compute_goal();
+                }
+            } else if (state == SPIRAL) {
+                if (found_ball()) {
+                    state = FOUND_BALL;
+                } else {
+                    // get and remove first element of spiralPts
+                    dst = spiralPts.front();
+                    spiralPts.pop_front();
+                    nextPoint = map.compute_goal();
+                }
+            } else { // if state is FOUND_BALL 
+                if (targetSites.size() > 0) {
+                    // get and remove first element of targetSites
+                    dst = targetSites[0];
+                }
             }
-        } else if (state == SPIRAL) {
-            if (found_ball()) {
-                state = FOUND_BALL;
-            } else {
-                // get and remove first element of spiralPts
-                dst = spiralPts[0];
-                nextPoint = map.compute_goal();
+
+            // step 3: use current location and obstacle data to update map
+            for (int i = 1; i < obstacles.size(); i++) {
+                obstacleVector left = obstacles.at(i-1);
+                point a{ (curr_lng + cos(left.angle)*left.distance), (curr_lat + sin(left.angle)*left.distance) };
+                obstacleVector right = obstacles.at(i);
+                point b{ (curr_lng + cos(right.angle)*right.distance), (curr_lat + sin(right.angle)*right.distance) };
+                map.add_obstacle(a, b);
             }
-        } else { // if state is FOUND_BALL 
-            if (targetSites.size() > 0) {
-                // get and remove first element of targetSites
-                dst = targetSites[0];
-            }
+
+            // step 5: use next point to send packets specifying new direction and speed to proceed
+            float delta_heading = atan2(nextPoint.y - curr_lng, nextPoint.x - curr_lat);
+            setDirection(delta_heading);
+            setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
         }
-
-        // step 3: use current location and obstacle data to update map
-        for (int i = 1; i < obstacles.size(); i++) {
-            obstacleVector left = obstacles.at(i-1);
-            point a{ (curr_lng + cos(left.angle)*left.distance), (curr_lat + sin(left.angle)*left.distance) };
-            obstacleVector right = obstacles.at(i);
-            point b{ (curr_lng + cos(right.angle)*right.distance), (curr_lat + sin(right.angle)*right.distance) };
-            map.add_obstacle(a, b);
-        }
-
-        // step 5: use next point to send packets specifying new direction and speed to proceed
-        float delta_heading = atan2(nextPoint.y - curr_lng, nextPoint.x - curr_lat);
-        setDirection(delta_heading);
-        setSpeed(1.0); //TODO: figure out how setting speed and heading actually works
     }
 
     bool in_spiral_radius() {
@@ -160,9 +162,8 @@ namespace RP {
 
 	
 	void Controller::foundTennisBall(float dist, float dir) {
-		target = convertToLatLng(dist - 1, dir);
-		map.shortest_path_to();
 	}
+
     // angle must be in radians, dist in meters
     RP::point Controller::convertToLatLng(float dist, float angle) {
 		return RP::convertToLatLng(curr_lat, curr_lng, curr_dir, dist, angle); 
