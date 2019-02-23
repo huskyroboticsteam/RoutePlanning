@@ -22,3 +22,4 @@ $(OUT): $(OBJECTS)
 .PHONY: clean
 clean:
 	rm $(OUT)
+	rm -rf obj/*
