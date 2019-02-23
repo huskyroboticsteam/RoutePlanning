@@ -22,7 +22,7 @@
 
 class Agent : public sf::Drawable, public sf::Transformable {
 public:
-    Agent(float gScale, float gWidth, float gHeight, RP::point startPos = {0, 0}, float startR = 0.f, float tSpeed = 1.f / 6.f, float rSpeed = 20.f / 6.f);
+    Agent(float gScale, float gWidth, float gHeight, RP::point startPos = {0, 0}, float startR = 0.f, float tSpeed = 0.18, float rSpeed = 2.5);
     void move(float dx, float dy);
     void rotate(float dr);
     void clearPath();

@@ -38,24 +38,71 @@ const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
 #endif
 
+// ---------------------------------------- //
+// ---------- Internal Variables ---------- //
+// ---------------------------------------- //
+Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
 const sf::Color bgColor = sf::Color(255, 255, 255);
 
-Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
 float gridScale = grid.retrieveScale();
 float gridHeight = grid.retrieveHeight();
 Agent agent(gridScale, grid.retrieveWidth(), gridHeight, RP::point{2, 2});
+
 RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
 RP::Map map(sim.getpos(), grid.target);
 
 RP::AutoController control(grid, agent, map);
+// ---------------------------------------- //
+
+
+// ---------------------------------------- //
+// ---------- BeagleBone Methods ---------- //
+// ---------------------------------------- //
+
+// moves the robot forward or backward at a given speed
+// speed should be between 1 and -1, where negative is backwards
+void move(float speed) {
+    grid.moveAgent(agent, agent.drive(speed));
+}
+
+// rotates the robot clockwise or counterclockwise at a given speed
+// speed should be between 1 and -1, where negative is counterclockwise
+void turn(float speed) {
+    grid.rotateAgent(agent, agent.turn(speed));
+}
+
+// returns the current position of the robot, in meters, relative to the grid origin
+// x and y increase to the right and to the top respectively
+static RP::point currentPosition() {
+    return RP::point{ agent.getX(), agent.getY() };
+}
+
+// returns the current rotation of the robot, in degrees increasing counterclockwise
+// value is between 0 and 360, where 0 is true right relative to the grid
+static float currentRotation() {
+    return agent.getInternalRotation();
+}
+
+// returns all the obstacles currently visible to the robot
+// note that these may be partial obstacles
+// TODO may return an RP::obstacle depending on implementation
+static std::vector<RP::line> currentObstaclesInView() {
+    // TODO
+}
+// ---------------------------------------- //
+
 
 int main(int, char const **)
 {
-    const unsigned int FRAMERATE = 60;
-
     sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
-    window.setFramerateLimit(FRAMERATE);
-
+    window.setFramerateLimit(60);
+    
+    sf::Image icon;
+    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
+    {
+        window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+    }
+    
     // setting toggles
     bool lazer = false;
     bool breadcrumb = false;
@@ -65,17 +112,15 @@ int main(int, char const **)
     bool auto_turning = false;
     float auto_orig_angle; // angle of robot before it entered turning phase
 
-    sf::Image icon;
-    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
-    {
-        window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-    }
     
     // OPTIONAL FURTHER INIT
-    agent.scaleSpeed(2.f);
+    //agent.scaleSpeed(2.f);
     grid.target = RP::point{35.f, 35.f};
     // END INIT
 
+    // ---------------------------------------- //
+    // ---------- 60 FPS Update Loop ---------- //
+    // ---------------------------------------- //
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -142,6 +187,23 @@ int main(int, char const **)
             }
         }
         
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            // move forwards
+            move(1);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+            // move backwards
+            move(-1);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+            // turn left
+            turn(-1);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+            // turn right
+            turn(1);
+        }
+        
         if (auton)
             control.tic();
         if (lazer)
@@ -159,37 +221,7 @@ int main(int, char const **)
         // printf("%f, %f\n", next.x, next.y);
         window.display();
     }
+    // ---------- End of 60 FPS Update Loop ---------- //
 
     return EXIT_SUCCESS;
-}
-
-// moves the robot forward or backward at a given speed
-// speed should be between 1 and -1, where negative is backwards
-static void move(float speed) {
-    grid.moveAgent(agent, speed);
-}
-
-// rotates the robot clockwise or counterclockwise at a given speed
-// speed should be between 1 and -1, where negative is clockwise
-static void turn(float speed) {
-    grid.rotateAgent(agent, speed);
-}
-
-// returns the current position of the robot, in meters, relative to the grid origin
-// x and y increase to the right and to the top respectively
-static RP::point currentPosition() {
-    return RP::point{ agent.getX(), agent.getY() };
-}
-
-// returns the current rotation of the robot, in degrees increasing counterclockwise
-// value is between 0 and 360, where 0 is true right relative to the grid
-static float currentRotation() {
-    return agent.getInternalRotation();
-}
-
-// returns all the obstacles currently visible to the robot
-// note that these may be partial obstacles
-// TODO may return an RP::obstacle depending on implementation
-static std::vector<RP::line> currentObstaclesInView() {
-    // TODO
 }
