@@ -215,7 +215,7 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
 {
     obstacle merged;
     // bool debug = timer.elapsed() > 1;
-    bool debug = false;
+    bool debug = true;
     if (debug) {
         // printf("Mem Count: %d\n", mem_obstacles.size());
         // for (const obstacle& o : mem_obstacles) printf("mem (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
@@ -235,10 +235,10 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
             // merge obstacles, remove vobs and don't add newobs, and add merged obstacles
             obstacle temp = merge(merged, *it_mobs, can_merge);
             if (debug) {
-                printf("merged(): m(%f, %f) (%f, %f) and n(%f, %f) (%f, %f) -> t(%f, %f), (%f, %f)\n",
-                            it_mobs->coord1.x, it_mobs->coord1.y, it_mobs->coord2.x, it_mobs->coord2.y,
-                            newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y,
-                            temp.coord1.x, temp.coord1.y, temp.coord2.x, temp.coord2.y);
+                // printf("merged(): m(%f, %f) (%f, %f) and n(%f, %f) (%f, %f) -> t(%f, %f), (%f, %f)\n",
+                //             it_mobs->coord1.x, it_mobs->coord1.y, it_mobs->coord2.x, it_mobs->coord2.y,
+                //             newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y,
+                //             temp.coord1.x, temp.coord1.y, temp.coord2.x, temp.coord2.y);
             }
             if (can_merge)
             {
