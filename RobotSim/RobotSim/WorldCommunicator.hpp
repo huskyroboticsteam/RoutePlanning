@@ -25,6 +25,6 @@ class WorldCommunicator {
 		void listen();
 		SOCKET out;
 		std::mutex mtx;
-		std::queue<std::array<char, 256>> packetQ;
+		std::queue<std::vector<char>> packetQ;
 		std::thread listenThread;
 };

@@ -5,7 +5,7 @@ WorldCommunicator::WorldCommunicator() : listenThread(&WorldCommunicator::listen
 }
 
 void WorldCommunicator::update() {
-	std::array<char, 256> nextPacket;
+	std::vector<char> nextPacket;
 	bool gotAPacket = false;
 	mtx.lock();
 	if(!packetQ.empty()) {
@@ -19,7 +19,7 @@ void WorldCommunicator::update() {
 
 void WorldCommunicator::listen() {
 	while(true) {
-		std::array<char, 256> buf;
+		std::vector<char> buf;
 		//TODO: listen for a packet;
 		mtx.lock();
 		packetQ.push(buf);
