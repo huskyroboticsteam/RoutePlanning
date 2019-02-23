@@ -93,7 +93,7 @@ bool Grid::drawPath() {
     return true;
 }
 
-bool Grid::drawPath(std::vector<RP::point> path, Agent agent) {
+bool Grid::drawPath(std::vector<RP::point> path, Agent &agent) {
     if (path.size() < 1)
         return false;
     
@@ -242,7 +242,7 @@ bool Grid::boxCollision(std::array<std::array<float, 4>, 4> box, std::array<floa
 // returns false if there will be no collisions
 // is not very sophisticated (simply checks target location instead of path), TODO make better
 // currently only checks the map borders
-bool Grid::willCollide(Agent agent, float dx, float dy, float dr)
+bool Grid::willCollide(Agent &agent, float dx, float dy, float dr)
 {
     if (noclip)
         return false;

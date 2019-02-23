@@ -35,10 +35,10 @@ class Grid : public sf::Drawable, public sf::Transformable
 
     bool linesCollide(std::array<float, 4> line1, std::array<float, 4> line2);
     bool boxCollision(std::array<std::array<float, 4>, 4> box, std::array<float, 4> line);
-    bool willCollide(Agent agent, float dx, float dy, float dr);
+    bool willCollide(Agent &agent, float dx, float dy, float dr);
 
     bool drawPath();
-    bool drawPath(std::vector<RP::point> path, Agent agent);
+    bool drawPath(std::vector<RP::point> path, Agent &agent);
     
 #if THEME == 0
     sf::Color BORDER_COLOR = sf::Color::Black;

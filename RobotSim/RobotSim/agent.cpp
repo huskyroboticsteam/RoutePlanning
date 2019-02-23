@@ -1,10 +1,10 @@
 #include "agent.hpp"
 
-Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float startY, float startR, float tSpeed, float rSpeed) : speedScale(1.f)
+Agent::Agent(float gScale, float gWidth, float gHeight, RP::point startPos, float startR, float tSpeed, float rSpeed) : speedScale(1.f)
 {
     // internal position stored in meters
-    xPos = startX;
-    yPos = startY;
+    xPos = startPos.x;
+    yPos = startPos.y;
     // internal rotation stored in degrees
     rotation = startR;
     // internal speed that is currently unused
@@ -12,9 +12,9 @@ Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float 
     rotSpeed = rSpeed;
 
     // the map's scale (pixels per meter)
-    scale = mapScale;
-    mapWidth = mapW;
-    mapHeight = mapH;
+    scale = gScale;
+    mapWidth = gWidth;
+    mapHeight = gHeight;
 
     // default agent size in pixels (meters * pixels per meter)
     float agentWidth = 1.f * scale;

@@ -43,7 +43,7 @@ const sf::Color bgColor = sf::Color(255, 255, 255);
 Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
 float gridScale = grid.retrieveScale();
 float gridHeight = grid.retrieveHeight();
-Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 2.f, 2.f);
+Agent agent(gridScale, grid.retrieveWidth(), gridHeight, RP::point{2, 2});
 RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
 RP::Map map(sim.getpos(), grid.target);
 
@@ -176,6 +176,7 @@ static void turn(float speed) {
 }
 
 // returns the current position of the robot, in meters, relative to the grid origin
+// x and y increase to the right and to the top respectively
 static RP::point currentPosition() {
     return RP::point{ agent.getX(), agent.getY() };
 }
