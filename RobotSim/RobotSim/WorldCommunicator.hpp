@@ -7,6 +7,9 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <mutex>
+#include <queue>
+#include <thread>
 #define SOCKET int
 #define SOCKET_ERROR -1
 
@@ -19,7 +22,9 @@ class WorldCommunicator {
 	private:
 		int timer;
 		bool send_action(std::vector<unsigned char> data, unsigned char id);
-		bool listen();
+		void listen();
 		SOCKET out;
-		
-}
+		std::mutex mtx;
+		std::queue<std::array<char, 256>> packetQ;
+		std::thread listenThread;
+};
