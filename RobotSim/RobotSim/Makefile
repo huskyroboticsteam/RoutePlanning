@@ -1,12 +1,12 @@
 CC = g++
 SDIR = .
 ODIR = obj
-SOURCES = main.cpp agent.cpp grid.cpp obstacle.cpp utils.cpp Simulator.cpp Map.cpp timer.cpp autoController.cpp
+SOURCES = main.cpp agent.cpp grid.cpp obstacle.cpp utils.cpp Simulator.cpp Map.cpp timer.cpp autoController.cpp WorldCommunicator.cpp
 _OBJECTS = $(SOURCES:.cpp=.o)
 OBJECTS = $(patsubst %,$(ODIR)/%,$(_OBJECTS))
 SFML = C:/SFML-2.5.1/
 INC = -I$(SFML)include
-LINK = -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
+LINK = -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -pthread
 CFLAGS = -std=c++11 -g
 OUT = build/simulator.exe
 
