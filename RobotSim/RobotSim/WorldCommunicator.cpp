@@ -13,10 +13,18 @@ void WorldCommunicator::update() {
 		packetQ.pop();
 		gotAPacket = true;
 	}
+	else {
+		return;
+	}
 	mtx.unlock();
-	//TODO: Process the packet
+	
+	// Process Packet
+	// Assuming format: ID (char denoting action) and Data (float denoting amount)
+	char id = nextPacket.at(0);
+	float* data = (float*)&(nextPacket.at(1));
 }
 
+// Listens for packet 
 void WorldCommunicator::listen() {
 	while(true) {
 		std::vector<char> buf;
