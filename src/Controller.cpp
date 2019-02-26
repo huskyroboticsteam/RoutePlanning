@@ -94,7 +94,7 @@ namespace RP {
                     dst = targetSites.front();
                     targetSites.pop_front();
                 }else {
-                    nextPoint = map.compute_goal();
+                    nextPoint = map.shortest_path_to()[0];
                 }
             } else if (state == SPIRAL) {
                 if (found_ball()) {
@@ -103,7 +103,7 @@ namespace RP {
                     // get and remove first element of spiralPts
                     dst = spiralPts.front();
                     spiralPts.pop_front();
-                    nextPoint = map.compute_goal();
+                    nextPoint = map.shortest_path_to()[0];
                 }
             } else { // if state is FOUND_BALL 
                 if (targetSites.size() > 0) {
@@ -128,11 +128,11 @@ namespace RP {
         }
     }
 
-    bool in_spiral_radius() {
+    bool Controller::in_spiral_radius() {
         return true;
     }
 
-    bool found_ball() {
+    bool Controller::found_ball() {
         return true;
     }
 
