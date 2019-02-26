@@ -10,6 +10,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include "main.hpp"
 #define SOCKET int
 #define SOCKET_ERROR -1
 

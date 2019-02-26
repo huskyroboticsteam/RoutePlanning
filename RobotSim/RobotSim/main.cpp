@@ -29,6 +29,7 @@
 #include "Simulator.hpp"
 #include "Map.hpp"
 #include "autoController.hpp"
+#include "main.hpp"
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";

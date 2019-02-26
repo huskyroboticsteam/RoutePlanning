@@ -22,6 +22,15 @@ void WorldCommunicator::update() {
 	// Assuming format: ID (char denoting action) and Data (float denoting amount)
 	char id = nextPacket.at(0);
 	float* data = (float*)&(nextPacket.at(1));
+
+	// // Assuming id 0 = move and id 1 = turn
+	// This doesn't work
+	// if (id == 0) {
+	// 	move(*data);
+	// }
+	// else {
+	// 	turn(*data);
+	// }
 }
 
 // Listens for packet 
