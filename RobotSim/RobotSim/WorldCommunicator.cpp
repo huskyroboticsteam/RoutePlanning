@@ -4,7 +4,7 @@ WorldCommunicator::WorldCommunicator() : listenThread(&WorldCommunicator::listen
 	
 }
 
-void WorldCommunicator::update() {
+void WorldCommunicator::update(float& move, float& turn) {
 	std::vector<char> nextPacket;
 	mtx.lock();
 	if(!packetQ.empty()) {
@@ -19,16 +19,16 @@ void WorldCommunicator::update() {
 	// Process Packet
 	// Assuming format: ID (char denoting action) and Data (float denoting amount)
 	char id = nextPacket.at(0);
-	float* data = (float*)&(nextPacket.at(1));
-
+	float data;
+	memcpy(&data, &nextPacket[1], sizeof(float));
 	// // Assuming id 0 = move and id 1 = turn
 	// This doesn't work
-	// if (id == 0) {
-	// 	move(*data);
-	// }
-	// else {
-	// 	turn(*data);
-	// }
+	if (id == 0) {
+		move = data;
+	}
+	else {
+		turn = data;
+	}
 }
 
 // Listens for packet 

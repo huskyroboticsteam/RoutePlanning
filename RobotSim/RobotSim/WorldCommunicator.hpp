@@ -10,15 +10,16 @@
 #include <mutex>
 #include <queue>
 #include <thread>
-#include "main.hpp"
+
 #define SOCKET int
 #define SOCKET_ERROR -1
+
 
 class WorldCommunicator {
 	public:
 		// Sends and receives packets
 		// To be called in the main update loop
-		void update();
+		void update(float& move, float& turn);
 		WorldCommunicator();
 	private:
 		int timer;
