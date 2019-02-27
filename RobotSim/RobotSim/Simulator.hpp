@@ -65,7 +65,7 @@ private:
   std::list<obstacle> view_obstacles;
 
   virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
-  std::list<sf::VertexArray> getCircleLines(float angular_pos, float radius, float angle_spread, point pos, int maxpts=10) const;
+  std::list<sf::VertexArray> getCircleLines(float angular_pos, float radius, float angle_spread, point pos, int maxpts, sf::Color clr) const;
 };
 } // namespace RP
 
