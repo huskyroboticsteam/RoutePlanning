@@ -10,7 +10,7 @@ OUT = build/routeplanning.exe
 all: $(OUT)
 
 $(ODIR)/%.o: $(SDIR)/%.cpp
-	$(CC) -o $@ $< $(CFLAGS) 
+	$(CC) -c -o $@ $< $(CFLAGS) 
 
 
 $(OUT): $(OBJECTS)
