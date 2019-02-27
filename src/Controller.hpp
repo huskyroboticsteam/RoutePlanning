@@ -1,5 +1,5 @@
 #include <iostream>
-#include <vector>
+#include <deque>
 #include "Map.hpp"
 #include "Server.hpp"
 namespace RP
@@ -9,12 +9,23 @@ namespace RP
         public:
 			RP::Map map;
 			RP::Server server;
+			Controller(const point& cur_pos, std::deque<point> targetSites);
 			bool setDirection(float heading);
 			bool setSpeed(float speed);
+			void update();
 			void parsePacket(unsigned char packetID, unsigned char data[]);
-            void addObstacle(float curr_lat, float curr_lng, float curr_dir, float dist1, float dir1, float dist2, float dir2);
-        
+            void addObstacle(float dist1, float dir1, float dist2, float dir2);
+			void foundTennisBall(float dist, float dir);
         private:
-            point convertToLatLng(float curr_lat, float curr_lng, float curr_dir, float dist, float dir);
+            int state;
+            RP::point dst;
+			std::deque<point> targetSites;
+            std::deque<point> spiralPts;
+			float curr_lat; 
+            float curr_lng; 
+            float curr_dir;
+            bool in_spiral_radius();
+            bool found_ball();
+            RP::point convertToLatLng(float dist, float dir);
     };
 }

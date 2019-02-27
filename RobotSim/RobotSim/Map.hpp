@@ -37,6 +37,7 @@ public:
   point compute_search();                        // search for the tennis ball once the goal is reached. Return a target direction vector.
   void update(const std::list<obstacle>& new_obstacles);
   std::vector<point> shortest_path_to(); //Returns a std::vector of lat/lng pairs that specifies the shortest path to the target destination (for debugging)
+  void set_target(point curr, point target);
   // void reassign_target(const point& target) { tar = target; }
   const std::list<obstacle>& memo_obstacles() { return mem_obstacles; }
 
