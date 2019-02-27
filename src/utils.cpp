@@ -4,6 +4,10 @@
 
 #define PI 3.14159265359
 
+#define CONV_FACTOR_LNG 8.627
+#define DEGREES_METER_LNG 0.0001
+#define CONV_FACTOR_LAT 111319.9
+
 bool RP::point::operator==(const point &p) const
 {
     return x == p.x && y == p.y;
@@ -185,20 +189,15 @@ RP::point RP::lat_long_to_meters(RP::point pt, RP::point origin)
     return point{(pt.x - origin.x) * 87029, (pt.y - origin.y) * 111111};
 }
 
-// generates 100 points in spiral formation around origin and returns in vector
-std::vector<RP::point> RP::generate_spiral()
+// generates maxpoints points in spiral formation in relation to the offset with armDist (m) between arms and returns in vector
+std::deque<RP::point> RP::generate_spiral(float armDist, int maxPoints, float xOffset, float yOffset)
 {
-    int scaleFactor = 10;
-    std::vector<point> spiralPoints;
+    std::deque<point> spiralPoints;
 
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < maxPoints; ++i)
     {
-        int x = round(scaleFactor * i * cos(i + (PI)));
-        int y = round(scaleFactor * i * sin(i + (PI)));
-        spiralPoints.push_back(point{(float)x, (float)y});
-#if 0
-		std::cout << i << ": (" << px << ", " << py << ")" << '\n';
-#endif
+		float angle = (PI / 5) * i;
+		spiralPoints.push_back(convertToLatLng(xOffset, yOffset, 0, armDist, angle));
     }
 
     return spiralPoints;
@@ -227,4 +226,17 @@ float RP::relative_angle(point o, point p)
 bool RP::same_point(const point &p, const point &q, float tol)
 {
     return std::sqrt(dist_sq(p, q)) <= tol;
+}
+
+RP::point RP::convertToLatLng(float lat, float lng, float dir, float dist, float angle) {
+		float delta_x = dist * cos(angle + dir + M_PI/2);
+		float delta_y = dist * sin(angle + dir + M_PI/2);
+		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
+		float delta_lng = delta_x / CONV_FACTOR_LNG * DEGREES_METER_LNG;
+		float delta_lat = delta_y / CONV_FACTOR_LAT;
+		//std::cout << "delta_lat: " << delta_lat << " delta_lng: " << delta_lng << "\n";
+		point p;
+		p.x = delta_lat + lat;
+		p.y = delta_lng + lng;
+		return p;
 }

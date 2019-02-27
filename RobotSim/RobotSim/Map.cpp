@@ -2,6 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <list>
+#include <cassert>
 #include "Map.hpp"
 
 RP::Map::Map(const point &cpos, const point &tget) : cur(cpos), tar(tget)
@@ -88,13 +89,17 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         add_edge(0, 1); // probably start (origin or current?) and target nodes
         return (nodes);
     }
-
+    
+    std::vector<bool> visited(obstacles.size() * 2, false); // visited[i] and [i+1] stores whether obstacles[i/2].p or q has been visited, respectively
     std::queue<int> unprocessed_nodes;
     unprocessed_nodes.push(0);
     // for each safety node, find the obstacle closest to it
     while (!unprocessed_nodes.empty())
     {
+        // printf("stuck\n");
         int curr_node = unprocessed_nodes.front();
+        // printf("curr_node: %f, %f\n", nodes.at(curr_node).coord.x, nodes.at(curr_node).coord.y);
+        assert(curr_node >= 0);
         unprocessed_nodes.pop();
         bool destination_blocked = false;
         int closest_obst;
@@ -105,6 +110,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
             auto &obst = obstacles[i];
             if (RP::segments_intersect(nodes[curr_node].coord, obst.coord1, tar, obst.coord2))
             {
+                // printf("destination blocked by %f, %f\n", nodes[curr_node].coord.x, nodes[curr_node].coord.y);
                 destination_blocked = true;
                 point inters = intersection(nodes[curr_node].coord, tar, obst.coord1, obst.coord2);
                 float dist = RP::dist_sq(nodes[curr_node].coord, inters);
@@ -119,64 +125,72 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         {
             auto &obst = obstacles[closest_obst];
             int n1 = -1, n2 = -1;
-            if (!obst.marked)
-            {
-                obst.marked = true;
+            // if (!obst.marked)
+            // {
+                // obst.marked = true;
                 // really move around the side points
                 auto side_points = add_length_to_line_segment(obst.coord1, obst.coord2, SIDE_TOLERANCE);
-                move_line_toward_point(side_points, cur, 0.6f);
+                move_line_toward_point(side_points, cur, 1.2f);
 
                 bool create_n1 = true;
                 bool create_n2 = true;
 
                 //TODO(sasha): if this is too slow, use a partitioning scheme to only check against
                 //             nodes in the vicinity
-                for (int safety = 2; safety < nodes.size(); safety++)
-                {
-                    // if n1/n2 too closest to another endpoint, set n1/n2 to that
-                    // endpoint instead
-                    node &n = nodes[safety];
-                    if (RP::within_radius(n.coord, side_points.p, SIDE_TOLERANCE))
-                    {
-                        create_n1 = false;
-                        n1 = safety;
-                    }
-                    if (RP::within_radius(n.coord, side_points.q, SIDE_TOLERANCE))
-                    {
-                        create_n2 = false;
-                        n2 = safety;
-                    }
+                // for (int safety = 2; safety < nodes.size(); safety++)
+                // {
+                //     // if n1/n2 too closest to another endpoint, set n1/n2 to that
+                //     // endpoint instead
+                //     node &n = nodes[safety];
+                //     if (RP::within_radius(n.coord, side_points.p, SIDE_TOLERANCE))
+                //     {
+                //         printf("within radius\n");
+                //         create_n1 = false;
+                //         n1 = safety;
+                //     }
+                //     if (RP::within_radius(n.coord, side_points.q, SIDE_TOLERANCE))
+                //     {
+                //         printf("within radius\n");
+                //         create_n2 = false;
+                //         n2 = safety;
+                //     }
+                // }
+                if (!visited.at(closest_obst * 2)) {
+                    n1 = create_node(side_points.p);
+                    visited.at(closest_obst * 2) = true;
+                    obst.side_safety_nodes.first = n1;
                 }
 
-                if (create_n1)
-                    n1 = create_node(side_points.p);
-
-                if (create_n2)
+                if (!visited[closest_obst * 2 + 1]) {
                     n2 = create_node(side_points.q);
-
-                obst.side_safety_nodes.first = n1;
-                obst.side_safety_nodes.second = n2;
+                    visited.at(closest_obst * 2 + 1) = true;
+                    obst.side_safety_nodes.second = n2;
+                }
 
                 // make robot move to somewhere near the center of the obstacle first,
                 // and then move it to one of the side safety nodes
                 point center_coord = RP::center_point_with_radius(nodes[curr_node].coord, side_points.p, side_points.q, CENTER_TOLERANCE);
+                // printf("CENTER COORD: %f, %f\n", center_coord.x, center_coord.y);
                 obst.center_safety_node = create_node(center_coord);
                 add_edge(curr_node, obst.center_safety_node);
-                add_edge(n1, obst.center_safety_node);
-                add_edge(n2, obst.center_safety_node);
-            }
-            else
-            {
-                n1 = obst.side_safety_nodes.first;
-                n2 = obst.side_safety_nodes.second;
-            }
-            if (n1 >= 0)
+                if (n1 >= 0)
+                    add_edge(n1, obst.center_safety_node);
+                if (n2 >= 0)
+                    add_edge(n2, obst.center_safety_node);
+            // }
+            // else
+            // {
+            //     n1 = obst.side_safety_nodes.first;
+            //     n2 = obst.side_safety_nodes.second;
+            // }
+            if (n1 >= 0) {
                 add_edge(curr_node, n1);
-            if (n2 >= 0)
+                unprocessed_nodes.push(n1);
+            }
+            if (n2 >= 0) {
                 add_edge(curr_node, n2);
-
-            unprocessed_nodes.push(n1);
-            unprocessed_nodes.push(n2);
+                unprocessed_nodes.push(n2);
+            }
         }
         else
         {
@@ -329,7 +343,12 @@ std::vector<RP::point> RP::Map::shortest_path_to()
     int i = 1;
     while (i != 0)
     {
+        if (i == -1) {
+            printf("WARNING: no path found!\n");
+            break;
+        }
         node &n = nodes[i];
+        // printf("node: %f, %f\n", n.coord.x, n.coord.y);
         result.push_back(n.coord);
         i = n.prev;
     }
