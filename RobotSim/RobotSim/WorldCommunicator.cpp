@@ -6,12 +6,10 @@ WorldCommunicator::WorldCommunicator() : listenThread(&WorldCommunicator::listen
 
 void WorldCommunicator::update() {
 	std::vector<char> nextPacket;
-	bool gotAPacket = false;
 	mtx.lock();
 	if(!packetQ.empty()) {
 		nextPacket = packetQ.front();
 		packetQ.pop();
-		gotAPacket = true;
 	}
 	else {
 		return;
