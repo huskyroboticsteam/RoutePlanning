@@ -23,7 +23,7 @@
 #define VIEW_SHAPE_COLOR sf::Color::Blue
 #endif
 
-#define float double // YOU ARE GOING TO HELL
+//#define float double // YOU ARE GOING TO HELL
  
 typedef unsigned int uint;
 namespace RP
