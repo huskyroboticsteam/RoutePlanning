@@ -31,6 +31,8 @@ void WorldCommunicator::update(float& move, float& turn) {
 	}
 }
 
+void WorldCommunicator::update() {}
+
 // Listens for packet 
 void WorldCommunicator::listen() {
 	while(true) {

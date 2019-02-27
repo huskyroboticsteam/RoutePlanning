@@ -20,6 +20,7 @@ class WorldCommunicator {
 		// Sends and receives packets
 		// To be called in the main update loop
 		void update(float& move, float& turn);
+		void update();
 		WorldCommunicator();
 	private:
 		int timer;

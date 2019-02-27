@@ -55,8 +55,8 @@ RP::Map map(sim.getpos(), grid.target);
 RP::AutoController control(grid, agent, map);
 
 WorldCommunicator worldCommunicator;
-float toTurn;
-float toMove;
+static float toTurn;
+static float toMove;
 // ---------------------------------------- //
 
 
@@ -216,10 +216,15 @@ int main(int, char const **)
         
         sim.update_agent();
         map.update(sim.visible_obstacles());
-
-		worldCommunicator.update(toMove, toTurn);
+		
+		worldCommunicator.update();
+		float a;
+		float b;
+		worldCommunicator.update(a, b);
 		turn(toTurn);
 		move(toMove);
+		
+		
 		
         window.clear(bgColor);
         window.draw(grid);
