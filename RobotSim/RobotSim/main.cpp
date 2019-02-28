@@ -261,7 +261,7 @@ int main(int, char const **)
         }
         sim.update_agent();
         map.update(sim.visible_obstacles());
-
+        
         window.clear(bgColor);
         window.draw(grid);
         window.draw(agent);

@@ -36,10 +36,10 @@ Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float 
 
     // the hitbox is stored as four vectors in polar coordinates
     // each vector corresponds to the displacement of one vertex from the center of the agent
-    hitBox[0] = {.9f, atan2(.75f, -.5f)};
-    hitBox[1] = {.9f, atan2(.75f, .5f)};
-    hitBox[2] = {.9f, atan2(-.75f, .5f)};
-    hitBox[3] = {.9f, atan2(-.75f, -.5f)};
+    hitBox[0] = RP::polarPoint{.9f, atan2(.75f, -.5f)};
+    hitBox[1] = RP::polarPoint{.9f, atan2(.75f, .5f)};
+    hitBox[2] = RP::polarPoint{.9f, atan2(-.75f, .5f)};
+    hitBox[3] = RP::polarPoint{.9f, atan2(-.75f, -.5f)};
 
     // draws the path the agent has taken
     path.setPrimitiveType(sf::Lines);

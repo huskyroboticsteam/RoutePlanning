@@ -10,8 +10,32 @@ bool RP::point::operator==(const point &p) const
 {
     return x == p.x && y == p.y;
 }
-
 bool RP::point::operator!=(const point &p) const
+{
+    return !(*this == p);
+}
+
+RP::line::line(point inp, point inq) {
+    p = inp;
+    q = inq;
+}
+RP::line::line(float px, float py, float qx, float qy) {
+    p.x = px;
+    p.y = py;
+    q.x = qx;
+    q.y = qy;
+}
+
+bool RP::polarPoint::operator==(const polarPoint& p) const
+{
+    if (r == p.r)
+        return normalize_angle(th) == normalize_angle(p.th);
+    else if (r == -p.r)
+        return normalize_angle(th) == -normalize_angle(p.th);
+    else
+        return false;
+}
+bool RP::polarPoint::operator!=(const polarPoint& p) const
 {
     return !(*this == p);
 }

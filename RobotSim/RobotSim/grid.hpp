@@ -33,9 +33,9 @@ class Grid : public sf::Drawable, public sf::Transformable
     float retrieveWidth() { return width; }
     float retrieveHeight() { return height; }
 
-    bool linesCollide(std::array<float, 4> line1, std::array<float, 4> line2);
-    bool boxCollision(std::array<std::array<float, 4>, 4> box, std::array<float, 4> line);
-    bool willCollide(Agent agent, float dx, float dy, float dr);
+    bool linesCollide(RP::line line1, RP::line line2);
+    bool boxCollision(std::array<RP::line, 4> box, RP::line line);
+    bool willCollide(Agent &agent, float dx, float dy, float dr);
 
     bool drawPath();
     bool drawPath(std::vector<RP::point> path, Agent agent);
@@ -62,10 +62,10 @@ class Grid : public sf::Drawable, public sf::Transformable
     bool showGrid;
     bool noclip;
 
-    std::array<float, 4> TOP_BORDER;
-    std::array<float, 4> RIGHT_BORDER;
-    std::array<float, 4> BOTTOM_BORDER;
-    std::array<float, 4> LEFT_BORDER;
+    RP::line TOP_BORDER;
+    RP::line RIGHT_BORDER;
+    RP::line BOTTOM_BORDER;
+    RP::line LEFT_BORDER;
 
     float width;        // in meters
     float height;       // in meters

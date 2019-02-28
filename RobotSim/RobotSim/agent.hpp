@@ -39,7 +39,7 @@ public:
     float turnTowards(float targetX, float targetY);
     void scaleSpeed(float ss);
     
-    std::array<std::pair<float, float>, 4> getHitBox() { return hitBox; }
+    std::array<RP::polarPoint, 4> getHitBox() { return hitBox; }
     
 #if THEME == 0
     const sf::Color BASE_COLOR = sf::Color(55, 22, 126);
@@ -66,7 +66,7 @@ private:
     
     // stores the four corners of the hitbox as polar coordinates (r, θ)
     // r is in meters, θ is in radians
-    std::array<std::pair<float, float>, 4> hitBox;
+    std::array<RP::polarPoint, 4> hitBox;
     
     unsigned int scale;
     float mapWidth;

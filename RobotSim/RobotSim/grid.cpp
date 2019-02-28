@@ -12,7 +12,6 @@
 #include <math.h>
 
 #include "grid.hpp"
-#include "utils.hpp"
 
 // creates a grid that can have obstacles and agents that it moves around
 // !!! NOTE !!!
@@ -202,17 +201,17 @@ float Grid::rotateAgent(Agent &agent, float dr)
 // returns true if the two lines, stored as {x1, y1, x2, y2}, intersect
 // otherwise returns false
 // sorry for variable names, but believe me it works 100%
-bool Grid::linesCollide(std::array<float, 4> line1, std::array<float, 4> line2)
+bool Grid::linesCollide(RP::line line1, RP::line line2)
 {
-    float l1x1 = line1[0];
-    float l1y1 = line1[1];
-    float l1x2 = line1[2];
-    float l1y2 = line1[3];
+    float l1x1 = line1.p.x;
+    float l1y1 = line1.p.y;
+    float l1x2 = line1.q.x;
+    float l1y2 = line1.q.y;
 
-    float l2x1 = line2[0];
-    float l2y1 = line2[1];
-    float l2x2 = line2[2];
-    float l2y2 = line2[3];
+    float l2x1 = line2.p.x;
+    float l2y1 = line2.p.y;
+    float l2x2 = line2.q.x;
+    float l2y2 = line2.q.y;
 
     float uA = ((l2x2 - l2x1) * (l1y1 - l2y1) - (l2y2 - l2y1) * (l1x1 - l2x1)) / ((l2y2 - l2y1) * (l1x2 - l1x1) - (l2x2 - l2x1) * (l1y2 - l1y1));
 
@@ -224,10 +223,10 @@ bool Grid::linesCollide(std::array<float, 4> line1, std::array<float, 4> line2)
 // returns true if any of four lines in an array collides with the other given line
 // otherwise returns false
 // expects all lines to be arrays storing {x1, y1, x2, y2} in that order
-bool Grid::boxCollision(std::array<std::array<float, 4>, 4> box, std::array<float, 4> line)
+bool Grid::boxCollision(std::array<RP::line, 4> box, RP::line line)
 {
     bool flag = false;
-    for (std::array<float, 4> boxLine : box)
+    for (RP::line boxLine : box)
     {
         if (linesCollide(boxLine, line))
         {
@@ -250,13 +249,13 @@ bool Grid::willCollide(Agent agent, float dx, float dy, float dr)
     int xQuadrant = agent.getX() / 4;
     int yQuadrant = agent.getY() / 4;
 
-    std::array<std::pair<float, float>, 4> hitbox = agent.getHitBox();
-    std::array<std::array<float, 4>, 4> hitboxLines;
+    std::array<RP::polarPoint, 4> hitbox = agent.getHitBox();
+    std::array<RP::line, 4> hitboxLines;
 
     // apply rotation to hitbox
     for (int i = 0; i < 4; i++)
     {
-        hitbox[i].second += (agent.getInternalRotation() + dr + 90) * PI / 180.f;
+        hitbox[i].th += (agent.getInternalRotation() + dr + 90) * PI / 180.f;
     }
 
     // convert to cartesian, and then create the lines
@@ -266,17 +265,17 @@ bool Grid::willCollide(Agent agent, float dx, float dy, float dr)
         if (end > 3)
             end = 0;
 
-        float r1 = hitbox[i].first;
-        float t1 = hitbox[i].second;
-        float r2 = hitbox[end].first;
-        float t2 = hitbox[end].second;
+        float r1 = hitbox[i].r;
+        float t1 = hitbox[i].th;
+        float r2 = hitbox[end].r;
+        float t2 = hitbox[end].th;
 
-        hitboxLines[i] = {r1 * cos(t1), r1 * sin(t1), r2 * cos(t2), r2 * sin(t2)};
+        hitboxLines[i] = RP::line(r1 * cos(t1), r1 * sin(t1), r2 * cos(t2), r2 * sin(t2));
 
-        hitboxLines[i][0] += agent.getX() + dx;
-        hitboxLines[i][1] += agent.getY() + dy;
-        hitboxLines[i][2] += agent.getX() + dx;
-        hitboxLines[i][3] += agent.getY() + dy;
+        hitboxLines[i].p.x += agent.getX() + dx;
+        hitboxLines[i].p.y += agent.getY() + dy;
+        hitboxLines[i].q.x += agent.getX() + dx;
+        hitboxLines[i].q.y += agent.getY() + dy;
     }
 
     bool flag = false;
@@ -301,7 +300,8 @@ bool Grid::willCollide(Agent agent, float dx, float dy, float dr)
 
     for (Obstacle o : obstacleList)
     {
-        if (boxCollision(hitboxLines, {o.x1, o.y1, o.x2, o.y2}))
+        //if (boxCollision(hitboxLines, {o.x1, o.y1, o.x2, o.y2}))
+        if (boxCollision(hitboxLines, RP::line(o.x1, o.y1, o.x2, o.y2)))
         {
             flag = true;
             debugMsg("Hit obstacle");
