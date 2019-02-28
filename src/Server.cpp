@@ -186,17 +186,18 @@ bool RP::Server::send_action(unsigned char id) // same id format as in Scarlet
 }
 
 void RP::Server::send_watchdog() {
-	bool hasSent = RP::Server::send_action(WATCHDOG_ID);
-
-	while (!hasSent) {
+	bool hasSent;
+	while (true) {
+		hasSent = RP::Server::send_action(WATCHDOG_ID);
+		while (!hasSent) {
+			hasSent = RP::Server::send_action(WATCHDOG_ID);
+		}
 		// Sleep for 100 milliseconds and then try again
 #ifdef _WIN32 // Windows
 		Sleep(100); // in milliseconds
 #else // Unix
 		usleep(100 * 1000); // in microseconds
 #endif
-
-		RP::Server::send_action(WATCHDOG_ID);
 	}
 }
 
