@@ -217,14 +217,12 @@ int main(int, char const **)
         sim.update_agent();
         map.update(sim.visible_obstacles());
 		
-        /*
-		worldCommunicator.update();
-		float a;
-		float b;
-		worldCommunicator.update(a, b);
-		turn(toTurn);
-		move(toMove);
-		*/
+
+		//worldCommunicator.update(currentPosition(), currentRotation(), toTurn, toMove);
+
+		//turn(toTurn);
+		//move(toMove);
+		
 		
 		
         window.clear(bgColor);

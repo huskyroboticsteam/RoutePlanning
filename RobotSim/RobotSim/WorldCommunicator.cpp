@@ -1,10 +1,27 @@
 #include "WorldCommunicator.hpp"
 
+
 WorldCommunicator::WorldCommunicator() : listenThread(&WorldCommunicator::listen, this) {
+	in = socket(AF_INET, SOCK_DGRAM, 0);
+	// Bind in socket (copied from Server.cpp)
+	sockaddr_in serverHint;
+	serverHint.sin_addr.s_addr = INADDR_ANY;
+	serverHint.sin_family = AF_INET;
+	serverHint.sin_port = htons(54000);
+	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
+	{
+		std::cout << "Can't bind socket! " << strerror(errno) << std::endl;
+	}
 	
+	out = socket(AF_INET, SOCK_DGRAM, 0);
+	// Set up the address we should send to:
+	send_to.sin_family = AF_INET;
+	send_to.sin_port = htons(54000);
+	inet_aton("127.0.0.1", &(send_to.sin_addr));
+	memset(&(send_to.sin_zero), '\0', 8);
 }
 
-void WorldCommunicator::update(float& move, float& turn) {
+void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn) {
 	std::vector<char> nextPacket;
 	mtx.lock();
 	if(!packetQ.empty()) {
@@ -18,9 +35,10 @@ void WorldCommunicator::update(float& move, float& turn) {
 	
 	// Process Packet
 	// Assuming format: ID (char denoting action) and Data (float denoting amount)
-	char id = nextPacket.at(0);
+	// Ignore time stamp 
+	char id = nextPacket.at(4);
 	float data;
-	memcpy(&data, &nextPacket[1], sizeof(float));
+	memcpy(&data, &nextPacket[5], sizeof(float));
 	// // Assuming id 0 = move and id 1 = turn
 	// This doesn't work
 	if (id == 0) {
@@ -29,17 +47,63 @@ void WorldCommunicator::update(float& move, float& turn) {
 	else {
 		turn = data;
 	}
+	
+	if(timer % framesPerGPS == 0) {
+		std::vector<unsigned char> data(2*sizeof(float));
+		memcpy(&data[0], &position.x, sizeof(float));
+		memcpy(&data[sizeof(float)], &position.y, sizeof(float));
+		send_action(data, gpsId);
+	}
+	if(timer % framesPerMag == 0) {
+		std::vector<unsigned char> data(sizeof(float));
+		memcpy(&data[0], &rotation, sizeof(float));
+		send_action(data, magId);
+	}
+	
+	timer++;
 }
 
-void WorldCommunicator::update() {}
 
 // Listens for packet 
 void WorldCommunicator::listen() {
 	while(true) {
-		std::vector<char> buf;
-		//TODO: listen for a packet;
+		std::vector<char> buf(256);
+		
+		sockaddr_in client;
+		memset(&client, 0, sizeof(sockaddr_in));
+		
+		unsigned int clientLength = sizeof(client);
+		
+		int bytesIn = recvfrom(in, &buf[0], 256, 0, (sockaddr*)&client, &clientLength);
+		
+		if (bytesIn == SOCKET_ERROR) 
+		{
+			std::cout << "Error receiving from client " << strerror(errno);
+		}
+		
 		mtx.lock();
 		packetQ.push(buf);
 		mtx.unlock();
+	}
+}
+
+bool WorldCommunicator::send_action(std::vector<unsigned char> data, const unsigned char id) {
+	std::vector<unsigned char> packet;
+	for(int i = 0; i < 4; i++) {
+		packet.push_back(0); //fake time stamp
+	}
+	packet.push_back(id); // represents component to be controlled
+	for (unsigned i = 0; i < data.size(); i++) {
+		packet.push_back(data[i]); // represents speed/position to be sent
+	}
+
+	// packet.data() first four bytes are the time stamp, fifth is the id, and the rest is the data
+	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*)&send_to, sizeof(send_to));
+	if (sendOk == SOCKET_ERROR) {
+		std::cout << "That didn't work! " << strerror(errno);
+		return false;
+	}
+	else {
+		return true;
 	}
 }
