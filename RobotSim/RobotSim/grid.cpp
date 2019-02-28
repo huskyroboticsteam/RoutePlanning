@@ -241,7 +241,7 @@ bool Grid::boxCollision(std::array<RP::line, 4> box, RP::line line)
 // returns false if there will be no collisions
 // is not very sophisticated (simply checks target location instead of path), TODO make better
 // currently only checks the map borders
-bool Grid::willCollide(Agent agent, float dx, float dy, float dr)
+bool Grid::willCollide(Agent& agent, float dx, float dy, float dr)
 {
     if (noclip)
         return false;
