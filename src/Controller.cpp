@@ -42,8 +42,8 @@ int main() {
 	RP::Controller controller(p, targetSites);
 
 	// Thread for sending watchdog packets
-	RP::Server server();
-	std::thread watchdogThread(server().send_watchdog);
+	static RP::Server server;
+	std::thread watchdogThread(server.send_watchdog);
 }
 
 namespace RP {
