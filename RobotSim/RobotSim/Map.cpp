@@ -222,6 +222,11 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
         // printf("New Count: %d\n", new_obstacles.size());
         // for (const obstacle& o : new_obstacles) printf("new (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
     }
+    /*
+    iterate over each new obstacle, try to merge it with existing obstacles
+    if they can merge (meaning, if they are colinear and overlapping), remove the old 
+    obstacles and add the new merged obstacle
+    */
     for (const obstacle &newobs : new_obstacles)
     {
         // printf("(%f, %f), (%f, %f)\n", newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y);
@@ -234,20 +239,20 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
             // if intersect/overlap
             // merge obstacles, remove vobs and don't add newobs, and add merged obstacles
             obstacle temp = merge(merged, *it_mobs, can_merge);
-            if (debug) {
-                // printf("merged(): m(%f, %f) (%f, %f) and n(%f, %f) (%f, %f) -> t(%f, %f), (%f, %f)\n",
-                //             it_mobs->coord1.x, it_mobs->coord1.y, it_mobs->coord2.x, it_mobs->coord2.y,
-                //             newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y,
-                //             temp.coord1.x, temp.coord1.y, temp.coord2.x, temp.coord2.y);
-            }
             if (can_merge)
             {
+                // printf("attempted merge: m(%f, %f) (%f, %f) and n(%f, %f) (%f, %f) -> t(%f, %f), (%f, %f)\n",
+                //                 it_mobs->coord1.x, it_mobs->coord1.y, it_mobs->coord2.x, it_mobs->coord2.y,
+                //                 newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y,
+                //                 temp.coord1.x, temp.coord1.y, temp.coord2.x, temp.coord2.y);
                 if (!same_obstacle(temp, *it_mobs))
                 {
                     merged = temp;
                     it_mobs = mem_obstacles.erase(it_mobs);
                     nmerged++;
-                    if (debug) printf("merged\n");
+                    if (debug) {
+                        
+                    }
                 }
                 else
                 {
@@ -285,7 +290,7 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     can_merge = true;
     point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
     std::sort(points, points + 4, [](const point &p1, const point &p2) { 
-        if (p1.x != p2.x)
+        if (fabs(p1.x - p2.x) > 1e-5)
             return fabs(p1.x) > fabs(p2.x);
         else
             return fabs(p1.y) > fabs(p2.y);
