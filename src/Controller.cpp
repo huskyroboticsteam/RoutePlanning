@@ -40,10 +40,6 @@ int main() {
 	std::cin >> p.x;
 	std::cin >> p.y;
 	RP::Controller controller(p, targetSites);
-
-	// Thread for sending watchdog packets
-	static RP::Server server;
-	std::thread watchdogThread(server.send_watchdog);
 }
 
 namespace RP {
@@ -55,7 +51,8 @@ namespace RP {
 		state = FOLLOW_PATH;
 		curr_lat = cur_pos.x;
 		curr_lng = cur_pos.y;
-		
+
+		std::thread watchdogThread(&RP::Server::send_watchdog, &server);
 	}
 
     // using given packet data and server send a packet containing either a direction or motor power
