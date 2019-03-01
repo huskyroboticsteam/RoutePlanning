@@ -50,7 +50,7 @@ turnstate = SURVEY_COUNTERCW;
 #endif
                 break;
             }
-            printf("turning toward target %f\n", tar_angle);
+            // printf("turning toward target %f\n", tar_angle);
             grid.rotateAgent(agent, agent.turnTowards(tar_angle));
             break;
         case SURVEY_COUNTERCW:
@@ -78,7 +78,7 @@ turnstate = SURVEY_COUNTERCW;
         case BACK_TO_TARGET:
             if (angleCloseEnough(agent.getInternalRotation(), tar_angle, 0.5))
             {
-                printf("reached turning target of %f\n", tar_angle);
+                // printf("reached turning target of %f\n", tar_angle);
                 turning = false;
                 timer.reset();
                 break;
