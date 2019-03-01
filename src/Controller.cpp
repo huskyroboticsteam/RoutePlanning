@@ -8,8 +8,8 @@
 #define DATA_GPS 0xC0
 #define DATA_MAG 0xC1
 
-#define SET_SPEED 0x95
-#define HEADING_CHANGE 0x97
+#define SET_SPEED 0x01
+#define HEADING_CHANGE 0x02
 
 #define TARGET_LAT 123.0
 #define TARGET_LNG 321.0
@@ -39,7 +39,9 @@ int main() {
 	std::cin >> p.x;
 	std::cin >> p.y;
 	RP::Controller controller(p, targetSites);
-	
+	while(true) {
+		controller.update();
+	}
 }
 
 
