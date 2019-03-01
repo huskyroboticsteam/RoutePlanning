@@ -1,7 +1,8 @@
 #include "WorldCommunicator.hpp"
+#include <chrono>
 
 
-WorldCommunicator::WorldCommunicator() : listenThread(&WorldCommunicator::listen, this) {
+WorldCommunicator::WorldCommunicator()  {
 	in = socket(AF_INET, SOCK_DGRAM, 0);
 	// Bind in socket (copied from Server.cpp)
 	sockaddr_in serverHint;
@@ -19,16 +20,19 @@ WorldCommunicator::WorldCommunicator() : listenThread(&WorldCommunicator::listen
 	send_to.sin_port = htons(54000);
 	inet_aton("127.0.0.1", &(send_to.sin_addr));
 	memset(&(send_to.sin_zero), '\0', 8);
+	listenThread = std::thread(&WorldCommunicator::listen, this);
 }
 
 void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn) {
-	std::vector<char> nextPacket;
+	std::vector<unsigned char> nextPacket;
 	mtx.lock();
 	if(!packetQ.empty()) {
 		nextPacket = packetQ.front();
 		packetQ.pop();
+		std::cout << "Update thread got a packet" <<  timer << std::endl;
 	}
 	else {
+		mtx.unlock();
 		return;
 	}
 	mtx.unlock();
@@ -43,9 +47,11 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 	// This doesn't work
 	if (id == 0) {
 		move = data;
+		std::cout << "Update thread got a move packet" <<  timer << std::endl;
 	}
 	else {
 		turn = data;
+		std::cout << "Update thread got a turn packet" <<  timer << std::endl;
 	}
 	
 	if(timer % framesPerGPS == 0) {
@@ -67,23 +73,27 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 // Listens for packet 
 void WorldCommunicator::listen() {
 	while(true) {
-		std::vector<char> buf(256);
+		std::vector<unsigned char> buf(256);
 		
 		sockaddr_in client;
 		memset(&client, 0, sizeof(sockaddr_in));
 		
 		unsigned int clientLength = sizeof(client);
 		
-		int bytesIn = recvfrom(in, &buf[0], 256, 0, (sockaddr*)&client, &clientLength);
-		
+		int bytesIn = recvfrom(in, &buf.front(), 256, 0, (sockaddr*)&client, &clientLength);
+		char clientIp[256];
+		memset(clientIp, 0, 256);
+		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
+		std::cout << "Listen thread got packet from " << clientIp << std::endl;
 		if (bytesIn == SOCKET_ERROR) 
 		{
-			std::cout << "Error receiving from client " << strerror(errno);
+			std::cout << "Error receiving from client " << strerror(errno) << std::endl;
 		}
 		
 		mtx.lock();
 		packetQ.push(buf);
 		mtx.unlock();
+		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 	}
 }
 

@@ -218,10 +218,10 @@ int main(int, char const **)
         map.update(sim.visible_obstacles());
 		
 
-		//worldCommunicator.update(currentPosition(), currentRotation(), toTurn, toMove);
+		worldCommunicator.update(currentPosition(), currentRotation(), toTurn, toMove);
 
-		//turn(toTurn);
-		//move(toMove);
+		turn(toTurn);
+		move(toMove);
 		
 		
 		

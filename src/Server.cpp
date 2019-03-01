@@ -47,7 +47,7 @@ RP::Server::Server()
 	//Example of how to set up sendto address:
 	server.sin_family = AF_INET;
 	server.sin_port = htons(54000);
-	inet_aton("127.0.0.1", &(server.sin_addr));
+	inet_aton("10.18.213.34", &(server.sin_addr));
 	memset(&(server.sin_zero), '\0', 8);
 	
 	// Bind socket to ip address and port

@@ -34,7 +34,7 @@ class WorldCommunicator {
 		//Mutex used to lock packetQ during multithreading
 		std::mutex mtx;
 		// Queue of packets to be processed
-		std::queue<std::vector<char>> packetQ;
+		std::queue<std::vector<unsigned char>> packetQ;
 		// Thread used to run listen method asynchronously
 		std::thread listenThread;
 		// Address we should send stuff to
