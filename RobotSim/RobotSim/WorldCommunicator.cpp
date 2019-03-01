@@ -1,5 +1,4 @@
 #include "WorldCommunicator.hpp"
-#include <chrono>
 
 
 WorldCommunicator::WorldCommunicator()  {
@@ -8,7 +7,7 @@ WorldCommunicator::WorldCommunicator()  {
 	sockaddr_in serverHint;
 	serverHint.sin_addr.s_addr = INADDR_ANY;
 	serverHint.sin_family = AF_INET;
-	serverHint.sin_port = htons(54000);
+	serverHint.sin_port = htons(54001);
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
 		std::cout << "Can't bind socket! " << strerror(errno) << std::endl;
@@ -18,18 +17,36 @@ WorldCommunicator::WorldCommunicator()  {
 	// Set up the address we should send to:
 	send_to.sin_family = AF_INET;
 	send_to.sin_port = htons(54000);
-	inet_aton("127.0.0.1", &(send_to.sin_addr));
+	inet_aton("10.18.213.34", &(send_to.sin_addr));
 	memset(&(send_to.sin_zero), '\0', 8);
 	listenThread = std::thread(&WorldCommunicator::listen, this);
 }
 
 void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn) {
+	timer++;
+	
+	if(timer % framesPerGPS == 0) {
+		std::vector<unsigned char> data(2*sizeof(float));
+		memcpy(&data[0], &position.x, sizeof(float));
+		memcpy(&data[sizeof(float)], &position.y, sizeof(float));
+		if(send_action(data, gpsId)) {
+			//std::cout << "Sent a GPS packet" << std::endl;
+		}
+	}
+	if(timer % framesPerMag == 0) {
+		std::vector<unsigned char> data(sizeof(float));
+		memcpy(&data[0], &rotation, sizeof(float));
+		if(send_action(data, magId)) {
+			//std::cout << "Sent a magnetometer packet" << std::endl;
+		}
+	}
+	
+	
 	std::vector<unsigned char> nextPacket;
 	mtx.lock();
 	if(!packetQ.empty()) {
 		nextPacket = packetQ.front();
 		packetQ.pop();
-		std::cout << "Update thread got a packet" <<  timer << std::endl;
 	}
 	else {
 		mtx.unlock();
@@ -41,32 +58,20 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 	// Assuming format: ID (char denoting action) and Data (float denoting amount)
 	// Ignore time stamp 
 	char id = nextPacket.at(4);
-	float data;
-	memcpy(&data, &nextPacket[5], sizeof(float));
+	float dataToSend;
+	memcpy(&dataToSend, &nextPacket[5], sizeof(float));
 	// // Assuming id 0 = move and id 1 = turn
 	// This doesn't work
-	if (id == 0) {
-		move = data;
-		std::cout << "Update thread got a move packet" <<  timer << std::endl;
+	if (id == 1) {
+		move = dataToSend;
+		std::cout << "Update thread got a move packet" << std::endl;
 	}
-	else {
-		turn = data;
-		std::cout << "Update thread got a turn packet" <<  timer << std::endl;
+	else if(id == 2) {
+		turn = dataToSend;
+		std::cout << "Update thread got a turn packet" << std::endl;
 	}
+
 	
-	if(timer % framesPerGPS == 0) {
-		std::vector<unsigned char> data(2*sizeof(float));
-		memcpy(&data[0], &position.x, sizeof(float));
-		memcpy(&data[sizeof(float)], &position.y, sizeof(float));
-		send_action(data, gpsId);
-	}
-	if(timer % framesPerMag == 0) {
-		std::vector<unsigned char> data(sizeof(float));
-		memcpy(&data[0], &rotation, sizeof(float));
-		send_action(data, magId);
-	}
-	
-	timer++;
 }
 
 
@@ -84,16 +89,14 @@ void WorldCommunicator::listen() {
 		char clientIp[256];
 		memset(clientIp, 0, 256);
 		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
-		std::cout << "Listen thread got packet from " << clientIp << std::endl;
 		if (bytesIn == SOCKET_ERROR) 
 		{
 			std::cout << "Error receiving from client " << strerror(errno) << std::endl;
 		}
-		
+
 		mtx.lock();
 		packetQ.push(buf);
 		mtx.unlock();
-		std::this_thread::sleep_for (std::chrono::milliseconds(1));
 	}
 }
 

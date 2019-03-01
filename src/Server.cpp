@@ -55,7 +55,7 @@ RP::Server::Server()
 	serverHint.sin_addr.s_addr = INADDR_ANY;
 	//inet_pton(AF_INET, "10.19.161.242", &serverHint.sin_addr.s_addr);
 	serverHint.sin_family = AF_INET;
-	serverHint.sin_port = htons(54111);
+	serverHint.sin_port = htons(54000);
 	
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
