@@ -23,6 +23,7 @@ WorldCommunicator::WorldCommunicator()  {
 }
 
 void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn) {
+	
 	timer++;
 	
 	if(timer % framesPerGPS == 0) {
@@ -63,6 +64,7 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 	// // Assuming id 0 = move and id 1 = turn
 	// This doesn't work
 	std::cout << "World Communicator update thread got a packet" << std::endl;
+	std::cout << id << std::endl;
 	if (id == 1) {
 		move = dataToSend;
 		std::cout << "Update thread got a move packet" << std::endl;
@@ -71,8 +73,6 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 		turn = dataToSend;
 		std::cout << "Update thread got a turn packet" << std::endl;
 	}
-
-	
 }
 
 
@@ -81,16 +81,13 @@ void WorldCommunicator::listen() {
 	while(true) {
 		std::cout << "Started listening" << std::endl;
 		std::vector<unsigned char> buf(256);
-		
+		//char buf[256];
 		sockaddr_in client;
 		memset(&client, 0, sizeof(sockaddr_in));
 		
 		unsigned int clientLength = sizeof(client);
-		std::cout << "" << std::endl;
 		int bytesIn = recvfrom(in, &buf.front(), 256, 0, (sockaddr*)&client, &clientLength);
-		char clientIp[256];
-		memset(clientIp, 0, 256);
-		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
+		
 		if (bytesIn == SOCKET_ERROR) 
 		{
 			std::cout << "Error receiving from client " << strerror(errno) << std::endl;
