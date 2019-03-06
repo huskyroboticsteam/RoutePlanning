@@ -29,7 +29,7 @@
 #include "Simulator.hpp"
 #include "Map.hpp"
 #include "autoController.hpp"
-#include "main.hpp"
+#include "WorldCommunicator.hpp"
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
@@ -53,6 +53,10 @@ RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gr
 RP::Map map(sim.getpos(), grid.target);
 
 RP::AutoController control(grid, agent, map);
+
+WorldCommunicator worldCommunicator;
+static float toTurn;
+static float toMove;
 // ---------------------------------------- //
 
 
@@ -212,7 +216,15 @@ int main(int, char const **)
         
         sim.update_agent();
         map.update(sim.visible_obstacles());
+		
 
+		worldCommunicator.update(currentPosition(), currentRotation(), toTurn, toMove);
+
+		turn(toTurn);
+		move(toMove);
+		
+		
+		
         window.clear(bgColor);
         window.draw(grid);
         window.draw(agent);
