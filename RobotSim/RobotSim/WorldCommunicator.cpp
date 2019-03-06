@@ -79,6 +79,7 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 // Listens for packet 
 void WorldCommunicator::listen() {
 	while(true) {
+		std::cout << "Started listening" << std::endl;
 		std::vector<unsigned char> buf(256);
 		
 		sockaddr_in client;

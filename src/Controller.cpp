@@ -5,8 +5,8 @@
 #include "Server.hpp"
 #include "Map.hpp"
 
-#define DATA_GPS 0xC0
-#define DATA_MAG 0xC1
+#define DATA_GPS 10
+#define DATA_MAG 11
 
 #define SET_SPEED 0x01
 #define HEADING_CHANGE 0x02
@@ -82,12 +82,13 @@ namespace RP {
 
             // step 2: wait for server to give current location
 			// Note: If Scarlet changes size of Timestamp, be sure to update the parsePacket paramaters below
+
 			//TODO: make this a vector or shared_ptr
             unsigned char* firstPacket = server.go();
             parsePacket(firstPacket[4], &firstPacket[5]);
             unsigned char* secondPacket = server.go();
             parsePacket(secondPacket[4], &secondPacket[5]);
-			std::cout << "Controller got a packet" << std::endl;
+			//std::cout << "Controller got a packet" << std::endl;
             point nextPoint {0.0, 0.0};
             if (state == FOLLOW_PATH) {
                 if (in_spiral_radius()) {
@@ -147,14 +148,16 @@ namespace RP {
             float lng = 0.0;
             std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
 			curr_lat = lat;
-			curr_lng = lng;
+			curr_lng = lng; 
+			std::cout << "lat: " << lat << " long: " << lng << std::endl;
 	    // Magnometer has x, y, z values
         } else if (packetID == DATA_MAG) {
             float x = 0.0, y = 0.0, z = 0.0;
             std::memcpy(&x, data, sizeof(float));
-            std::memcpy(&y, &data[sizeof(float)], sizeof(float));
-            std::memcpy(&z, &data[2 * sizeof(float)], sizeof(float));
-        }
+           // std::memcpy(&y, &data[sizeof(float)], sizeof(float));
+            //std::memcpy(&z, &data[2 * sizeof(float)], sizeof(float));
+			std::cout << "direction: " << x << std::endl;
+		}
 		
     }
 
