@@ -82,11 +82,12 @@ namespace RP {
 
             // step 2: wait for server to give current location
 			// Note: If Scarlet changes size of Timestamp, be sure to update the parsePacket paramaters below
+			//TODO: make this a vector or shared_ptr
             unsigned char* firstPacket = server.go();
             parsePacket(firstPacket[4], &firstPacket[5]);
             unsigned char* secondPacket = server.go();
             parsePacket(secondPacket[4], &secondPacket[5]);
-
+			std::cout << "Controller got a packet" << std::endl;
             point nextPoint {0.0, 0.0};
             if (state == FOLLOW_PATH) {
                 if (in_spiral_radius()) {

@@ -17,7 +17,7 @@ WorldCommunicator::WorldCommunicator()  {
 	// Set up the address we should send to:
 	send_to.sin_family = AF_INET;
 	send_to.sin_port = htons(54000);
-	inet_aton("10.18.213.34", &(send_to.sin_addr));
+	inet_aton("10.18.237.87", &(send_to.sin_addr));
 	memset(&(send_to.sin_zero), '\0', 8);
 	listenThread = std::thread(&WorldCommunicator::listen, this);
 }
@@ -30,14 +30,14 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 		memcpy(&data[0], &position.x, sizeof(float));
 		memcpy(&data[sizeof(float)], &position.y, sizeof(float));
 		if(send_action(data, gpsId)) {
-			//std::cout << "Sent a GPS packet" << std::endl;
+			std::cout << "Sent a GPS packet" << std::endl;
 		}
 	}
 	if(timer % framesPerMag == 0) {
 		std::vector<unsigned char> data(sizeof(float));
 		memcpy(&data[0], &rotation, sizeof(float));
 		if(send_action(data, magId)) {
-			//std::cout << "Sent a magnetometer packet" << std::endl;
+			std::cout << "Sent a magnetometer packet" << std::endl;
 		}
 	}
 	
@@ -62,6 +62,7 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 	memcpy(&dataToSend, &nextPacket[5], sizeof(float));
 	// // Assuming id 0 = move and id 1 = turn
 	// This doesn't work
+	std::cout << "World Communicator update thread got a packet" << std::endl;
 	if (id == 1) {
 		move = dataToSend;
 		std::cout << "Update thread got a move packet" << std::endl;
@@ -84,7 +85,7 @@ void WorldCommunicator::listen() {
 		memset(&client, 0, sizeof(sockaddr_in));
 		
 		unsigned int clientLength = sizeof(client);
-		
+		std::cout << "" << std::endl;
 		int bytesIn = recvfrom(in, &buf.front(), 256, 0, (sockaddr*)&client, &clientLength);
 		char clientIp[256];
 		memset(clientIp, 0, 256);
@@ -93,7 +94,7 @@ void WorldCommunicator::listen() {
 		{
 			std::cout << "Error receiving from client " << strerror(errno) << std::endl;
 		}
-
+		std::cout << "World communicator listen thread got a packet" << std::endl;
 		mtx.lock();
 		packetQ.push(buf);
 		mtx.unlock();
