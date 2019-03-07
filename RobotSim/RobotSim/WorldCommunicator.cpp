@@ -31,14 +31,14 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 		memcpy(&data[0], &position.x, sizeof(float));
 		memcpy(&data[sizeof(float)], &position.y, sizeof(float));
 		if(send_action(data, gpsId)) {
-			std::cout << "Sent a GPS packet" << std::endl;
+			//std::cout << "Sent a GPS packet" << std::endl;
 		}
 	}
 	if(timer % framesPerMag == 0) {
 		std::vector<unsigned char> data(sizeof(float));
 		memcpy(&data[0], &rotation, sizeof(float));
 		if(send_action(data, magId)) {
-			std::cout << "Sent a magnetometer packet" << std::endl;
+			//std::cout << "Sent a magnetometer packet" << std::endl;
 		}
 	}
 	
