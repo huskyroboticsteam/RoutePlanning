@@ -29,6 +29,7 @@
 #include "Simulator.hpp"
 #include "Map.hpp"
 #include "autoController.hpp"
+#include <queue>
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
@@ -43,6 +44,8 @@ const sf::Color bgColor = sf::Color(255, 255, 255);
 #else
 const sf::Color bgColor = sf::Color(0, 0, 0);
 #endif
+
+static inline sf::CircleShape getNode(RP::node, float scale, float height);
 
 int main(int, char const **)
 {
@@ -64,6 +67,9 @@ int main(int, char const **)
     bool auto_turning = false;
     float auto_orig_angle; // angle of robot before it entered turning phase
 
+    // states
+    bool showGraph = false;
+
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
     {
@@ -74,7 +80,7 @@ int main(int, char const **)
     float gridScale = grid.retrieveScale();
     float gridHeight = grid.retrieveHeight();
     Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 2.f, 2.f);
-    agent.scaleSpeed(2.f);
+    // agent.scaleSpeed(2.f);
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Map map(sim.getpos(), grid.target);
@@ -113,6 +119,7 @@ int main(int, char const **)
                     std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                     std::cout << "U   -- Complete autonomous mode" << std::endl;
                     std::cout << "N   -- Toggle clipping" << std::endl;
+                    std::cout << "E   -- Toggle show graph" << std::endl;
                     std::cout << "0   -- Clear robot path" << std::endl;
                     std::cout << "7   -- Drive forward at max speed" << std::endl;
                     std::cout << "8   -- Turn towards the target" << std::endl;
@@ -152,6 +159,11 @@ int main(int, char const **)
                 case sf::Keyboard::N:
                 {
                     grid.toggleClipping();
+                    break;
+                }
+                case sf::Keyboard::E:
+                {
+                    showGraph = !showGraph;
                     break;
                 }
                 case sf::Keyboard::Tilde:
@@ -201,6 +213,11 @@ int main(int, char const **)
                     grid.rotateAgent(agent, -15.f);
                     break;
                 }
+                // case sf::Keyboard::J:
+                // {
+                //     for (const auto& o : sim.visible_obstacles())
+                //         printf("(%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
+                // }
                 case sf::Keyboard::B:
                 {
                     map.breakpoint(); // temp; used for debug only
@@ -236,7 +253,8 @@ int main(int, char const **)
         }
         else
         {
-            if (vroom) {
+            if (vroom)
+            {
                 //grid.moveAgent(agent, agent.drive());
                 RP::point st_target = map.compute_next_point();
                 grid.moveAgent(agent, agent.driveTowards(st_target.x, st_target.y));
@@ -261,7 +279,7 @@ int main(int, char const **)
         }
         sim.update_agent();
         map.update(sim.visible_obstacles());
-        
+
         window.clear(bgColor);
         window.draw(grid);
         window.draw(agent);
@@ -269,8 +287,40 @@ int main(int, char const **)
             window.draw(get_vertex_line(obst.coord1, obst.coord2, SEEN_OBST_COLOR, gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
+
+        // draw nodes
+        if (showGraph && !map.d_nodes.empty())
+        {
+            std::vector<bool> visited(map.d_nodes.size(), false);
+            std::queue<int> q;
+            q.push(0);
+            while (!q.empty())
+            {
+                int ind = q.front();
+                const auto &nd = map.d_nodes.at(ind);
+                q.pop();
+                if (visited.at(ind))
+                    continue;
+                visited.at(ind) = true;
+                for (const auto &pair : nd.connection)
+                {
+                    q.push(pair.first);
+                    window.draw(get_vertex_line(nd.coord, map.d_nodes.at(pair.first).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                }
+                if (ind != 0)
+                    window.draw(getNode(nd, gridScale, gridHeight));
+            }
+        }
         window.display();
     }
 
     return EXIT_SUCCESS;
+}
+
+static inline sf::CircleShape getNode(RP::node nd, float scale, float height)
+{
+    sf::CircleShape circle(7);
+    circle.setFillColor(GRAPH_NODE_COLOR);
+    circle.setPosition((nd.coord.x + 1) * scale, (height - nd.coord.y) * scale);
+    return circle;
 }

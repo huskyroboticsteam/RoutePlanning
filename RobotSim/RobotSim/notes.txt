@@ -1,4 +1,10 @@
-TODOs for path splitting algorithm
-* change SIDE_TOLERANCE AND CENTER_TOLERANCE based on how far robot is from safety node
-* look around before turning or simply calculate once and turn blindly to avoid 
-  manic head shaking
+Path-splitting algorithm:
+
+1. place two nodes as "safeties" around each endpoint
+X                            X
+^   ----------------------   ^
+X                            X
+               R
+2. remove BOTH failed safeties
+3. unmark visited nodes if fail to add BOTH endpoints
+4. renamed visited nodes to processed nodes or something

@@ -139,7 +139,7 @@ bool RP::on_segment(point p, point q, point r)
 }
 
 //Probably returns whether p1q1 and p2q2 intersect
-bool RP::segments_intersect(point p1, point p2, point q1, point q2)
+bool RP::segments_intersect(point p1, point q1, point p2, point q2)
 {
     int o1 = orientation(p1, q1, p2);
     int o2 = orientation(p1, q1, q2);

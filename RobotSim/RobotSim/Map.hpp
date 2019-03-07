@@ -8,17 +8,21 @@
 
 namespace RP
 {
+struct edge
+{
+  int parent;
+  int child;
+  float len;
+};
+
+typedef std::shared_ptr<edge> eptr;
 
 struct node
 {
   int prev;
   float dist_to;
   point coord;
-  std::vector<std::pair<int, float>> connection;
-  // ~node()
-  // {
-  //   connection.clear();
-  // }
+  std::vector<eptr> connection;
 };
 
 struct obstacle
@@ -33,6 +37,7 @@ class Map
 {
 public:
   Map(const point& cur_pos, const point& target);
+  const std::vector<node>& d_nodes = nodes;
   point compute_next_point();                    // return coordinate for next point to go to
   point compute_search();                        // search for the tennis ball once the goal is reached. Return a target direction vector.
   void update(const std::list<obstacle>& new_obstacles);
@@ -45,7 +50,7 @@ public:
 private:
   void add_obstacle(point coord1, point coord2); //Adds an obstacle to the map. Obstacle is specified with 2 points
   line add_length_to_line_segment(point p, point q, float length); //Returns a pair of points that are "length" away from the ends of segment pq
-  void add_edge(int n1, int n2);                                   //Adds an edge to the graph
+  RP::eptr add_edge(int parent, int child);                                   //Adds an edge to the graph; returns parent=>child edge pointer
   int create_node(point coord);                                    //Creates a node. Returns index in nodes of the created node
   std::vector<node> build_graph(point cur, point tar);             //Builds the graph using the obstacles so that the shortest path gets calculated
   std::vector<node> nodes;                                         //The nodes to the graph
@@ -54,6 +59,7 @@ private:
   const point& tar;
   std::list<obstacle> mem_obstacles;
   Timer timer; // for debugging
+  constexpr point& nd_coord(int node) { return nodes[node].coord; }
 
   bool debugging = false;
 };

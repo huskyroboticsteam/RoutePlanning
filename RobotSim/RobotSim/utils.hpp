@@ -15,12 +15,16 @@
 #define VISIBLE_OBST_COLOR sf::Color(178, 255, 145)
 #define SEEN_OBST_COLOR sf::Color::Green
 #define VIEW_SHAPE_COLOR sf::Color::White
+#define GRAPH_EDGE_COLOR sf::Color::Red
+#define GRAPH_NODE_COLOR sf::Color::Red
 #else
 #define PATH_COLOR sf::Color(115, 92, 196);
 #define OBST_COLOR sf::Color::Black
 #define VISIBLE_OBST_COLOR sf::Color::Green
 #define SEEN_OBST_COLOR sf::Color(58, 201, 0)
 #define VIEW_SHAPE_COLOR sf::Color::Blue
+#define GRAPH_EDGE_COLOR sf::Color::Red
+#define GRAPH_NODE_COLOR sf::Color::Red
 #endif
 
 //#define float double // YOU ARE GOING TO HELL
