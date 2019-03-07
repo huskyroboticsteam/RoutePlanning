@@ -231,9 +231,10 @@ int main(int, char const **)
         sim.update_agent();
         map.update(sim.visible_obstacles());
 		
-
-		worldCommunicator.update(currentPosition(), currentRotation(), goalDirection, toMove);
-
+		float change = 0.0;
+		worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+		goalDirection += change;
+		goalDirection = (int)goalDirection%360;
 		turnTo(goalDirection);
 		move(toMove);
 		
