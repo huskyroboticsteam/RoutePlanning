@@ -24,20 +24,19 @@ WorldCommunicator::WorldCommunicator()  {
 
 void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn) {
 	timer++;
-	
 	if(timer % framesPerGPS == 0) {
 		std::vector<unsigned char> data(2*sizeof(float));
 		memcpy(&data[0], &position.x, sizeof(float));
 		memcpy(&data[sizeof(float)], &position.y, sizeof(float));
 		if(send_action(data, gpsId)) {
-			std::cout << "Sent a GPS packet" << std::endl;
+			//std::cout << "Sent a GPS packet" << std::endl;
 		}
 	}
 	if(timer % framesPerMag == 0) {
 		std::vector<unsigned char> data(sizeof(float));
 		memcpy(&data[0], &rotation, sizeof(float));
 		if(send_action(data, magId)) {
-			std::cout << "Sent a magnetometer packet" << std::endl;
+			//std::cout << "Sent a magnetometer packet" << std::endl;
 		}
 	}
 	
@@ -79,14 +78,18 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 // Listens for packet 
 void WorldCommunicator::listen() {
 	while(true) {
-		std::vector<unsigned char> buf(256);
-		
+        std::cout << "Started listening" << std::endl;
+		//std::vector<unsigned char> buf(256);
+		char buf[256];
+
 		sockaddr_in client;
 		memset(&client, 0, sizeof(sockaddr_in));
 		
 		unsigned int clientLength = sizeof(client);
 		std::cout << "" << std::endl;
-		int bytesIn = recvfrom(in, &buf.front(), 256, 0, (sockaddr*)&client, &clientLength);
+        std::cout << "starting receive" << std::endl;
+		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
+        std::cout << "done receiving" << std::endl;
 		char clientIp[256];
 		memset(clientIp, 0, 256);
 		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
@@ -96,7 +99,7 @@ void WorldCommunicator::listen() {
 		}
 		std::cout << "World communicator listen thread got a packet" << std::endl;
 		mtx.lock();
-		packetQ.push(buf);
+		//packetQ.push(buf);
 		mtx.unlock();
 	}
 }

@@ -1,20 +1,16 @@
 #include "utils.hpp"
-#include <map>
+#include <cmath>
 
 namespace RP
 {
-struct range {
-    
-}
-
 class GPSSim
 {
     public:
         GPSSim();
         RP::point generate_pt(float err, float true_lat, float true_lng);
     private:
-        
-        float convert_to_gps_err(float err_meters);
+        RP::point convertToLatLng(float lat, float lng, float dir, float dist, float angle);
+        float convert_to_gps_err(float err_meter, float true_lat, float true_lng);
 };
 }
 
