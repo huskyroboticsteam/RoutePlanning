@@ -79,7 +79,7 @@ int main(int, char const **)
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     float gridScale = grid.retrieveScale();
     float gridHeight = grid.retrieveHeight();
-    Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 2.f, 2.f);
+    Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 25.f, 16.f, 60.f);
     // agent.scaleSpeed(2.f);
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
@@ -311,6 +311,7 @@ int main(int, char const **)
                     window.draw(getNode(nd, gridScale, gridHeight));
             }
         }
+        
         window.display();
     }
 

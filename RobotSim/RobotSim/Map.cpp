@@ -34,6 +34,7 @@ RP::line RP::Map::add_length_to_line_segment(point p, point q, float length)
 
 RP::eptr RP::Map::add_edge(int parent, int child)
 {
+    printf("added edge: %d, %d\n", parent, child);
     float dist = std::sqrt(dist_sq(nodes[parent].coord, nodes[child].coord));
 
     auto p_to_c = eptr(new edge{parent, child, dist});
@@ -60,12 +61,12 @@ void RP::Map::remove_edge(int parent, int child)
     }
     if (!found) printf("WARNING: edge not removed. Parent: %d, child %d\n", parent, child);
     found = false;
-    conn = nodes.at(child).connection;
-    for (int i = 0; i < conn.size(); i++)
+    auto& conn2 = nodes.at(child).connection;
+    for (int i = 0; i < conn2.size(); i++)
     {
-        if (conn.at(i)->child == parent)
+        if (conn2.at(i)->child == parent)
         {
-            conn.erase(conn.begin() + i);
+            conn2.erase(conn2.begin() + i);
             found = true;
             break;
         }
@@ -113,9 +114,12 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     create_node(cur);
     nodes[0].dist_to = 0.0f;
     create_node(tar);
+    
+    // initial edge
+    add_edge(0, 1);
+    
     if (obstacles.empty())
     {
-        add_edge(0, 1); // probably start (origin or current?) and target nodes
         return (nodes);
     }
 
@@ -127,19 +131,19 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     while (!unprocessed_edges.empty())
     {
         // TODO handle visited, intersections in edge chains (i.e. remove node and maybe edge)
-        const auto& curr_edge = *unprocessed_edges.front();
+        const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
         float min_dist = INFINITY;
         int closest_obst = -1;
         for (int i = 0; i < obstacles.size(); i++)
         {
             const auto& obst = obstacles.at(i);
-            if (segments_intersect(nd_coord(curr_edge.parent),
-                nd_coord(curr_edge.child), obst.coord1, obst.coord2))
+            if (segments_intersect(nd_coord(curr_edge->parent),
+                nd_coord(curr_edge->child), obst.coord1, obst.coord2))
             {
-                const point inters = segments_intersection(nd_coord(curr_edge.parent),
-                    nd_coord(curr_edge.child), obst.coord1, obst.coord2);
-                float dist = dist_sq(inters, nd_coord(curr_edge.parent));
+                const point inters = segments_intersection(nd_coord(curr_edge->parent),
+                    nd_coord(curr_edge->child), obst.coord1, obst.coord2);
+                float dist = dist_sq(inters, nd_coord(curr_edge->parent));
                 if (dist < min_dist) 
                 {
                     min_dist = dist;
@@ -150,16 +154,17 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 
         if (closest_obst != -1) 
         {
+            remove_edge(curr_edge->parent, curr_edge->child);
+            printf("rm: %d, %d\n", curr_edge->parent, curr_edge->child);
             if (!visited.at(closest_obst))
             {
                 // make copies of endponts
                 point end1 = obstacles.at(closest_obst).coord1;
                 point end2 = obstacles.at(closest_obst).coord2;
-                line closer{end1, end2};
-                line farther{end1, end2};
-                add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
-                move_line_toward_point(closer, nd_coord(curr_edge.parent), SIDE_TOLERANCE);
-                move_line_toward_point(farther, nd_coord(curr_edge.child), SIDE_TOLERANCE);
+                line closer = add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
+                line farther = add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
+                move_line_toward_point(closer, nd_coord(curr_edge->parent), SIDE_TOLERANCE);
+                move_line_toward_point(farther, nd_coord(curr_edge->child), SIDE_TOLERANCE);
 
                 // create safety nodes 
                 int branch1closer = create_node(closer.p);
@@ -168,134 +173,20 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 int branch2farther = create_node(farther.q);
 
                 // add edges to nodes
-                unprocessed_edges.push(add_edge(curr_edge.parent, branch1closer));
+                unprocessed_edges.push(add_edge(curr_edge->parent, branch1closer));
                 unprocessed_edges.push(add_edge(branch1closer, branch1farther));
-                unprocessed_edges.push(add_edge(branch1farther, curr_edge.child));
-                unprocessed_edges.push(add_edge(curr_edge.parent, branch2closer));
-                unprocessed_edges.push(add_edge(branch1closer, branch2farther));
-                unprocessed_edges.push(add_edge(branch2farther, curr_edge.child));
+                unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
+                unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
+                unprocessed_edges.push(add_edge(branch2closer, branch2farther));
+                unprocessed_edges.push(add_edge(branch2farther, curr_edge->child));
 
                 // set endpoints associated with obstacle as visited
                 visited.at(closest_obst) = true;
             }
-            remove_edge(curr_edge.parent, curr_edge.child);
         }
     }
-//     while (!unprocessed_nodes.empty())
-//     {
-//         // printf("stuck\n");
-//         int curr_node = unprocessed_nodes.front();
-//         // printf("curr_node: %f, %f\n", nodes.at(curr_node).coord.x, nodes.at(curr_node).coord.y);
-//         assert(curr_node >= 0);
-//         unprocessed_nodes.pop();
-//         bool destination_blocked = false;
-//         int closest_obst;
-//         float min_dist = INFINITY;
-//         // find closest intersection
-//         for (int i = 0; i < obstacles.size(); i++)
-//         {
-//             auto &obst = obstacles[i];
-//             for (const auto &neighborpair : nodes[curr_node].connection)
-//             {
-//                 int neighbor = neighborpair.first;
-//                 if (RP::segments_intersect(nodes[curr_node].coord, obst.coord1, nodes[neighbor].coord, obst.coord2))
-//                 {
-//                     printf("destination blocked by %f, %f\n", nodes[curr_node].coord.x, nodes[curr_node].coord.y);
-//                     destination_blocked = true;
-//                     point inters = intersection(nodes[curr_node].coord, tar, obst.coord1, obst.coord2);
-//                     float dist = RP::dist_sq(nodes[curr_node].coord, inters);
-//                     if (dist < min_dist)
-//                     {
-//                         min_dist = dist;
-//                         closest_obst = i;
-//                     }
-//                 }
-//             }
-//         }
-//         if (destination_blocked)
-//         {
-//             auto &obst = obstacles[closest_obst];
-//             int n1 = -1, n2 = -1;
-//             // if (!obst.marked)
-//             // {
-//             // obst.marked = true;
-//             // really move around the side points
-//             auto side_points = add_length_to_line_segment(obst.coord1, obst.coord2, SIDE_TOLERANCE);
-//             // move_line_toward_point(side_points, cur, 1.2f);
-
-//             bool create_n1 = true;
-//             bool create_n2 = true;
-
-//             //TODO(sasha): if this is too slow, use a partitioning scheme to only check against
-//             //             nodes in the vicinity
-//             // for (int safety = 2; safety < nodes.size(); safety++)
-//             // {
-//             //     // if n1/n2 too closest to another endpoint, set n1/n2 to that
-//             //     // endpoint instead
-//             //     node &n = nodes[safety];
-//             //     if (RP::within_radius(n.coord, side_points.p, SIDE_TOLERANCE))
-//             //     {
-//             //         printf("within radius\n");
-//             //         create_n1 = false;
-//             //         n1 = safety;
-//             //     }
-//             //     if (RP::within_radius(n.coord, side_points.q, SIDE_TOLERANCE))
-//             //     {
-//             //         printf("within radius\n");
-//             //         create_n2 = false;
-//             //         n2 = safety;
-//             //     }
-//             // }
-
-//             // don't add if visited
-//             if (!visited.at(closest_obst * 2))
-//             {
-//                 n1 = create_node(side_points.p);
-//                 visited.at(closest_obst * 2) = true;
-//                 obst.side_safety_nodes.first = n1;
-//             }
-
-//             if (!visited[closest_obst * 2 + 1])
-//             {
-//                 n2 = create_node(side_points.q);
-//                 visited.at(closest_obst * 2 + 1) = true;
-//                 obst.side_safety_nodes.second = n2;
-//             }
-
-//             // make robot move to somewhere near the center of the obstacle first,
-//             // and then move it to one of the side safety nodes
-//             // point center_coord = RP::center_point_with_radius(nodes[curr_node].coord, side_points.p, side_points.q, CENTER_TOLERANCE);
-//             // printf("CENTER COORD: %f, %f\n", center_coord.x, center_coord.y);
-//             // obst.center_safety_node = create_node(center_coord);
-//             // add_edge(curr_node, obst.center_safety_node);
-//             if (n1 >= 0)
-//                 add_edge(n1, obst.center_safety_node);
-//             if (n2 >= 0)
-//                 add_edge(n2, obst.center_safety_node);
-//             // }
-//             // else
-//             // {
-//             //     n1 = obst.side_safety_nodes.first;
-//             //     n2 = obst.side_safety_nodes.second;
-//             // }
-//             if (n1 >= 0)
-//             {
-//                 add_edge(curr_node, n1);
-//                 unprocessed_nodes.push(n1);
-//             }
-//             if (n2 >= 0)
-//             {
-//                 add_edge(curr_node, n2);
-//                 unprocessed_nodes.push(n2);
-//             }
-//         }
-//         else
-//         {
-//             add_edge(curr_node, 1);
-//         }
-//     }
-
-//     return (nodes);
+    
+    return nodes;
 }
 
 // return true if original and challenger are sufficiently different
