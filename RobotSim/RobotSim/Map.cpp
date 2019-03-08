@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <list>
 #include <cassert>
-#include <memory>
 #include "Map.hpp"
 
 RP::Map::Map(const point &cpos, const point &tget) : cur(cpos), tar(tget)
@@ -44,6 +43,34 @@ RP::eptr RP::Map::add_edge(int parent, int child)
     nodes[child].connection.push_back(c_to_p);
 
     return p_to_c;
+}
+
+void RP::Map::remove_edge(int parent, int child)
+{
+    auto& conn = nodes.at(parent).connection;
+    bool found = false;
+    for (int i = 0; i < conn.size(); i++)
+    {
+        if (conn.at(i)->child == child)
+        {
+            conn.erase(conn.begin() + i);
+            found = true;
+            break;
+        }
+    }
+    if (!found) printf("WARNING: edge not removed. Parent: %d, child %d\n", parent, child);
+    found = false;
+    conn = nodes.at(child).connection;
+    for (int i = 0; i < conn.size(); i++)
+    {
+        if (conn.at(i)->child == parent)
+        {
+            conn.erase(conn.begin() + i);
+            found = true;
+            break;
+        }
+    }
+    if (!found) printf("WARNING: edge not removed (reverse). Parent: %d, child %d\n", parent, child);
 }
 
 int RP::Map::create_node(point coord)
@@ -92,7 +119,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         return (nodes);
     }
 
-    std::vector<bool> visited(obstacles.size() * 2, false); // visited[i] and [i+1] stores whether obstacles[i/2].p or q has been visited, respectively
+    std::vector<bool> visited(obstacles.size(), false); // visited[i] and [i+1] stores whether obstacles[i/2].p or q has been visited, respectively
     std::queue<eptr> unprocessed_edges;
     unprocessed_edges.push(nodes[0].connection[0]);
     // pad for curr and parent
@@ -121,30 +148,37 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
             }
         }
 
-        if (closest_obst != -1)
+        if (closest_obst != -1) 
         {
-            // make copies of endponts
-            point end1 = obstacles.at(closest_obst).coord1;
-            point end2 = obstacles.at(closest_obst).coord2;
-            line closer{end1, end2};
-            line farther{end1, end2};
-            add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
-            move_line_toward_point(closer, nd_coord(curr_edge.parent), SIDE_TOLERANCE);
-            move_line_toward_point(farther, nd_coord(curr_edge.child), SIDE_TOLERANCE);
+            if (!visited.at(closest_obst))
+            {
+                // make copies of endponts
+                point end1 = obstacles.at(closest_obst).coord1;
+                point end2 = obstacles.at(closest_obst).coord2;
+                line closer{end1, end2};
+                line farther{end1, end2};
+                add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
+                move_line_toward_point(closer, nd_coord(curr_edge.parent), SIDE_TOLERANCE);
+                move_line_toward_point(farther, nd_coord(curr_edge.child), SIDE_TOLERANCE);
 
-            // create safety nodes 
-            int branch1closer = create_node(closer.p);
-            int branch1farther = create_node(farther.p);
-            int branch2closer = create_node(closer.q);
-            int branch2farther = create_node(farther.q);
+                // create safety nodes 
+                int branch1closer = create_node(closer.p);
+                int branch1farther = create_node(farther.p);
+                int branch2closer = create_node(closer.q);
+                int branch2farther = create_node(farther.q);
 
-            // add edges to nodes
-            unprocessed_edges.push(add_edge(curr_edge.parent, branch1closer));
-            unprocessed_edges.push(add_edge(branch1closer, branch1farther));
-            unprocessed_edges.push(add_edge(branch1farther, curr_edge.child));
-            unprocessed_edges.push(add_edge(curr_edge.parent, branch2closer));
-            unprocessed_edges.push(add_edge(branch1closer, branch2farther));
-            unprocessed_edges.push(add_edge(branch2farther, curr_edge.child));
+                // add edges to nodes
+                unprocessed_edges.push(add_edge(curr_edge.parent, branch1closer));
+                unprocessed_edges.push(add_edge(branch1closer, branch1farther));
+                unprocessed_edges.push(add_edge(branch1farther, curr_edge.child));
+                unprocessed_edges.push(add_edge(curr_edge.parent, branch2closer));
+                unprocessed_edges.push(add_edge(branch1closer, branch2farther));
+                unprocessed_edges.push(add_edge(branch2farther, curr_edge.child));
+
+                // set endpoints associated with obstacle as visited
+                visited.at(closest_obst) = true;
+            }
+            remove_edge(curr_edge.parent, curr_edge.child);
         }
     }
 //     while (!unprocessed_nodes.empty())

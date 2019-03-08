@@ -304,8 +304,8 @@ int main(int, char const **)
                 visited.at(ind) = true;
                 for (const auto &pair : nd.connection)
                 {
-                    q.push(pair.first);
-                    window.draw(get_vertex_line(nd.coord, map.d_nodes.at(pair.first).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                    q.push(pair->child);
+                    window.draw(get_vertex_line(nd.coord, map.d_nodes.at(pair->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
                 }
                 if (ind != 0)
                     window.draw(getNode(nd, gridScale, gridHeight));
