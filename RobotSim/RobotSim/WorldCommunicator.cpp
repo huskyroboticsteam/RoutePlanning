@@ -23,7 +23,9 @@ WorldCommunicator::WorldCommunicator()  {
 }
 
 void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn) {
+	
 	timer++;
+	
 	if(timer % framesPerGPS == 0) {
 		std::vector<unsigned char> data(2*sizeof(float));
 		memcpy(&data[0], &position.x, sizeof(float));
@@ -33,8 +35,10 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 		}
 	}
 	if(timer % framesPerMag == 0) {
+		float fudged_rotation = rotation + magError * ((float)rand()/(float)RAND_MAX);
 		std::vector<unsigned char> data(sizeof(float));
 		memcpy(&data[0], &rotation, sizeof(float));
+		std::cout << "Fudged rotation: " << fudged_rotation << std::endl;
 		if(send_action(data, magId)) {
 			//std::cout << "Sent a magnetometer packet" << std::endl;
 		}
@@ -62,6 +66,7 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 	// // Assuming id 0 = move and id 1 = turn
 	// This doesn't work
 	std::cout << "World Communicator update thread got a packet" << std::endl;
+	std::cout << id << std::endl;
 	if (id == 1) {
 		move = dataToSend;
 		std::cout << "Update thread got a move packet" << std::endl;
@@ -70,36 +75,28 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 		turn = dataToSend;
 		std::cout << "Update thread got a turn packet" << std::endl;
 	}
-
-	
 }
 
 
 // Listens for packet 
 void WorldCommunicator::listen() {
 	while(true) {
-        std::cout << "Started listening" << std::endl;
-		//std::vector<unsigned char> buf(256);
-		char buf[256];
-
+		std::cout << "Started listening" << std::endl;
+		std::vector<unsigned char> buf(256);
+		//char buf[256];
 		sockaddr_in client;
 		memset(&client, 0, sizeof(sockaddr_in));
 		
 		unsigned int clientLength = sizeof(client);
-		std::cout << "" << std::endl;
-        std::cout << "starting receive" << std::endl;
-		int bytesIn = recvfrom(in, buf, 256, 0, (sockaddr*)&client, &clientLength);
-        std::cout << "done receiving" << std::endl;
-		char clientIp[256];
-		memset(clientIp, 0, 256);
-		inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
+		int bytesIn = recvfrom(in, &buf.front(), 256, 0, (sockaddr*)&client, &clientLength);
+		
 		if (bytesIn == SOCKET_ERROR) 
 		{
 			std::cout << "Error receiving from client " << strerror(errno) << std::endl;
 		}
 		std::cout << "World communicator listen thread got a packet" << std::endl;
 		mtx.lock();
-		//packetQ.push(buf);
+		packetQ.push(buf);
 		mtx.unlock();
 	}
 }

@@ -43,4 +43,5 @@ class WorldCommunicator {
 		const int framesPerMag = 5;
 		unsigned const char gpsId = 10;
 		unsigned const char magId = 11;
+		const float magError = 1.8;
 };

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string>
+#include <cmath>
 
 // Imports resourcePath() for macos
 #include "ResourcePath.hpp"
@@ -55,7 +56,7 @@ RP::Map map(sim.getpos(), grid.target);
 RP::AutoController control(grid, agent, map);
 
 WorldCommunicator worldCommunicator;
-static float toTurn;
+static float goalDirection;
 static float toMove;
 // ---------------------------------------- //
 
@@ -76,6 +77,19 @@ void turn(float speed) {
     grid.rotateAgent(agent, agent.turn(speed));
 }
 
+void turnTo(float goalDirection) {
+	//std::cout << "goal direction: " << goalDirection << std::endl;
+	//std::cout << "internal direction: " << agent.getInternalRotation() << std::endl;
+	if(abs(goalDirection - agent.getInternalRotation()) > 1.0) {
+		if(goalDirection > agent.getInternalRotation()) {
+			turn(-1);
+		} else {
+			turn(1);
+		}
+	} else {
+		turn(0);
+	}
+}
 // returns the current position of the robot, in meters, relative to the grid origin
 // x and y increase to the right and to the top respectively
 static RP::point currentPosition() {
@@ -217,10 +231,11 @@ int main(int, char const **)
         sim.update_agent();
         map.update(sim.visible_obstacles());
 		
-
-		worldCommunicator.update(currentPosition(), currentRotation(), toTurn, toMove);
-
-		turn(toTurn);
+		float change = 0.0;
+		worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+		goalDirection += change;
+		goalDirection = (int)goalDirection%360;
+		turnTo(goalDirection);
 		move(toMove);
 		
 		
