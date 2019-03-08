@@ -225,55 +225,61 @@ std::vector<RP::point> RP::Map::a_star_algorithm(float cur_lat, float cur_lng,
 	std::vector<node> nodes = build_graph(cur, tar);
 
 	// Assigns a heuristic value to all nodes and puts their pointers in a new vector (necessary to find neighbor nodes)
-	using heuristicPair = std::pair<node, std::pair<float, float>>;
-	std::vector<heuristicPair*> heuristicNodes;
-	heuristicPair start = { nodes[0], std::make_pair(0, std::sqrt(dist_sq(nodes[0].coord, tar))) };
+	struct heuristicNode { 
+		node* nodeAddress;
+		float dist_from; 
+		float dist_to;
+	};
+	std::vector<heuristicNode*> heuristicNodes;
+	heuristicNode start = { &nodes[0], 0, std::sqrt(dist_sq(nodes[0].coord, tar)) };
 	heuristicNodes.push_back(&start);
 	for (node node : nodes) {
-		heuristicPair neighbor = std::make_pair(node, std::make_pair(INFINITY, std::sqrt(dist_sq(node.coord, tar))));
+		heuristicNode neighbor = { &node, INFINITY, std::sqrt(dist_sq(node.coord, tar)) };
 		heuristicNodes.push_back(&neighbor);
 	}
 	// Remove duplicate start node
 	heuristicNodes.erase(heuristicNodes.begin() + 1); 
 
 	// Create and fill a priorityqueue of heuristic pointers, ordered on heuristic value
-	auto cmp = [&](heuristicPair* l, heuristicPair* r) { 
-		return l->second.first + l->second.second < r->second.first + r->second.second; 
+	auto cmp = [heuristicNodes](int l, int r) { 
+		return ((*heuristicNodes[l]).dist_from + (*heuristicNodes[l]).dist_to <= (*heuristicNodes[l]).dist_from + (*heuristicNodes[l]).dist_to);
 	};
-	std::priority_queue<heuristicPair*, std::vector<heuristicPair*>, decltype(cmp)> openNodes(cmp);
-	openNodes.push(&start);
+	std::priority_queue<int, std::vector<int>, decltype(cmp)> openNodes(cmp);
+	openNodes.push(0);
 
 	// Create a vector to be filled with searched nodes
-	std::vector<heuristicPair*> closedNodes;
+	std::vector<heuristicNode*> closedNodes;
 
 	// While we're not at tar, keep evaluating paths
-	while (!openNodes.empty() && (openNodes.top()->first.coord != tar)) { 
-		heuristicPair current = *openNodes.top();
+	while (!openNodes.empty() && heuristicNodes[openNodes.top()]->nodeAddress->coord != tar) { 
+		heuristicNode current = *heuristicNodes[openNodes.top()];
 		openNodes.pop();
 		closedNodes.push_back(&current);
 
 		// For each neighbor of current
-		for (auto &index : current.first.connection) {
-			heuristicPair neighbor = *heuristicNodes[index.first];
-			float distFromStart = index.second + current.second.first;
+		for (auto &index : current.nodeAddress->connection) {
+			heuristicNode neighbor = *heuristicNodes[index.first];
+			float distFromStart = index.second + current.dist_from;
 			// If this is a more efficient path
-			if (neighbor.second.first > distFromStart) {
+			if (neighbor.dist_from > distFromStart) {
 				// If neighbor is in closedNodes, remove it
-				int closedIndex = std::find(closedNodes.begin(), closedNodes.end(), &neighbor) - closedNodes.begin;
-				if (closedIndex < closedNodes.size) {
-					closedNodes.erase(closedNodes.begin + closedIndex);
+				std::vector<heuristicNode*>::iterator closedIndex;
+				closedIndex = std::find(closedNodes.begin(), closedNodes.end(), &neighbor);
+				if (closedIndex != closedNodes.end()) {
+					closedNodes.erase(closedIndex);
 				}
 				// If neighbor is in openNodes, remove it
 				else {
-					neighbor.second.first = -INFINITY;
-					if (openNodes.top() == &neighbor) {
+					neighbor.dist_from = -INFINITY;
+					if (heuristicNodes[openNodes.top()] == &neighbor) {
 						openNodes.pop();
 					}
 				}
 				// Add neighbor to openNodes and set its previous to the current node
-				neighbor.second.first = distFromStart;
-				openNodes.push(&neighbor);
-				neighbor.first.prev = std::find(heuristicNodes.begin(), heuristicNodes.end(), &current) - heuristicNodes.begin;
+				neighbor.dist_from = distFromStart;
+				int neighborIndex = std::distance(heuristicNodes.begin(), std::find(heuristicNodes.begin(), heuristicNodes.end(), &neighbor));
+				openNodes.push(neighborIndex);
+				neighbor.nodeAddress->prev = std::distance(heuristicNodes.begin(), std::find(heuristicNodes.begin(), heuristicNodes.end(), &current));
 			}
 		}
 	}
