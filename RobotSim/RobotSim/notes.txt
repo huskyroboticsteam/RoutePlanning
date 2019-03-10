@@ -1,0 +1,10 @@
+Path-splitting algorithm:
+
+1. place two nodes as "safeties" around each endpoint
+X                            X
+^   ----------------------   ^
+X                            X
+               R
+2. remove BOTH failed safeties
+3. unmark visited nodes if fail to add BOTH endpoints
+4. renamed visited nodes to processed nodes or something
