@@ -25,14 +25,14 @@ Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float 
     shapeBase.setOrigin(agentWidth / 2.f, agentLength / 2.f);
     shapeBase.setFillColor(BASE_COLOR);
     shapeBase.setPosition((xPos + 1) * scale, (mapHeight - yPos) * scale);
-    shapeBase.setRotation(90 + startR);
+    shapeBase.setRotation(90 - startR);
 
     // this is a triangle, drawn on top of the rectangle
     shapeTop = sf::CircleShape(agentWidth / 2.f, 3);
     shapeTop.setOrigin(agentWidth / 2.f, agentWidth / 2.f);
     shapeTop.setFillColor(TOP_COLOR);
     shapeTop.setPosition((xPos + 1) * scale, (mapHeight - yPos) * scale);
-    shapeTop.setRotation(90 + startR);
+    shapeTop.setRotation(90 - startR);
 
     // the hitbox is stored as four vectors in polar coordinates
     // each vector corresponds to the displacement of one vertex from the center of the agent
