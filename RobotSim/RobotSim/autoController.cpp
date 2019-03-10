@@ -89,11 +89,16 @@ turnstate = SURVEY_COUNTERCW;
     }
     else
     {
-        auto path = map.shortest_path_to();
+        std::vector<point> path = map.shortest_path_to();
         if (timer.elapsed() > AUTO_MOVE_TIME)
         {
-            tar_angle = atan2(path.front().y - agent.getY(),
-                              path.front().x - agent.getX()) *
+            // turning time 
+            // prevent robot from getting stuck at one point
+            std::vector<point>::iterator next;
+            for (next = path.begin(); next != path.end() &&
+                same_point(*next, point{agent.getX(), agent.getY()}, 0.5); next++) {}
+            tar_angle = atan2(next->y - agent.getY(),
+                              next->x - agent.getX()) *
                         180 / PI;
             if (path.size() == 1)
             {
@@ -108,6 +113,7 @@ turnstate = SURVEY_COUNTERCW;
         }
         else
         {
+            // moving time
             float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
             float speed;
             if (path.size() == 1)
@@ -116,7 +122,7 @@ turnstate = SURVEY_COUNTERCW;
             }
             else
             {
-                speed = 0.11f * dist + 0.2f;
+                speed = 0.11f * dist + 0.3f;
             }
 
             if (speed > 1.f)

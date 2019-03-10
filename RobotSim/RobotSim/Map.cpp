@@ -151,7 +151,6 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         if (closest_obst != -1) 
         {
             remove_edge(curr_edge->parent, curr_edge->child);
-            printf("rm: %d, %d\n", curr_edge->parent, curr_edge->child);
             if (!visited.at(closest_obst))
             {
                 // make copies of endponts
