@@ -245,6 +245,31 @@ int main(int, char const **)
                 grid.rotateAgent(agent, -200.f / FRAMERATE);
             }
         }
+        window.clear(bgColor);
+        // draw nodes
+        if (showGraph && !map.d_nodes.empty())
+        {
+            std::vector<bool> visited(map.d_nodes.size(), false);
+            std::queue<int> q;
+            q.push(0);
+            while (!q.empty())
+            {
+                int ind = q.front();
+                const auto &nd = map.d_nodes[ind];
+                q.pop();
+                visited.at(ind) = true;
+                for (const RP::eptr edge : nd.connection)
+                {
+                    if (!visited.at(edge->child))
+                    {
+                        q.push(edge->child);
+                        window.draw(get_vertex_line(nd.coord, map.d_nodes.at(edge->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                    }
+                }
+                if (ind != 0)
+                    window.draw(getNode(nd, gridScale, gridHeight));
+            }
+        }
         if (auton)
         {
             control.tic();
@@ -279,8 +304,6 @@ int main(int, char const **)
         }
         sim.update_agent();
         map.update(sim.visible_obstacles());
-
-        window.clear(bgColor);
         window.draw(grid);
         window.draw(agent);
         for (auto obst : map.memo_obstacles())
@@ -288,34 +311,8 @@ int main(int, char const **)
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
 
-        // draw nodes
-        if (showGraph && !map.d_nodes.empty())
-        {
-            std::vector<bool> visited(map.d_nodes.size(), false);
-            std::queue<int> q;
-            q.push(0);
-            while (!q.empty())
-            {
-                int ind = q.front();
-                const auto &nd = map.d_nodes[ind];
-                q.pop();
-                visited.at(ind) = true;
-                for (const RP::eptr edge : nd.connection)
-                {
-                    if (!visited.at(edge->child))
-                    {
-                        q.push(edge->child);
-                        window.draw(get_vertex_line(nd.coord, map.d_nodes.at(edge->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
-                    }
-                }
-                if (ind != 0)
-                    window.draw(getNode(nd, gridScale, gridHeight));
-            }
-        }
-        
         window.display();
     }
-
     return EXIT_SUCCESS;
 }
 

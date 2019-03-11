@@ -61,6 +61,7 @@ private:
   std::list<obstacle> mem_obstacles;
   Timer timer; // for debugging
   inline point& nd_coord(int node) { return nodes[node].coord; }
+  get_closest_obstacle(eptr edge); // return index of closest obstacle that intersects with edge. If doesn't exist return -1
 
   bool debugging = false;
 };

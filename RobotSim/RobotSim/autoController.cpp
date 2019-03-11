@@ -94,9 +94,9 @@ turnstate = SURVEY_COUNTERCW;
         {
             // turning time 
             // prevent robot from getting stuck at one point
-            std::vector<point>::iterator next;
-            for (next = path.begin(); next != path.end() &&
-                same_point(*next, point{agent.getX(), agent.getY()}, 0.5f); next++) {}
+            std::vector<point>::iterator next = path.begin();
+            // for (next = path.begin(); next != path.end() &&
+            //     same_point(*next, point{agent.getX(), agent.getY()}, 0.3f); next++) {}
             tar_angle = atan2(next->y - agent.getY(),
                               next->x - agent.getX()) *
                         180 / PI;

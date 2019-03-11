@@ -48,7 +48,7 @@ RP::eptr RP::Map::add_edge(int parent, int child)
 void RP::Map::remove_edge(int parent, int child)
 {
     assert(parent >= 0 && child >= 0);
-    auto& conn = nodes.at(parent).connection;
+    auto &conn = nodes.at(parent).connection;
     bool found = false;
     for (int i = 0; i < conn.size(); i++)
     {
@@ -59,9 +59,10 @@ void RP::Map::remove_edge(int parent, int child)
             break;
         }
     }
-    if (!found) printf("WARNING: edge not removed. Parent: %d, child %d\n", parent, child);
+    if (!found)
+        printf("WARNING: edge not removed. Parent: %d, child %d\n", parent, child);
     found = false;
-    auto& conn2 = nodes.at(child).connection;
+    auto &conn2 = nodes.at(child).connection;
     for (int i = 0; i < conn2.size(); i++)
     {
         if (conn2.at(i)->child == parent)
@@ -71,7 +72,8 @@ void RP::Map::remove_edge(int parent, int child)
             break;
         }
     }
-    if (!found) printf("WARNING: edge not removed (reverse). Parent: %d, child %d\n", parent, child);
+    if (!found)
+        printf("WARNING: edge not removed (reverse). Parent: %d, child %d\n", parent, child);
 }
 
 int RP::Map::create_node(point coord)
@@ -131,31 +133,14 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         // TODO handle visited, intersections in edge chains (i.e. remove node and maybe edge)
         const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
-        float min_dist = INFINITY;
-        int closest_index = -1;
-        for (int i = 0; i < obstacles.size(); i++)
-        {
-            const auto& obst = obstacles.at(i);
-            if (segments_intersect(nd_coord(curr_edge->parent),
-                nd_coord(curr_edge->child), obst.coord1, obst.coord2))
-            {
-                const point inters = segments_intersection(nd_coord(curr_edge->parent),
-                    nd_coord(curr_edge->child), obst.coord1, obst.coord2);
-                float dist = dist_sq(inters, nd_coord(curr_edge->parent));
-                if (dist < min_dist) 
-                {
-                    min_dist = dist;
-                    closest_index = i;
-                }
-            }
-        }
+        int closest_index = get_closest_obstacle(curr_edge);
 
-        if (closest_index != -1) 
+        if (closest_index != -1)
         {
-            obstacle& closest = obstacles.at(closest_index);
+            obstacle &closest = obstacles.at(closest_index);
             remove_edge(curr_edge->parent, curr_edge->child);
             // printf("removing %f, %f - %f, %f\n", nodes.at(curr_edge->parent).coord.x, nodes.at(curr_edge->parent).coord.y,
-                // nodes.at(curr_edge->child).coord.x, nodes.at(curr_edge->child).coord.y);
+            // nodes.at(curr_edge->child).coord.x, nodes.at(curr_edge->child).coord.y);
             if (!visited[closest_index])
             {
                 // make copies of endponts
@@ -166,30 +151,71 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 move_line_toward_point(closer, nd_coord(curr_edge->parent), SIDE_TOLERANCE);
                 move_line_toward_point(farther, nd_coord(curr_edge->child), SIDE_TOLERANCE);
 
-                // create safety nodes 
-                int branch1closer = create_node(closer.p);
+                // create safety nodes
                 int branch1farther = create_node(farther.p);
-                int branch2closer = create_node(closer.q);
-                int branch2farther = create_node(farther.q);
-
-                // add edges to nodes
-                unprocessed_edges.push(add_edge(curr_edge->parent, branch1closer));
-                unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
-                unprocessed_edges.push(add_edge(branch1closer, branch1farther));
-                unprocessed_edges.push(add_edge(branch2closer, branch2farther));
+                eptr test_edge = eptr(new edge{curr_edge->parent, branch1farther});
+                if (get_closest_obstacle(test_edge) == -1)
+                {
+                    unprocessed_edges.push(add_edge(curr_edge->parent, branch1farther));
+                }
+                else
+                {
+                    int branch1closer = create_node(closer.p);
+                    unprocessed_edges.push(add_edge(curr_edge->parent, branch1closer));
+                    unprocessed_edges.push(add_edge(branch1closer, branch1farther));
+                }
                 unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
+
+                int branch2farther = create_node(farther.q);
+                test_edge = eptr(new edge{curr_edge->parent, branch2farther});
+                if (get_closest_obstacle(test_edge) == -1)
+                {
+                    unprocessed_edges.push(add_edge(curr_edge->parent, branch2farther));
+                }
+                else
+                {
+                    int branch2closer = create_node(closer.q);
+                    unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
+                    unprocessed_edges.push(add_edge(branch2closer, branch2farther));
+                }
+
                 unprocessed_edges.push(add_edge(branch2farther, curr_edge->child));
 
                 // set endpoints associated with obstacle as visited
                 visited.at(closest_index) = true;
-            } else {
+            }
+            else
+            {
                 // printf("visited (%f, %f) - (%f, %f)\n", obstacles[closest_index].coord1.x, obstacles[closest_index].coord1.y, obstacles[closest_index].coord2.x,
                 // obstacles[closest_index].coord2.y);
             }
         }
     }
-    
+
     return nodes;
+}
+
+int RP::Map::get_closest_obstacle(eptr edge)
+{
+    float min_dist = INFINITY;
+    int closest_index = -1;
+    for (int i = 0; i < obstacles.size(); i++)
+    {
+        const auto &obst = obstacles.at(i);
+        if (segments_intersect(nd_coord(edge->parent),
+                               nd_coord(edge->child), obst.coord1, obst.coord2))
+        {
+            const point inters = segments_intersection(nd_coord(edge->parent),
+                                                       nd_coord(edge->child), obst.coord1, obst.coord2);
+            float dist = dist_sq(inters, nd_coord(edge->parent));
+            if (dist < min_dist)
+            {
+                min_dist = dist;
+                closest_index = i;
+            }
+        }
+    }
+    return closest_index;
 }
 
 // return true if original and challenger are sufficiently different
@@ -354,12 +380,13 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         i = n.prev;
     }
     // path not found. resort to node closest to target
-    if (!pathFound) {
-        const node& tar = nodes[1];
+    if (!pathFound)
+    {
+        const node &tar = nodes[1];
         auto best_it = std::min_element(nodes.begin() + 2, nodes.end(),
-            [tar](const node& n1, const node& n2) {
-                return dist_sq(n1.coord, tar.coord) > dist_sq(n2.coord, tar.coord);
-            });
+                                        [tar](const node &n1, const node &n2) {
+                                            return dist_sq(n1.coord, tar.coord) > dist_sq(n2.coord, tar.coord);
+                                        });
 
         int i = std::distance(nodes.begin(), best_it);
         result.clear();
@@ -401,4 +428,3 @@ void move_line_toward_point(RP::line &side_points, RP::point pt, float d)
     side_points.q.x += dir.x;
     side_points.q.y += dir.y;
 }
-
