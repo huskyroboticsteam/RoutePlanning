@@ -12,7 +12,7 @@ RP::Map::Map(const point &cpos, const point &tget) : cur(cpos), tar(tget)
 void RP::Map::add_obstacle(point coord1, point coord2)
 {
     // obstacle o{};
-    obstacles.push_back(obstacle{false, coord1, coord2});
+    obstacles.push_back(obstacle{coord1, coord2});
 }
 
 RP::point RP::Map::compute_next_point()
@@ -47,6 +47,7 @@ RP::eptr RP::Map::add_edge(int parent, int child)
 
 void RP::Map::remove_edge(int parent, int child)
 {
+    assert(parent >= 0 && child >= 0);
     auto& conn = nodes.at(parent).connection;
     bool found = false;
     for (int i = 0; i < conn.size(); i++)
@@ -101,7 +102,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     obstacles.clear();
     obstacles.reserve(mem_obstacles.size());
     for (const auto &o : mem_obstacles)
-        obstacles.emplace_back(obstacle{false, o.coord1, o.coord2});
+        obstacles.emplace_back(obstacle{o.coord1, o.coord2});
 
     // printf("%d\n", obstacles.size());
     // for (auto &n : nodes)
@@ -118,7 +119,8 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         return (nodes);
     }
 
-    std::vector<bool> visited(obstacles.size(), false); // visited[i] and [i+1] stores whether obstacles[i/2].p or q has been visited, respectively
+    // if obstacle has been visited from one side
+    std::vector<bool> visited(obstacles.size(), false);
     std::queue<eptr> unprocessed_edges;
     // add first edge
     unprocessed_edges.push(add_edge(0, 1));
@@ -130,7 +132,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
         float min_dist = INFINITY;
-        int closest_obst = -1;
+        int closest_index = -1;
         for (int i = 0; i < obstacles.size(); i++)
         {
             const auto& obst = obstacles.at(i);
@@ -143,19 +145,22 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 if (dist < min_dist) 
                 {
                     min_dist = dist;
-                    closest_obst = i;
+                    closest_index = i;
                 }
             }
         }
 
-        if (closest_obst != -1) 
+        if (closest_index != -1) 
         {
+            obstacle& closest = obstacles.at(closest_index);
             remove_edge(curr_edge->parent, curr_edge->child);
-            if (!visited.at(closest_obst))
+            // printf("removing %f, %f - %f, %f\n", nodes.at(curr_edge->parent).coord.x, nodes.at(curr_edge->parent).coord.y,
+                // nodes.at(curr_edge->child).coord.x, nodes.at(curr_edge->child).coord.y);
+            if (!visited[closest_index])
             {
                 // make copies of endponts
-                point end1 = obstacles.at(closest_obst).coord1;
-                point end2 = obstacles.at(closest_obst).coord2;
+                point end1 = closest.coord1;
+                point end2 = closest.coord2;
                 line closer = add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
                 line farther = add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
                 move_line_toward_point(closer, nd_coord(curr_edge->parent), SIDE_TOLERANCE);
@@ -169,14 +174,17 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 
                 // add edges to nodes
                 unprocessed_edges.push(add_edge(curr_edge->parent, branch1closer));
-                unprocessed_edges.push(add_edge(branch1closer, branch1farther));
-                unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
                 unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
+                unprocessed_edges.push(add_edge(branch1closer, branch1farther));
                 unprocessed_edges.push(add_edge(branch2closer, branch2farther));
+                unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
                 unprocessed_edges.push(add_edge(branch2farther, curr_edge->child));
 
                 // set endpoints associated with obstacle as visited
-                visited.at(closest_obst) = true;
+                visited.at(closest_index) = true;
+            } else {
+                // printf("visited (%f, %f) - (%f, %f)\n", obstacles[closest_index].coord1.x, obstacles[closest_index].coord1.y, obstacles[closest_index].coord2.x,
+                // obstacles[closest_index].coord2.y);
             }
         }
     }
@@ -293,7 +301,7 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     //     printf("(%f, %f), ", p.x, p.y);
     // }
     // printf("\n");
-    return obstacle{false, points[0], points[3]};
+    return obstacle{points[0], points[3]};
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
@@ -331,17 +339,37 @@ std::vector<RP::point> RP::Map::shortest_path_to()
 
     std::vector<point> result;
     int i = 1;
+    bool pathFound = true;
     while (i != 0)
     {
         if (i == -1)
         {
-            printf("WARNING: no path found!\n");
+            // printf("WARNING: no path found! Resorting to node closest to target\n");
+            pathFound = false;
             break;
         }
         node &n = nodes[i];
         // printf("node: %f, %f\n", n.coord.x, n.coord.y);
         result.push_back(n.coord);
         i = n.prev;
+    }
+    // path not found. resort to node closest to target
+    if (!pathFound) {
+        const node& tar = nodes[1];
+        auto best_it = std::min_element(nodes.begin() + 2, nodes.end(),
+            [tar](const node& n1, const node& n2) {
+                return dist_sq(n1.coord, tar.coord) > dist_sq(n2.coord, tar.coord);
+            });
+
+        int i = std::distance(nodes.begin(), best_it);
+        result.clear();
+        while (i != 0)
+        {
+            node &n = nodes[i];
+            // printf("node: %f, %f\n", n.coord.x, n.coord.y);
+            result.push_back(n.coord);
+            i = n.prev;
+        }
     }
     std::reverse(result.begin(), result.end());
     return (result);

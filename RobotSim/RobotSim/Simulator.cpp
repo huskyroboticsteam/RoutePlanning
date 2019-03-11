@@ -192,7 +192,7 @@ void RP::Simulator::update_agent()
             point a = *it;
             if (++it == obs.endpoints.end())
                 break;
-            view_obstacles.push_back(obstacle{false, a, *it});
+            view_obstacles.push_back(obstacle{a, *it});
         }
     }
     // for (auto & obs : view_obstacles)

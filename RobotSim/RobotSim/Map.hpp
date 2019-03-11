@@ -28,7 +28,6 @@ struct node
 
 struct obstacle
 {
-  bool marked; // indicates whether this obstacle has already been accounted for in build_graph()
   point coord1;
   point coord2;
   std::pair<int, int> side_safety_nodes;

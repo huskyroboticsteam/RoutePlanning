@@ -297,7 +297,7 @@ int main(int, char const **)
             while (!q.empty())
             {
                 int ind = q.front();
-                const auto &nd = map.d_nodes.at(ind);
+                const auto &nd = map.d_nodes[ind];
                 q.pop();
                 visited.at(ind) = true;
                 for (const RP::eptr edge : nd.connection)

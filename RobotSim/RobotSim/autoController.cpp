@@ -96,7 +96,7 @@ turnstate = SURVEY_COUNTERCW;
             // prevent robot from getting stuck at one point
             std::vector<point>::iterator next;
             for (next = path.begin(); next != path.end() &&
-                same_point(*next, point{agent.getX(), agent.getY()}, 0.5); next++) {}
+                same_point(*next, point{agent.getX(), agent.getY()}, 0.5f); next++) {}
             tar_angle = atan2(next->y - agent.getY(),
                               next->x - agent.getX()) *
                         180 / PI;
@@ -122,7 +122,7 @@ turnstate = SURVEY_COUNTERCW;
             }
             else
             {
-                speed = 0.11f * dist + 0.3f;
+                speed = 0.11f * dist + 0.2f;
             }
 
             if (speed > 1.f)
