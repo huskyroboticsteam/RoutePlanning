@@ -79,11 +79,25 @@ namespace RP
     //Tells if three points are on a line segment
     bool on_segment(point p, point q, point r);
 
-    //Returns true if segment p1q1 intersects p2q2
+    //Returns true if segment p1p2 intersects q1q2. p1p2
     bool segments_intersect(point p1, point p2, point q1, point q2);
 
     // intersection() but constrained by segment length
     point segments_intersection(point a, point b, point c, point d);
+
+    // return normalized orthogonal to ln. If countercw, [ln.p, ln.q, ret] is countercw
+    point get_ortho(const line& ln, bool countercw);
+
+    float dot(const point& u, const point& v);
+
+    // same as segments_intersect() except p1p2 now has width p_width
+    // returns 0 if no intersection; 1 if line_q pokes out of line_p; and
+    // 2 if line_q is entirely in line_p
+    char seg_intersects_width(point p1, point p2, point q1, point q2, float p_width, point& inters_out);
+
+    void move_line_toward_point(RP::line &side_points, RP::point cur, float dist);
+
+    line get_moved_line(const line& ln, float dist, bool countercw);
 
     //check if point a is on segment pq
     bool within_segment(point p, point q, point a);

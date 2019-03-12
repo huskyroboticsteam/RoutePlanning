@@ -3,9 +3,10 @@
 #include <algorithm>
 #include <list>
 #include <cassert>
+#include <numeric>
 #include "Map.hpp"
 
-RP::Map::Map(const point &cpos, const point &tget) : cur(cpos), tar(tget)
+RP::Map::Map(const point &cpos, const point &tget, float bw) : cur(cpos), tar(tget), bot_width(bw)
 {
 }
 
@@ -86,14 +87,13 @@ int RP::Map::create_node(point coord)
     return (nodes.size() - 1);
 }
 
-void move_line_toward_point(RP::line &side_points, RP::point cur, float dist);
-
 std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 {
 //TODO(sasha): make R a constant - the following few lines are just a hack
 //             to get R to be in lat/lng units
 //<hack>
 #define SIDE_TOLERANCE 2.f
+#define SKIP_TOLERANCE 4.f
     // shouldn't need this since we're passing meters
     // #define R_METERS 0.5f
     //     auto offset = RP::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
@@ -116,6 +116,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     create_node(cur);
     nodes[0].dist_to = 0.0f;
     create_node(tar);
+    eptr init_edge = add_edge(0, 1);
     if (obstacles.empty())
     {
         return (nodes);
@@ -125,7 +126,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     std::vector<bool> visited(obstacles.size(), false);
     std::queue<eptr> unprocessed_edges;
     // add first edge
-    unprocessed_edges.push(add_edge(0, 1));
+    unprocessed_edges.push(init_edge);
     // pad for curr and parent
     // for each safety node, find the obstacle closest to it
     while (!unprocessed_edges.empty())
@@ -133,7 +134,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
         // TODO handle visited, intersections in edge chains (i.e. remove node and maybe edge)
         const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
-        int closest_index = get_closest_obstacle(curr_edge);
+        int closest_index = get_closest_obstacle(curr_edge, bot_width);
 
         if (closest_index != -1)
         {
@@ -154,9 +155,10 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 // create safety nodes
                 int branch1farther = create_node(farther.p);
                 eptr test_edge = eptr(new edge{curr_edge->parent, branch1farther});
-                if (get_closest_obstacle(test_edge) == -1)
+                if (get_closest_obstacle(test_edge, SKIP_TOLERANCE) == -1)
                 {
                     unprocessed_edges.push(add_edge(curr_edge->parent, branch1farther));
+                    // printf("skipped\n");
                 }
                 else
                 {
@@ -167,8 +169,9 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
 
                 int branch2farther = create_node(farther.q);
-                test_edge = eptr(new edge{curr_edge->parent, branch2farther});
-                if (get_closest_obstacle(test_edge) == -1)
+                eptr test_edge2 = eptr(new edge{curr_edge->parent, branch2farther});
+                // use SIDE_TOLERANCE here for width to avoid running into things
+                if (get_closest_obstacle(test_edge2, SKIP_TOLERANCE) == -1)
                 {
                     unprocessed_edges.push(add_edge(curr_edge->parent, branch2farther));
                 }
@@ -195,18 +198,17 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     return nodes;
 }
 
-int RP::Map::get_closest_obstacle(eptr edge)
+int RP::Map::get_closest_obstacle(eptr edge, float path_width)
 {
     float min_dist = INFINITY;
     int closest_index = -1;
     for (int i = 0; i < obstacles.size(); i++)
     {
         const auto &obst = obstacles.at(i);
-        if (segments_intersect(nd_coord(edge->parent),
-                               nd_coord(edge->child), obst.coord1, obst.coord2))
+        point inters;
+        if (seg_intersects_width(nd_coord(edge->parent),
+                                 nd_coord(edge->child), obst.coord1, obst.coord2, path_width, inters))
         {
-            const point inters = segments_intersection(nd_coord(edge->parent),
-                                                       nd_coord(edge->child), obst.coord1, obst.coord2);
             float dist = dist_sq(inters, nd_coord(edge->parent));
             if (dist < min_dist)
             {
@@ -330,6 +332,27 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     return obstacle{points[0], points[3]};
 }
 
+void assertGraph(std::vector<RP::node> nodes)
+{
+    // debug
+    for (int parent = 0; parent < nodes.size(); parent++)
+    {
+        for (RP::eptr conn : nodes[parent].connection)
+        {
+            bool found = false;
+            for (RP::eptr connback : nodes[conn->child].connection)
+            {
+                if (connback->child == parent)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            assert(found);
+        }
+    }
+}
+
 //TODO(sasha): Find heuristics and upgrade to A*
 std::vector<RP::point> RP::Map::shortest_path_to()
 {
@@ -351,7 +374,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         int n = q.top();
         q.pop();
 
-        for (auto &e : nodes[n].connection)
+        for (const eptr &e : nodes[n].connection)
         {
             float dist = nodes[n].dist_to + e->len;
             if (dist < nodes[e->child].dist_to)
@@ -370,7 +393,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
     {
         if (i == -1)
         {
-            // printf("WARNING: no path found! Resorting to node closest to target\n");
+            // printf("No path to target found. Resorting to node closest to target\n");
             pathFound = false;
             break;
         }
@@ -383,48 +406,40 @@ std::vector<RP::point> RP::Map::shortest_path_to()
     if (!pathFound)
     {
         const node &tar = nodes[1];
-        auto best_it = std::min_element(nodes.begin() + 2, nodes.end(),
-                                        [tar](const node &n1, const node &n2) {
-                                            return dist_sq(n1.coord, tar.coord) > dist_sq(n2.coord, tar.coord);
-                                        });
-
-        int i = std::distance(nodes.begin(), best_it);
-        result.clear();
-        while (i != 0)
+        std::vector<size_t> indices(nodes.size());
+        iota(indices.begin(), indices.end(), 0);
+        // sort by closest to tar
+        std::sort(indices.begin() + 2, indices.end(),
+                  [nodes, tar](size_t i, size_t j) {
+                      return dist_sq(nodes[i].coord, tar.coord) < dist_sq(nodes[j].coord, tar.coord);
+                  });
+                  
+        assertGraph(nodes);
+        int i = -1;
+        for (auto it = indices.begin() + 2; it != indices.end(); it++)
         {
-            node &n = nodes[i];
-            // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-            result.push_back(n.coord);
-            i = n.prev;
+            // if (*it == 3)
+            //     printf("biatch");
+            result.clear();
+            i = *it;
+            while (i != 0)
+            {
+                if (i < 0)
+                    break;
+                node &n = nodes[i];
+                // printf("node: %f, %f\n", n.coord.x, n.coord.y);
+                result.push_back(n.coord);
+                i = n.prev;
+            }
+            if (i >= 0)
+                break;
+        }
+
+        if (i < 0)
+        {
+            printf("WARNING: no path found AT ALL\n");
         }
     }
     std::reverse(result.begin(), result.end());
     return (result);
-}
-
-void move_line_toward_point(RP::line &side_points, RP::point pt, float d)
-{
-    int orient = RP::orientation(side_points.p, side_points.q, pt);
-    if (orient == 0)
-        return;
-    RP::point along{side_points.q.x - side_points.p.x, side_points.q.y - side_points.p.y};
-    RP::point dir;
-    if (orient == 1)
-    {
-        dir.x = along.y;
-        dir.y = -along.x;
-    }
-    else
-    {
-        dir.x = -along.y;
-        dir.y = along.x;
-    }
-    float norm = sqrt(dir.x * dir.x + dir.y * dir.y);
-    dir.x *= d / norm;
-    dir.y *= d / norm;
-    // printf("%f, %f\n", dir.x, dir.y);
-    side_points.p.x += dir.x;
-    side_points.p.y += dir.y;
-    side_points.q.x += dir.x;
-    side_points.q.y += dir.y;
 }

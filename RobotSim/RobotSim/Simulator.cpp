@@ -17,7 +17,6 @@ RP::Simulator::Simulator(const std::list<Obstacle> &obstacleList, const Agent &a
                                                                                   window_height(windowH),
                                                                                   vision_dist_sq(std::pow(conf.vision_dist, 2))
 {
-    // std::cout << vision_dist_sq;
 }
 
 void RP::Simulator::update_agent()

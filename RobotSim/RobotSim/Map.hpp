@@ -36,7 +36,7 @@ struct obstacle
 class Map
 {
 public:
-  Map(const point& cur_pos, const point& target);
+  Map(const point& cur_pos, const point& target, float bot_width=0.f);
   const std::vector<node>& d_nodes = nodes;
   point compute_next_point();                    // return coordinate for next point to go to
   point compute_search();                        // search for the tennis ball once the goal is reached. Return a target direction vector.
@@ -46,6 +46,7 @@ public:
   const std::list<obstacle>& memo_obstacles() { return mem_obstacles; }
 
   void breakpoint() { debugging = true; }
+  const float bot_width;
   
 private:
   void add_obstacle(point coord1, point coord2); //Adds an obstacle to the map. Obstacle is specified with 2 points
@@ -61,7 +62,7 @@ private:
   std::list<obstacle> mem_obstacles;
   Timer timer; // for debugging
   inline point& nd_coord(int node) { return nodes[node].coord; }
-  get_closest_obstacle(eptr edge); // return index of closest obstacle that intersects with edge. If doesn't exist return -1
+  int get_closest_obstacle(eptr edge, float path_width); // return index of closest obstacle that intersects with edge. If doesn't exist return -1
 
   bool debugging = false;
 };

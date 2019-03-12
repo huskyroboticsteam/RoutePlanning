@@ -10,17 +10,8 @@ X                            X
 4. renamed visited nodes to processed nodes or something
 
 TODOs
-* modify part that checks intersection between path and obstacle. Make path thicker to account for thickenss of robot
-* need to have mechanism to unmark certain obstacles as visited if it does not actually provide a route (idea: have two
-visited vectors, one for each side of the obstacle). This becomes a problem for the following obstacles.txt:
-
-15 25   10 30
-10 30   20 35
-20 35   35 20
-35 20   25 15
-25 15   30 20
-30 20   20 30
-20 30   15 25
-
-where if the robot has seen all the obstacles, it will sometimes "overvisit" through a failed path within
-the obstacle polygon, preventing paths from connecting with target
+* to prevent bot from getting stuck at a point, either increase tolerance or "smoothen" two edges
+by merging them if they can be merged.
+* if there is no path at all (no node), gradually decrease bot width until one can be found.
+  this avoids from getting stuck but could potentially make bot run into things (not likely for 
+  conservatively-picked values)

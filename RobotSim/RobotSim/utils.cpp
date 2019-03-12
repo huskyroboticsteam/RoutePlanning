@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 #include "utils.hpp"
 
 #define PI 3.14159265359
@@ -138,31 +139,32 @@ bool RP::on_segment(point p, point q, point r)
             q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y));
 }
 
-//Probably returns whether p1q1 and p2q2 intersect
-bool RP::segments_intersect(point p1, point q1, point p2, point q2)
+//Probably returns whether p1p2 and q1q2 intersect
+bool RP::segments_intersect(point p1, point p2, point q1, point q2)
 {
-    int o1 = orientation(p1, q1, p2);
-    int o2 = orientation(p1, q1, q2);
-    int o3 = orientation(p2, q2, p1);
-    int o4 = orientation(p2, q2, q1);
+    int o1 = orientation(p1, p2, q1);
+    int o2 = orientation(p1, p2, q2);
+    int o3 = orientation(q1, q2, p1);
+    int o4 = orientation(q1, q2, p2);
 
     if (o1 != o2 && o3 != o4)
         return (true);
 
-    if (o1 == 0 && on_segment(p1, p2, q1))
+    if (o1 == 0 && on_segment(p1, q1, p2))
         return (true);
 
-    if (o2 == 0 && on_segment(p1, q2, q1))
+    if (o2 == 0 && on_segment(p1, q2, p2))
         return (true);
 
-    if (o3 == 0 && on_segment(p2, p1, q2))
+    if (o3 == 0 && on_segment(q1, p1, q2))
         return (true);
 
-    if (o4 == 0 && on_segment(p2, q1, q2))
+    if (o4 == 0 && on_segment(q1, p2, q2))
         return (true);
 
     return (false);
 }
+
 
 // returns the intersection between ab and cd (I know it's confusing since
 // it's ordered differently from segments_intersect() and I won't attempt to
@@ -175,6 +177,119 @@ RP::point RP::segments_intersection(point a, point b, point c, point d)
     if (!within_segment(a, b, x) || !within_segment(c, d, x))
         return point{INFINITY, INFINITY};
     return x;
+}
+
+char RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_width, point& inters_out)
+{
+    line p_line = line{p1, p2};
+    line left = get_moved_line(p_line, p_width / 2, true);
+    line right = get_moved_line(p_line, p_width / 2, false);
+    point ccw_points[]{left.p, left.q, right.q, right.p};
+    line sides[4];
+    for (int i = 0; i < 4; i++)
+        sides[i] = line{ccw_points[i], ccw_points[(i + 1) % 4]};
+    point intersects[2];
+    int inter_i = 0;
+    for (const line& side : sides)
+    {
+        if (segments_intersect(side.p, side.q, q1, q2))
+        {
+            assert(inter_i <= 2);
+            intersects[inter_i++] = segments_intersection(side.p, side.q, q1, q2);
+        }
+    }
+
+    if (inter_i == 0)
+    {
+        bool within = true;
+        // check if both points are inside p_line rectangle
+        for (const point& q : {q1, q2})
+        {
+            for (const line& side : sides)
+            {
+                const point dir{q1.x - side.p.x, q1.y - side.p.y}; 
+                if (dot(get_ortho(side, true), dir) > 0)
+                {
+                    within = false;
+                    break;
+                }
+            }
+        }
+        if (within)
+        {
+            intersects[0] = q1;
+            intersects[1] = q2;
+            inter_i = 2;
+        }
+    }
+
+    if (inter_i != 0)
+    {
+        if (inter_i == 1)
+            inters_out = intersects[0];
+        else {
+            const point& int1 = intersects[0];
+            const point& int2 = intersects[1];
+            inters_out = point{(int1.x + int2.x) / 2, (int1.y + int2.y) / 2};
+        }
+        return true;
+    }
+    return false;
+}
+
+float RP::dot(const point& u, const point& v)
+{
+    return u.x * v.x + u.y * v.y;
+}
+
+void RP::move_line_toward_point(RP::line &side_points, RP::point pt, float d)
+{
+    int orient = RP::orientation(side_points.p, side_points.q, pt);
+    if (orient == 0)
+        return;
+    point dir = get_ortho(side_points, orient == 2);
+    dir.x *= d;
+    dir.y *= d;
+    // printf("%f, %f\n", dir.x, dir.y);
+    side_points.p.x += dir.x;
+    side_points.p.y += dir.y;
+    side_points.q.x += dir.x;
+    side_points.q.y += dir.y;
+}
+
+RP::point RP::get_ortho(const RP::line& ln, bool ccw)
+{
+    point dir{ln.q.x - ln.p.x, ln.q.y - ln.p.y};
+    float t = dir.x;
+    if (ccw)
+    {
+        dir.x = -dir.y;
+        dir.y = t;
+    }
+    else
+    {
+        dir.x = dir.y;
+        dir.y = -t;
+    }
+
+    float norm = sqrt(dir.x * dir.x + dir.y * dir.y);
+    dir.x *= 1 / norm;
+    dir.y *= 1 / norm;
+    return dir;
+}
+
+RP::line RP::get_moved_line(const RP::line& ln, float d, bool ccw)
+{
+    point dir = get_ortho(ln, ccw);
+    dir.x *= d;
+    dir.y *= d;
+
+    line ret = ln;
+    ret.p.x += dir.x;
+    ret.p.y += dir.y;
+    ret.q.x += dir.x;
+    ret.q.y += dir.y;    
+    return ret;
 }
 
 //returns whether c is on ab assuming that abc is a line

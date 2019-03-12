@@ -38,6 +38,8 @@ public:
     float turnTowards(float targetAngle);
     float turnTowards(float targetX, float targetY);
     void scaleSpeed(float ss);
+
+    float bot_width;
     
     std::array<RP::polarPoint, 4> getHitBox() { return hitBox; }
     
