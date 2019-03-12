@@ -124,16 +124,16 @@ turnstate = SURVEY_COUNTERCW;
             }
             else
             {
-                // if (dist < 5.f)
-                // {
-                //     // avoid overshooting or undershooting
-                //     printf("kicks in\n");
-                //     speed = dist / AUTO_MOVE_TIME;
-                // }
-                // else
-                // {
-                speed = 0.16f * dist + 0.15f;
-                // }
+                if (dist < 5.f)
+                {
+                    // avoid overshooting or undershooting
+                    printf("kicks in: %f\n", dist/AUTO_MOVE_TIME);
+                    speed = dist / AUTO_MOVE_TIME / agent.getTSpeed();
+                }
+                else
+                {
+                    speed = 0.16f * dist + 0.15f;
+                }
                 
             }
 

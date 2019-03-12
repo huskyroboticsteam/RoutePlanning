@@ -81,7 +81,6 @@ int main(int, char const **)
     float gridHeight = grid.retrieveHeight();
     Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 1.f, 1.f, 0.f);
     agent.bot_width = 1.8f;
-    // agent.scaleSpeed(2.f);
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Map map(sim.getpos(), grid.target, agent.bot_width);
