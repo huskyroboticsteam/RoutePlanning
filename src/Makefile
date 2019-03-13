@@ -14,7 +14,7 @@ $(ODIR)/%.o: $(SDIR)/%.cpp
 
 
 $(OUT): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(OUT)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(OUT) -lpthread
 
 .PHONY: clean
 clean:

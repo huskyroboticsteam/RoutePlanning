@@ -195,9 +195,9 @@ void RP::Server::send_watchdog() {
 		}
 		// Sleep for 100 milliseconds and then try again
 #ifdef _WIN32 // Windows
-		//Sleep(100); // in milliseconds
+		Sleep(100); // in milliseconds
 #else // Unix
-		//usleep(100 * 1000); // in microseconds
+		usleep(100 * 1000); // in microseconds
 #endif
 	}
 }
