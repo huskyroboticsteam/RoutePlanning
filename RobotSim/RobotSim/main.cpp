@@ -319,6 +319,7 @@ int main(int, char const **)
 static inline sf::CircleShape getNode(RP::node nd, float scale, float height)
 {
     sf::CircleShape circle(5);
+    circle.setOrigin(5, 5);
     circle.setFillColor(GRAPH_NODE_COLOR);
     circle.setPosition((nd.coord.x + 1) * scale, (height - nd.coord.y) * scale);
     return circle;
