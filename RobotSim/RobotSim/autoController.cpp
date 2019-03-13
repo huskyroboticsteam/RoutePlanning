@@ -43,7 +43,7 @@ void RP::AutoController::tic()
                 orig_angle = agent.getInternalRotation();
                 tar_angle = orig_angle + AUTO_TURN_RANGE / 2.f;
 #if SURVEY
-turnstate = SURVEY_COUNTERCW;
+                turnstate = SURVEY_COUNTERCW;
 #else
                 turning = false;
                 timer.reset();
@@ -90,15 +90,17 @@ turnstate = SURVEY_COUNTERCW;
     else
     {
         std::vector<point> path = map.shortest_path_to();
-        if (path.empty()) return;
+        if (path.empty())
+            return;
         if (timer.elapsed() > AUTO_MOVE_TIME)
         {
-            // turning time 
-            // prevent robot from getting stuck at one point
+            // turning time
             std::vector<point>::iterator next = path.begin();
-            // TODO change this to something more robust
-            for (next = path.begin(); next != path.end() &&
-                same_point(*next, point{agent.getX(), agent.getY()}, 1.f); next++) {}
+            
+            // prevent robot from getting stuck at one point
+            // for (next = path.begin(); next != path.end() &&
+            //                           same_point(*next, point{agent.getX(), agent.getY()}, 1.f);
+            //      next++);
             tar_angle = atan2(next->y - agent.getY(),
                               next->x - agent.getX()) *
                         180 / PI;
@@ -124,17 +126,7 @@ turnstate = SURVEY_COUNTERCW;
             }
             else
             {
-                if (dist < 5.f)
-                {
-                    // avoid overshooting or undershooting
-                    printf("kicks in: %f\n", dist/AUTO_MOVE_TIME);
-                    speed = dist / AUTO_MOVE_TIME / agent.getTSpeed();
-                }
-                else
-                {
-                    speed = 0.16f * dist + 0.15f;
-                }
-                
+                speed = 0.16f * dist + 0.15f;
             }
 
             if (speed > 1.f)

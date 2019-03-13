@@ -63,6 +63,8 @@ private:
   Timer timer; // for debugging
   inline point& nd_coord(int node) { return nodes[node].coord; }
   int get_closest_obstacle(eptr edge, float path_width); // return index of closest obstacle that intersects with edge. If doesn't exist return -1
+  point ind_to_coord(int i);
+  void prune_path(std::vector<int>& path);
 
   bool debugging = false;
 };

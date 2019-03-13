@@ -93,7 +93,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
 //             to get R to be in lat/lng units
 //<hack>
 #define SIDE_TOLERANCE 2.f
-#define SKIP_TOLERANCE 4.f
+#define SKIP_TOLERANCE 2.f
     // shouldn't need this since we're passing meters
     // #define R_METERS 0.5f
     //     auto offset = RP::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
@@ -189,12 +189,14 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
             }
             else
             {
-                // printf("visited (%f, %f) - (%f, %f)\n", obstacles[closest_index].coord1.x, obstacles[closest_index].coord1.y, obstacles[closest_index].coord2.x,
-                // obstacles[closest_index].coord2.y);
+                /*
+                printf("visited (%f, %f) - (%f, %f)\n", obstacles[closest_index].coord1.x, 
+                    obstacles[closest_index].coord1.y, obstacles[closest_index].coord2.x,
+                obstacles[closest_index].coord2.y);
+                */
             }
         }
     }
-
     return nodes;
 }
 
@@ -271,9 +273,6 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
                     merged = temp;
                     it_mobs = mem_obstacles.erase(it_mobs);
                     nmerged++;
-                    if (debug)
-                    {
-                    }
                 }
                 else
                 {
@@ -291,7 +290,8 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
         }
         if (should_add)
         {
-            // if (debug) printf("added\n");
+            // if (debug)
+                // printf("added\n");
             mem_obstacles.emplace_back(merged);
         }
         if (debug)
@@ -353,10 +353,34 @@ void assertGraph(std::vector<RP::node> nodes)
     }
 }
 
+void RP::Map::prune_path(std::vector<int>& path)
+{ 
+    int i = 1;
+    path.insert(path.begin(), 0);
+
+    while (i < path.size() - 1)
+    {
+        // construct temporary edge
+        auto e = eptr(new edge{path[i-1], path[i+1]});
+        if (get_closest_obstacle(e, SKIP_TOLERANCE) == -1)
+        {
+            path.erase(path.begin() + i);
+        }
+        else
+        {
+            i++;
+        }
+    }
+    path.erase(path.begin());
+}
+
+// RP::point RP::Map::ind_to_coord(int i) { return nodes[i].coord; };
+
 //TODO(sasha): Find heuristics and upgrade to A*
 std::vector<RP::point> RP::Map::shortest_path_to()
 {
     std::vector<node> nodes = build_graph(cur, tar);
+
 #if 0
     for(int i = 0; i < nodes.size(); i++)
     {
@@ -386,7 +410,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         }
     }
 
-    std::vector<point> result;
+    std::vector<int> pathIndices;
     int i = 1;
     bool pathFound = true;
     while (i != 0)
@@ -399,7 +423,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         }
         node &n = nodes[i];
         // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-        result.push_back(n.coord);
+        pathIndices.push_back(i);
         i = n.prev;
     }
     // path not found. resort to node closest to target
@@ -413,14 +437,14 @@ std::vector<RP::point> RP::Map::shortest_path_to()
                   [nodes, tar](size_t i, size_t j) {
                       return dist_sq(nodes[i].coord, tar.coord) < dist_sq(nodes[j].coord, tar.coord);
                   });
-                  
+
         assertGraph(nodes);
         int i = -1;
         for (auto it = indices.begin() + 2; it != indices.end(); it++)
         {
             // if (*it == 3)
             //     printf("biatch");
-            result.clear();
+            pathIndices.clear();
             i = *it;
             while (i != 0)
             {
@@ -428,7 +452,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
                     break;
                 node &n = nodes[i];
                 // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-                result.push_back(n.coord);
+                pathIndices.push_back(i);
                 i = n.prev;
             }
             if (i >= 0)
@@ -440,6 +464,9 @@ std::vector<RP::point> RP::Map::shortest_path_to()
             printf("WARNING: no path found AT ALL\n");
         }
     }
-    std::reverse(result.begin(), result.end());
+    std::reverse(pathIndices.begin(), pathIndices.end());
+    prune_path(pathIndices);
+    std::vector<point> result;
+    for (int ind : pathIndices) result.push_back(nodes[ind].coord);
     return (result);
 }

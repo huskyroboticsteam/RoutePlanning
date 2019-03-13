@@ -26,7 +26,7 @@ enum TurnState
 class AutoController
 {
   public:
-    AutoController(Grid &grd, Agent &agt, Map &mp) : grid(grd), agent(agt), map(mp), base_speed(1.f) {};
+    AutoController(Grid &grd, Agent &agt, Map &mp) : grid(grd), agent(agt), map(mp), base_speed(1.f){};
     void start_auto();
     void tic();
     void stop_auto();
