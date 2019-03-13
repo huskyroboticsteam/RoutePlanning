@@ -64,7 +64,6 @@ private:
     float rotation;
     float transSpeed;
     float rotSpeed;
-    float speedScale;
     
     // stores the four corners of the hitbox as polar coordinates (r, θ)
     // r is in meters, θ is in radians

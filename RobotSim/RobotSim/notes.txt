@@ -10,8 +10,11 @@ X                            X
 4. renamed visited nodes to processed nodes or something
 
 TODOs
-* to prevent bot from getting stuck at a point, either increase tolerance or "smoothen" two edges
-by merging them if they can be merged.
+* remove fixed target, and then add path merging. Basically, go through best path and
+see if you can remove a point. connect the point before and after that point and check
+for intersection (larger tolerance) and then if possible discard that point. Also remove
+the similar logic in "add side points". Later, if necessary, add path pruning in the whole
+graph.
 * if there is no path at all (no node), gradually decrease bot width until one can be found.
   this avoids from getting stuck but could potentially make bot run into things (not likely for 
   conservatively-picked values)
