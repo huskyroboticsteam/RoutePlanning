@@ -55,7 +55,7 @@ RP::Server::Server()
 	serverHint.sin_addr.s_addr = INADDR_ANY;
 	//inet_pton(AF_INET, "10.19.161.242", &serverHint.sin_addr.s_addr);
 	serverHint.sin_family = AF_INET;
-	serverHint.sin_port = htons(54000);
+	serverHint.sin_port = htons(54111);
 	
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
@@ -187,17 +187,18 @@ bool RP::Server::send_action(unsigned char id) // same id format as in Scarlet
 }
 
 void RP::Server::send_watchdog() {
-	bool hasSent = RP::Server::send_action(WATCHDOG_ID);
-
-	while (!hasSent) {
+	bool hasSent;
+	while (true) {
+		hasSent = RP::Server::send_action(WATCHDOG_ID);
+		while (!hasSent) {
+			hasSent = RP::Server::send_action(WATCHDOG_ID);
+		}
 		// Sleep for 100 milliseconds and then try again
 #ifdef _WIN32 // Windows
 		//Sleep(100); // in milliseconds
 #else // Unix
 		//usleep(100 * 1000); // in microseconds
 #endif
-
-		RP::Server::send_action(WATCHDOG_ID);
 	}
 }
 

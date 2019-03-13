@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstring>
 #include <math.h>
+#include <thread>
 #include "Server.hpp"
 #include "Map.hpp"
 
@@ -54,7 +55,8 @@ namespace RP {
 		state = FOLLOW_PATH;
 		curr_lat = cur_pos.x;
 		curr_lng = cur_pos.y;
-		
+
+		std::thread watchdogThread(&RP::Server::send_watchdog, &server);
 	}
 
     // using given packet data and server send a packet containing either a direction or motor power

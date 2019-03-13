@@ -29,3 +29,4 @@ RobotSim/RobotSim/obj
 RobotSim/Robotsim/Resources/obstacles.txt
 RobotSim/RobotSim/testMutex.cpp
 *.o
+*.out
