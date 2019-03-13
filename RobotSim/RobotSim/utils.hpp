@@ -130,6 +130,14 @@ namespace RP
     bool closeEnough(float a, float b, float tol=1e-6);
     bool angleCloseEnough(float deg1, float deg2, float degtol=0.5f);
 
+    template<class T>
+    inline size_t arrlen(T* arr)
+    {
+        if (sizeof(arr) == 0)
+            return 0;
+        return sizeof(arr) / sizeof(*arr);
+    }
+
     //Find if o and p are parallel AND overlap. If they do, can merge is set to true and
     // return a merged obstacle; else, can_merge is set to false
     
