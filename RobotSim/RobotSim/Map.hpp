@@ -54,7 +54,7 @@ private:
   RP::eptr add_edge(int parent, int child);                                   //Adds an edge to the graph; returns parent=>child edge pointer
   void remove_edge(int parent, int child);
   int create_node(point coord);                                    //Creates a node. Returns index in nodes of the created node
-  std::vector<node> build_graph(point cur, point tar);             //Builds the graph using the obstacles so that the shortest path gets calculated
+  std::vector<node> build_graph(point cur, point tar, float tol);             //Builds the graph using the obstacles so that the shortest path gets calculated
   std::vector<node> nodes;                                         //The nodes to the graph
   std::vector<obstacle> obstacles;                                 //The obstacles
   const point& cur;
@@ -64,7 +64,7 @@ private:
   inline point& nd_coord(int node) { return nodes[node].coord; }
   int get_closest_obstacle(eptr edge, float path_width); // return index of closest obstacle that intersects with edge. If doesn't exist return -1
   point ind_to_coord(int i);
-  void prune_path(std::vector<int>& path);
+  void prune_path(std::vector<int>& path, float tol);
 
   bool debugging = false;
 };
