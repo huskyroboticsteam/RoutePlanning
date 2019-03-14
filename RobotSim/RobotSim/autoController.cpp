@@ -45,6 +45,18 @@ void RP::AutoController::tic()
 #if SURVEY
                 turnstate = SURVEY_COUNTERCW;
 #else
+                // time to drive forward
+                auto path = map.shortest_path_to();
+                float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
+                if (path.size() == 1)
+                {
+                    last_move_time = 0.5f;
+                }
+                else
+                {
+                    // TODO tune speed
+                    last_move_time = 0.2f + 0.1f * dist;
+                }
                 turning = false;
                 timer.reset();
 #endif
@@ -92,7 +104,7 @@ void RP::AutoController::tic()
         std::vector<point> path = map.shortest_path_to();
         if (path.empty())
             return;
-        if (timer.elapsed() > AUTO_MOVE_TIME)
+        if (timer.elapsed() > last_move_time)
         {
             // turning time
             std::vector<point>::iterator next = path.begin();
@@ -117,20 +129,6 @@ void RP::AutoController::tic()
         }
         else
         {
-            // moving time
-            float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
-            float speed;
-            if (path.size() == 1)
-            {
-                speed = 0.2f * (dist - 1.f);
-            }
-            else
-            {
-                speed = 0.16f * dist + 0.15f;
-            }
-
-            if (speed > 1.f)
-                speed = 1.f;
             grid.moveAgent(agent, agent.drive(speed));
         }
     }

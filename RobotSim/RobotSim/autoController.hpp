@@ -8,7 +8,6 @@
 
 // for how long robot should move until it re-calculates and turns again
 // TODO decrease this as robot gets closer to an obstacle
-#define AUTO_MOVE_TIME 0.4f
 // for how long robot should turn each time
 #define AUTO_TURN_TIME 3.f
 
@@ -26,7 +25,7 @@ enum TurnState
 class AutoController
 {
   public:
-    AutoController(Grid &grd, Agent &agt, Map &mp) : grid(grd), agent(agt), map(mp), base_speed(1.f){};
+    AutoController(Grid &grd, Agent &agt, Map &mp) : grid(grd), agent(agt), map(mp), speed(1.f){};
     void start_auto();
     void tic();
     void stop_auto();
@@ -37,11 +36,11 @@ class AutoController
     Map &map;
     Timer timer;
 
-    float base_speed;
-
+    float speed;
     float orig_angle; // angle before turning
     float tar_angle;  // target angle for turning
     bool turning;
+    double last_move_time;
     TurnState turnstate;
 
     void init_turn();

@@ -154,7 +154,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
                 int opar = orientation(closer.p, closer.q, par);
                 int ochd = orientation(farther.p, farther.q, chd);
 
-                if (opar == 0 || ochd == 0)
+                if (opar == 0 || ochd == 0 || opar == ochd)
                 {
                     closer = get_moved_line(closer, side_tolerance, true);
                     farther = get_moved_line(farther, side_tolerance, false);
@@ -379,7 +379,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
 {
     float tolerances[]{2.f, 1.5f, 1.f, 0.5f, 0.f};
     // size_t tol_len = arrlen(tolerances);
-    for (int tol_ind; tol_ind < 5; tol_ind++)
+    for (int tol_ind = 0; tol_ind < 5; tol_ind++)
     {
         float tol = tolerances[tol_ind];
         // printf("%f\n", tol);
@@ -474,6 +474,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         std::vector<point> result;
         for (int ind : pathIndices)
             result.push_back(nodes[ind].coord);
+
         return (result);
     }
     printf("WARNING: completely trapped.\n");
