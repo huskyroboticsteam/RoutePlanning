@@ -5,6 +5,9 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 // #include "Map.hpp"
+#define COLINEAR 0
+#define CLOCKWISE 1
+#define COUNTERCLOCKWISE 2
 
 #define THEME 0 // 0 is normal, 1 is HACKERMODE
 

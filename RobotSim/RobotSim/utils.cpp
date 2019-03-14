@@ -116,9 +116,6 @@ bool RP::segment_intersects_circle(point start,
     return ((0 <= t1 && t1 <= 1.0f) || (0 <= t2 && t2 <= 1.0f));
 }
 
-#define COLINEAR 0
-#define CLOCKWISE 1
-#define COUNTERCLOCKWISE 2
 //Returns 0 if p, q, and r are colinear.
 //Returns 1 if pq, qr, and rp are clockwise
 //Returns 2 if pq, qr, and rp are counterclockwise
