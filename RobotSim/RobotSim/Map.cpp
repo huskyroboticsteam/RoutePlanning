@@ -87,13 +87,11 @@ int RP::Map::create_node(point coord)
     return (nodes.size() - 1);
 }
 
-std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
+std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tolerance)
 {
-//TODO(sasha): make R a constant - the following few lines are just a hack
-//             to get R to be in lat/lng units
-//<hack>
-#define SIDE_TOLERANCE 2.f
-#define SKIP_TOLERANCE 2.f
+    //TODO(sasha): make R a constant - the following few lines are just a hack
+    //             to get R to be in lat/lng units
+    //<hack>
     // shouldn't need this since we're passing meters
     // #define R_METERS 0.5f
     //     auto offset = RP::lat_long_offset(cur.x, cur.y, 0.0f, R_METERS);
@@ -127,6 +125,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
     std::queue<eptr> unprocessed_edges;
     // add first edge
     unprocessed_edges.push(init_edge);
+
     // pad for curr and parent
     // for each safety node, find the obstacle closest to it
     while (!unprocessed_edges.empty())
@@ -147,42 +146,41 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar)
                 // make copies of endponts
                 point end1 = closest.coord1;
                 point end2 = closest.coord2;
-                line closer = add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
-                line farther = add_length_to_line_segment(end1, end2, SIDE_TOLERANCE);
-                move_line_toward_point(closer, nd_coord(curr_edge->parent), SIDE_TOLERANCE);
-                move_line_toward_point(farther, nd_coord(curr_edge->child), SIDE_TOLERANCE);
+                line closer = add_length_to_line_segment(end1, end2, side_tolerance);
+                line farther = add_length_to_line_segment(end1, end2, side_tolerance);
+
+                point par = nd_coord(curr_edge->parent);
+                point chd = nd_coord(curr_edge->child);
+                int opar = orientation(closer.p, closer.q, par);
+                int ochd = orientation(farther.p, farther.q, chd);
+
+                if (opar == 0 || ochd == 0)
+                {
+                    closer = get_moved_line(closer, side_tolerance, true);
+                    farther = get_moved_line(farther, side_tolerance, false);
+                }
+                else
+                {
+                    closer = get_moved_line(closer, side_tolerance, opar == COUNTERCLOCKWISE);
+                    farther = get_moved_line(farther, side_tolerance, ochd == COUNTERCLOCKWISE);
+                }
 
                 // create safety nodes
+                int branch1closer = create_node(closer.p);
                 int branch1farther = create_node(farther.p);
-                eptr test_edge = eptr(new edge{curr_edge->parent, branch1farther});
-                if (get_closest_obstacle(test_edge, SKIP_TOLERANCE) == -1)
-                {
-                    unprocessed_edges.push(add_edge(curr_edge->parent, branch1farther));
-                    // printf("skipped\n");
-                }
-                else
-                {
-                    int branch1closer = create_node(closer.p);
-                    unprocessed_edges.push(add_edge(curr_edge->parent, branch1closer));
-                    unprocessed_edges.push(add_edge(branch1closer, branch1farther));
-                }
+                unprocessed_edges.push(add_edge(curr_edge->parent, branch1closer));
+                unprocessed_edges.push(add_edge(branch1closer, branch1farther));
                 unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
 
+                int branch2closer = create_node(closer.q);
                 int branch2farther = create_node(farther.q);
-                eptr test_edge2 = eptr(new edge{curr_edge->parent, branch2farther});
-                // use SIDE_TOLERANCE here for width to avoid running into things
-                if (get_closest_obstacle(test_edge2, SKIP_TOLERANCE) == -1)
-                {
-                    unprocessed_edges.push(add_edge(curr_edge->parent, branch2farther));
-                }
-                else
-                {
-                    int branch2closer = create_node(closer.q);
-                    unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
-                    unprocessed_edges.push(add_edge(branch2closer, branch2farther));
-                }
-
+                unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
+                unprocessed_edges.push(add_edge(branch2closer, branch2farther));
                 unprocessed_edges.push(add_edge(branch2farther, curr_edge->child));
+
+                // special case for "vertical" obstacles
+                unprocessed_edges.push(add_edge(branch1closer, branch2closer));
+                unprocessed_edges.push(add_edge(branch1farther, branch2farther));
 
                 // set endpoints associated with obstacle as visited
                 visited.at(closest_index) = true;
@@ -291,7 +289,7 @@ void RP::Map::update(const std::list<obstacle> &new_obstacles)
         if (should_add)
         {
             // if (debug)
-                // printf("added\n");
+            // printf("added\n");
             mem_obstacles.emplace_back(merged);
         }
         if (debug)
@@ -312,12 +310,12 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     can_merge = true;
     point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
     std::sort(points, points + 4, [](const point &p1, const point &p2) {
-        if (fabs(p1.x - p2.x) > 1e-5)
+        if (fabs(p1.x - p2.x) > 1e-3)
             return fabs(p1.x) > fabs(p2.x);
         else
             return fabs(p1.y) > fabs(p2.y);
     });
-    if (fabs(points[3].x - points[0].x) - 1e-5 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x) || fabs(points[3].y - points[0].y) - 1e-5 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
+    if (fabs(points[3].x - points[0].x) - 1e-2 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x) || fabs(points[3].y - points[0].y) - 1e-2 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
     {
         can_merge = false;
         // printf("Colinear but not overlapping\n");
@@ -353,16 +351,16 @@ void assertGraph(std::vector<RP::node> nodes)
     }
 }
 
-void RP::Map::prune_path(std::vector<int>& path)
-{ 
+void RP::Map::prune_path(std::vector<int> &path, float tol)
+{
     int i = 1;
     path.insert(path.begin(), 0);
 
     while (i < path.size() - 1)
     {
         // construct temporary edge
-        auto e = eptr(new edge{path[i-1], path[i+1]});
-        if (get_closest_obstacle(e, SKIP_TOLERANCE) == -1)
+        auto e = eptr(new edge{path[i - 1], path[i + 1]});
+        if (get_closest_obstacle(e, tol) == -1)
         {
             path.erase(path.begin() + i);
         }
@@ -379,7 +377,13 @@ void RP::Map::prune_path(std::vector<int>& path)
 //TODO(sasha): Find heuristics and upgrade to A*
 std::vector<RP::point> RP::Map::shortest_path_to()
 {
-    std::vector<node> nodes = build_graph(cur, tar);
+    float tolerances[]{2.f, 1.5f, 1.f, 0.5f, 0.f};
+    // size_t tol_len = arrlen(tolerances);
+    for (int tol_ind = 0; tol_ind < 5; tol_ind++)
+    {
+        float tol = tolerances[tol_ind];
+        // printf("%f\n", tol);
+        std::vector<node> nodes = build_graph(cur, tar, tol);
 
 #if 0
     for(int i = 0; i < nodes.size(); i++)
@@ -390,83 +394,90 @@ std::vector<RP::point> RP::Map::shortest_path_to()
 	std::cout << std::endl;
     }
 #endif
-    auto cmp = [nodes](int l, int r) { return nodes[l].dist_to < nodes[r].dist_to; };
-    std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
-    q.push(0);
-    while (!q.empty())
-    {
-        int n = q.top();
-        q.pop();
-
-        for (const eptr &e : nodes[n].connection)
+        auto cmp = [nodes](int l, int r) { return nodes[l].dist_to < nodes[r].dist_to; };
+        std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
+        q.push(0);
+        while (!q.empty())
         {
-            float dist = nodes[n].dist_to + e->len;
-            if (dist < nodes[e->child].dist_to)
+            int n = q.top();
+            q.pop();
+            
+            for (const eptr &e : nodes[n].connection)
             {
-                nodes[e->child].prev = n;
-                nodes[e->child].dist_to = dist;
-                q.push(e->child);
+                float dist = nodes[n].dist_to + e->len;
+                if (dist < nodes[e->child].dist_to)
+                {
+                    nodes[e->child].prev = n;
+                    nodes[e->child].dist_to = dist;
+                    q.push(e->child);
+                }
             }
         }
-    }
 
-    std::vector<int> pathIndices;
-    int i = 1;
-    bool pathFound = true;
-    while (i != 0)
-    {
-        if (i == -1)
+        std::vector<int> pathIndices;
+        int i = 1;
+        bool pathFound = true;
+        while (i != 0)
         {
-            // printf("No path to target found. Resorting to node closest to target\n");
-            pathFound = false;
-            break;
-        }
-        node &n = nodes[i];
-        // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-        pathIndices.push_back(i);
-        i = n.prev;
-    }
-    // path not found. resort to node closest to target
-    if (!pathFound)
-    {
-        const node &tar = nodes[1];
-        std::vector<size_t> indices(nodes.size());
-        iota(indices.begin(), indices.end(), 0);
-        // sort by closest to tar
-        std::sort(indices.begin() + 2, indices.end(),
-                  [nodes, tar](size_t i, size_t j) {
-                      return dist_sq(nodes[i].coord, tar.coord) < dist_sq(nodes[j].coord, tar.coord);
-                  });
-
-        assertGraph(nodes);
-        int i = -1;
-        for (auto it = indices.begin() + 2; it != indices.end(); it++)
-        {
-            // if (*it == 3)
-            //     printf("biatch");
-            pathIndices.clear();
-            i = *it;
-            while (i != 0)
+            if (i == -1)
             {
-                if (i < 0)
-                    break;
-                node &n = nodes[i];
-                // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-                pathIndices.push_back(i);
-                i = n.prev;
-            }
-            if (i >= 0)
+                // printf("No path to target found. Resorting to node closest to target\n");
+                pathFound = false;
                 break;
+            }
+            node &n = nodes[i];
+            // printf("node: %f, %f\n", n.coord.x, n.coord.y);
+            pathIndices.push_back(i);
+            i = n.prev;
         }
-
-        if (i < 0)
+        // path not found. resort to node closest to target
+        if (!pathFound)
         {
-            printf("WARNING: no path found AT ALL\n");
+            const node &tar = nodes[1];
+            std::vector<size_t> indices(nodes.size());
+            iota(indices.begin(), indices.end(), 0);
+            // sort by closest to tar
+            std::sort(indices.begin() + 2, indices.end(),
+                      [nodes, tar](size_t i, size_t j) {
+                          return dist_sq(nodes[i].coord, tar.coord) < dist_sq(nodes[j].coord, tar.coord);
+                      });
+
+            assertGraph(nodes);
+            int i = -1;
+            for (auto it = indices.begin() + 2; it != indices.end(); it++)
+            {
+                // if (*it == 3)
+                //     printf("biatch");
+                pathIndices.clear();
+                i = *it;
+                while (i != 0)
+                {
+                    if (i < 0)
+                        break;
+                    node &n = nodes[i];
+                    // printf("node: %f, %f\n", n.coord.x, n.coord.y);
+                    pathIndices.push_back(i);
+                    i = n.prev;
+                }
+                if (i >= 0)
+                    break;
+            }
+
+            if (i < 0)
+            {
+                // printf("No path found for tolerance %f. Decreasing tolerance.\n", tol);
+                continue;
+            }
         }
+        std::reverse(pathIndices.begin(), pathIndices.end());
+        prune_path(pathIndices, tol + 1.f);
+        std::vector<point> result;
+        
+        for (int ind : pathIndices)
+            result.push_back(nodes[ind].coord);
+        
+        return (result);
     }
-    std::reverse(pathIndices.begin(), pathIndices.end());
-    prune_path(pathIndices);
-    std::vector<point> result;
-    for (int ind : pathIndices) result.push_back(nodes[ind].coord);
-    return (result);
+    printf("WARNING: completely trapped.\n");
+    return std::vector<point>();
 }

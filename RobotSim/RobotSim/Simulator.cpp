@@ -132,7 +132,7 @@ void RP::Simulator::update_agent()
                 }
                 if (same_point(s, p, 1e-5))
                 {
-                    // TODO this is a shared vertex. decide if this should be added
+                    // this is a shared vertex. decide if this should be added
                     // simply see the line intesection of jt and point{cur_pos, q}
                     // where q is the other side point (from p). If the intersect
                     // is in the same direction as q relative to cur_pos, then
