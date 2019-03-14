@@ -387,7 +387,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         {
             int n = q.top();
             q.pop();
-
+            
             for (const eptr &e : nodes[n].connection)
             {
                 float dist = nodes[n].dist_to + e->len;
@@ -458,10 +458,13 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         std::reverse(pathIndices.begin(), pathIndices.end());
         prune_path(pathIndices, tol + 1.f);
         std::vector<point> result;
+        
         for (int ind : pathIndices)
             result.push_back(nodes[ind].coord);
+        
         if (result.size() == 1)
             printf("ha");
+        
         return (result);
     }
     printf("WARNING: completely trapped.\n");
