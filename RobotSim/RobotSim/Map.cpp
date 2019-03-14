@@ -308,6 +308,7 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
         return o;
     }
     can_merge = true;
+    // sort points in an arbitrary but consistent direction
     point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
     std::sort(points, points + 4, [](const point &p1, const point &p2) {
         if (fabs(p1.x - p2.x) > 1e-3)
@@ -315,7 +316,8 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
         else
             return fabs(p1.y) > fabs(p2.y);
     });
-    if (fabs(points[3].x - points[0].x) - 1e-2 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x) || fabs(points[3].y - points[0].y) - 1e-2 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
+    if (fabs(points[3].x - points[0].x) - 1e-2 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x) ||
+        fabs(points[3].y - points[0].y) - 1e-2 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
     {
         can_merge = false;
         // printf("Colinear but not overlapping\n");
@@ -330,9 +332,9 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     return obstacle{points[0], points[3]};
 }
 
+// for debugging. assert edges go in two directions
 void assertGraph(std::vector<RP::node> nodes)
 {
-    // debug
     for (int parent = 0; parent < nodes.size(); parent++)
     {
         for (RP::eptr conn : nodes[parent].connection)
@@ -351,6 +353,8 @@ void assertGraph(std::vector<RP::node> nodes)
     }
 }
 
+// remove unnecessary nodes from the path (i.e. if removing it does
+// not introduce intersections) to increase stability and speed
 void RP::Map::prune_path(std::vector<int> &path, float tol)
 {
     int i = 1;
@@ -375,6 +379,7 @@ void RP::Map::prune_path(std::vector<int> &path, float tol)
 // RP::point RP::Map::ind_to_coord(int i) { return nodes[i].coord; };
 
 //TODO(sasha): Find heuristics and upgrade to A*
+// *low priority
 std::vector<RP::point> RP::Map::shortest_path_to()
 {
     float tolerances[]{2.f, 1.5f, 1.f, 0.5f, 0.f};

@@ -47,6 +47,8 @@ public:
 
   void breakpoint() { debugging = true; }
   const float bot_width;
+  const point& cur;
+  const point& tar;
   
 private:
   void add_obstacle(point coord1, point coord2); //Adds an obstacle to the map. Obstacle is specified with 2 points
@@ -57,8 +59,6 @@ private:
   std::vector<node> build_graph(point cur, point tar, float tol);             //Builds the graph using the obstacles so that the shortest path gets calculated
   std::vector<node> nodes;                                         //The nodes to the graph
   std::vector<obstacle> obstacles;                                 //The obstacles
-  const point& cur;
-  const point& tar;
   std::list<obstacle> mem_obstacles;
   Timer timer; // for debugging
   inline point& nd_coord(int node) { return nodes[node].coord; }
