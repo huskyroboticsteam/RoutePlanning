@@ -148,8 +148,22 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
                 point end2 = closest.coord2;
                 line closer = add_length_to_line_segment(end1, end2, side_tolerance);
                 line farther = add_length_to_line_segment(end1, end2, side_tolerance);
-                move_line_toward_point(closer, nd_coord(curr_edge->parent), side_tolerance);
-                move_line_toward_point(farther, nd_coord(curr_edge->child), side_tolerance);
+
+                point par = nd_coord(curr_edge->parent);
+                point chd = nd_coord(curr_edge->child);
+                int opar = orientation(closer.p, closer.q, par);
+                int ochd = orientation(farther.p, farther.q, chd);
+
+                if (opar == 0 || ochd == 0)
+                {
+                    closer = get_moved_line(closer, side_tolerance, true);
+                    farther = get_moved_line(farther, side_tolerance, false);
+                }
+                else
+                {
+                    closer = get_moved_line(closer, side_tolerance, opar == COUNTERCLOCKWISE);
+                    farther = get_moved_line(farther, side_tolerance, ochd == COUNTERCLOCKWISE);
+                }
 
                 // create safety nodes
                 int branch1closer = create_node(closer.p);
@@ -158,8 +172,8 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
                 unprocessed_edges.push(add_edge(branch1closer, branch1farther));
                 unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
 
-                int branch2farther = create_node(farther.q);
                 int branch2closer = create_node(closer.q);
+                int branch2farther = create_node(farther.q);
                 unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
                 unprocessed_edges.push(add_edge(branch2closer, branch2farther));
                 unprocessed_edges.push(add_edge(branch2farther, curr_edge->child));
@@ -296,12 +310,12 @@ RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
     can_merge = true;
     point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
     std::sort(points, points + 4, [](const point &p1, const point &p2) {
-        if (fabs(p1.x - p2.x) > 1e-5)
+        if (fabs(p1.x - p2.x) > 1e-3)
             return fabs(p1.x) > fabs(p2.x);
         else
             return fabs(p1.y) > fabs(p2.y);
     });
-    if (fabs(points[3].x - points[0].x) - 1e-5 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x) || fabs(points[3].y - points[0].y) - 1e-5 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
+    if (fabs(points[3].x - points[0].x) - 1e-2 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x) || fabs(points[3].y - points[0].y) - 1e-2 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
     {
         can_merge = false;
         // printf("Colinear but not overlapping\n");
@@ -461,9 +475,6 @@ std::vector<RP::point> RP::Map::shortest_path_to()
         
         for (int ind : pathIndices)
             result.push_back(nodes[ind].coord);
-        
-        if (result.size() == 1)
-            printf("ha");
         
         return (result);
     }
