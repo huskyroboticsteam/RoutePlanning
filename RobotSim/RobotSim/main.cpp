@@ -79,7 +79,7 @@ int main(int, char const **)
     Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
     float gridScale = grid.retrieveScale();
     float gridHeight = grid.retrieveHeight();
-    Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 1.f, 1.f, 0.f);
+    Agent agent(gridScale, grid.retrieveWidth(), gridHeight, 0.f, 0.f, 45.f);
     agent.bot_width = 1.8f;
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
