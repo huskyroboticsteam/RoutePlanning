@@ -130,7 +130,6 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
     // for each safety node, find the obstacle closest to it
     while (!unprocessed_edges.empty())
     {
-        // TODO handle visited, intersections in edge chains (i.e. remove node and maybe edge)
         const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
         int closest_index = get_closest_obstacle(curr_edge, bot_width);
