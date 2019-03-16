@@ -6,7 +6,7 @@
 #include <list>
 #include "obstacle.hpp"
 #include "agent.hpp"
-#include "autonomous/Map.hpp"
+#include "autonomous/Mapper.hpp"
 
 #define MAX_GRID_RESOLUTION 100 // max number of grid cells on each side of the map
 

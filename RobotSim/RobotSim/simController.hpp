@@ -4,7 +4,7 @@
 #include "grid.hpp"
 #include "agent.hpp"
 #include "autonomous/timer.hpp"
-#include "autonomous/Map.hpp"
+#include "autonomous/mapper.hpp"
 
 // for how long robot should move until it re-calculates and turns again
 // TODO decrease this as robot gets closer to an obstacle
@@ -27,7 +27,7 @@ enum TurnState
 class SimController
 {
   public:
-    SimController(Grid &grd, Agent &agt, Map &mp) : grid(grd), agent(agt), map(mp), speed(1.f) {};
+    SimController(Grid &grd, Agent &agt, Mapper &mp) : grid(grd), agent(agt), mapper(mp), speed(1.f) {};
     void start_auto();
     void tic();
     void stop_auto();
@@ -35,7 +35,7 @@ class SimController
   private:
     Grid &grid;
     Agent &agent;
-    Map &map;
+    Mapper &mapper;
     Timer timer;
 
     float speed;

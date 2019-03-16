@@ -4,18 +4,19 @@
 #include <list>
 #include <cassert>
 #include <numeric>
-#include "Map.hpp"
+#include "splitMapper.hpp"
 
-RP::Map::Map(const point &cpos, const point &tget, const Memorizer& mem, float bw) : cur(cpos), tar(tget), memorizer(mem), bot_width(bw)
+RP::SplitMapper::SplitMapper(const point &orig, const point &tget, const std::vector<line>& allobst, float bw) : 
+    Mapper(orig, tget, bw), all_obstacles(allobst), bot_width(bw)
 {
 }
 
-RP::point RP::Map::compute_next_point()
+RP::point RP::SplitMapper::compute_next_point()
 {
-    return shortest_path_to().front();
+    return compute_path().front();
 }
 
-RP::line RP::Map::add_length_to_line_segment(point p, point q, float length)
+RP::line RP::SplitMapper::add_length_to_line_segment(point p, point q, float length)
 {
     std::pair<float, float> pq = std::make_pair(q.x - p.x, q.y - p.y); //vector
     float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second);
@@ -27,7 +28,7 @@ RP::line RP::Map::add_length_to_line_segment(point p, point q, float length)
     return line{p1, p2};
 }
 
-RP::eptr RP::Map::add_edge(int parent, int child)
+RP::eptr RP::SplitMapper::add_edge(int parent, int child)
 {
     float dist = std::sqrt(dist_sq(nodes[parent].coord, nodes[child].coord));
 
@@ -40,7 +41,7 @@ RP::eptr RP::Map::add_edge(int parent, int child)
     return p_to_c;
 }
 
-void RP::Map::remove_edge(int parent, int child)
+void RP::SplitMapper::remove_edge(int parent, int child)
 {
     assert(parent >= 0 && child >= 0);
     auto &conn = nodes.at(parent).connection;
@@ -71,7 +72,7 @@ void RP::Map::remove_edge(int parent, int child)
         printf("WARNING: edge not removed (reverse). Parent: %d, child %d\n", parent, child);
 }
 
-int RP::Map::create_node(point coord)
+int RP::SplitMapper::create_node(point coord)
 {
     node n;
     n.prev = -1;
@@ -81,7 +82,7 @@ int RP::Map::create_node(point coord)
     return (nodes.size() - 1);
 }
 
-std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tolerance)
+std::vector<RP::node> RP::SplitMapper::update_graph(point cur, point tar, float side_tolerance)
 {
     //TODO(sasha): make R a constant - the following few lines are just a hack
     //             to get R to be in lat/lng units
@@ -93,20 +94,19 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
     //     float SIDE_TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
     // #undef R_METERS
     //</hack>
-    const std::vector<line> obstacles = memorizer.obstacles_ref;
 
     nodes.clear();
     create_node(cur);
     nodes[0].dist_to = 0.0f;
     create_node(tar);
     eptr init_edge = add_edge(0, 1);
-    if (obstacles.empty())
+    if (all_obstacles.empty())
     {
         return (nodes);
     }
 
     // if obstacle has been visited from one side
-    std::vector<bool> visited(obstacles.size(), false);
+    std::vector<bool> visited(all_obstacles.size(), false);
     std::queue<eptr> unprocessed_edges;
     // add first edge
     unprocessed_edges.push(init_edge);
@@ -118,11 +118,11 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
         // TODO handle visited, intersections in edge chains (i.e. remove node and maybe edge)
         const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
-        int closest_index = get_closest_obstacle(curr_edge, bot_width, obstacles);
+        int closest_index = get_closest_obstacle(curr_edge, bot_width, all_obstacles);
 
         if (closest_index != -1)
         {
-            const line &closest = obstacles.at(closest_index);
+            const line &closest = all_obstacles.at(closest_index);
             remove_edge(curr_edge->parent, curr_edge->child);
             // printf("removing %f, %f - %f, %f\n", nodes.at(curr_edge->parent).coord.x, nodes.at(curr_edge->parent).coord.y,
             // nodes.at(curr_edge->child).coord.x, nodes.at(curr_edge->child).coord.y);
@@ -183,7 +183,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
     return nodes;
 }
 
-int RP::Map::get_closest_obstacle(eptr edge, float path_width, const std::vector<line>& obstacles)
+int RP::SplitMapper::get_closest_obstacle(eptr edge, float path_width, const std::vector<line>& obstacles)
 {
     float min_dist = INFINITY;
     int closest_index = -1;
@@ -228,7 +228,7 @@ void assertGraph(std::vector<RP::node> nodes)
 
 // remove unnecessary nodes from the path (i.e. if removing it does
 // not introduce intersections) to increase stability and speed
-void RP::Map::prune_path(std::vector<int> &path, float tol)
+void RP::SplitMapper::prune_path(std::vector<int> &path, float tol)
 {
     int i = 1;
     path.insert(path.begin(), 0);
@@ -237,7 +237,7 @@ void RP::Map::prune_path(std::vector<int> &path, float tol)
     {
         // construct temporary edge
         auto e = eptr(new edge{path[i - 1], path[i + 1]});
-        if (get_closest_obstacle(e, tol, memorizer.obstacles_ref) == -1)
+        if (get_closest_obstacle(e, tol, all_obstacles) == -1)
         {
             path.erase(path.begin() + i);
         }
@@ -249,11 +249,11 @@ void RP::Map::prune_path(std::vector<int> &path, float tol)
     path.erase(path.begin());
 }
 
-// RP::point RP::Map::ind_to_coord(int i) { return nodes[i].coord; };
+// RP::point RP::SplitMapper::ind_to_coord(int i) { return nodes[i].coord; };
 
 //TODO(sasha): Find heuristics and upgrade to A*
 // *low priority
-std::vector<RP::point> RP::Map::shortest_path_to()
+std::vector<RP::point> RP::SplitMapper::compute_path()
 {
     float tolerances[]{2.f, 1.5f, 1.f, 0.5f, 0.f};
     // size_t tol_len = arrlen(tolerances);
@@ -261,7 +261,7 @@ std::vector<RP::point> RP::Map::shortest_path_to()
     {
         float tol = tolerances[tol_ind];
         // printf("%f\n", tol);
-        std::vector<node> nodes = build_graph(cur, tar, tol);
+        std::vector<node> nodes = update_graph(cur, tar, tol);
 
 #if 0
     for(int i = 0; i < nodes.size(); i++)

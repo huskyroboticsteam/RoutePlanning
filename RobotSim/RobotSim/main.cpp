@@ -27,7 +27,7 @@
 #include "ResourcePath.hpp"
 #include "grid.hpp"
 #include "Simulator.hpp"
-#include "autonomous/Map.hpp"
+#include "autonomous/splitMapper.hpp"
 #include "simController.hpp"
 #include "ui.hpp"
 
@@ -84,9 +84,9 @@ int main(int, char const **)
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Memorizer memorizer;
-    RP::Map map(sim.getpos(), grid.target, memorizer, agent.bot_width);
+    RP::SplitMapper mapper(sim.getpos(), grid.target, memorizer.obstacles_ref, agent.bot_width);
 
-    RP::SimController control(grid, agent, map);
+    RP::SimController control(grid, agent, mapper);
 
     while (window.isOpen())
     {
@@ -221,7 +221,7 @@ int main(int, char const **)
                 // }
                 case sf::Keyboard::B:
                 {
-                    map.breakpoint(); // temp; used for debug only
+                    mapper.breakpoint(); // temp; used for debug only
                 }
                 }
             }
@@ -248,15 +248,15 @@ int main(int, char const **)
         }
         window.clear(bgColor);
         // draw nodes
-        if (showGraph && !map.d_nodes.empty())
+        if (showGraph && !mapper.d_nodes.empty())
         {
-            std::vector<bool> visited(map.d_nodes.size(), false);
+            std::vector<bool> visited(mapper.d_nodes.size(), false);
             std::queue<int> q;
             q.push(0);
             while (!q.empty())
             {
                 int ind = q.front();
-                const auto &nd = map.d_nodes[ind];
+                const auto &nd = mapper.d_nodes[ind];
                 q.pop();
                 visited.at(ind) = true;
                 for (const RP::eptr edge : nd.connection)
@@ -264,7 +264,7 @@ int main(int, char const **)
                     if (!visited.at(edge->child))
                     {
                         q.push(edge->child);
-                        window.draw(get_vertex_line(nd.coord, map.d_nodes.at(edge->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                        window.draw(get_vertex_line(nd.coord, mapper.d_nodes.at(edge->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
                     }
                 }
                 if (ind != 0)
@@ -275,32 +275,32 @@ int main(int, char const **)
         {
             control.tic();
             if (lazer)
-                grid.drawPath(map.shortest_path_to(), agent);
+                grid.drawPath(mapper.compute_path(), agent);
         }
         else
         {
             if (vroom)
             {
                 //grid.moveAgent(agent, agent.drive());
-                RP::point st_target = map.compute_next_point();
+                RP::point st_target = mapper.compute_next_point();
                 grid.moveAgent(agent, agent.driveTowards(st_target.x, st_target.y));
             }
             // don't want to compute path twice
             if (spinny && lazer)
             {
-                auto path = map.shortest_path_to();
+                auto path = mapper.compute_path();
                 grid.rotateAgent(agent, agent.turnTowards(path.front().x, path.front().y));
-                grid.drawPath(map.shortest_path_to(), agent);
+                grid.drawPath(mapper.compute_path(), agent);
             }
             else
             {
                 if (spinny)
                 {
-                    RP::point st_target = map.compute_next_point();
+                    RP::point st_target = mapper.compute_next_point();
                     grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));
                 }
                 if (lazer)
-                    grid.drawPath(map.shortest_path_to(), agent);
+                    grid.drawPath(mapper.compute_path(), agent);
             }
         }
         sim.update_agent();

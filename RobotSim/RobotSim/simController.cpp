@@ -8,7 +8,7 @@ constexpr float TARGET_TOL_SQ = TARGET_TOL * TARGET_TOL;
 void RP::SimController::start_auto()
 {
     // timer.reset();
-    point target = map.compute_next_point();
+    point target = mapper.compute_next_point();
     tar_angle = atan2(target.y - agent.getY(),
                       target.x - agent.getX()) *
                 180 / PI;
@@ -25,7 +25,7 @@ void RP::SimController::init_turn()
 
 void RP::SimController::turn_and_go()
 {
-    auto path = map.shortest_path_to();
+    auto path = mapper.compute_path();
     float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
     if (path.size() == 1)
     {
@@ -53,7 +53,7 @@ void RP::SimController::tic()
         // }
         // else
         // {
-        //     auto path = map.shortest_path_to();
+        //     auto path = mapper.compute_path();
         //     RP::point st_target = path.front();
         //     grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));
         // }
@@ -62,12 +62,12 @@ void RP::SimController::tic()
         case TOWARD_TARGET:
             if (angleCloseEnough(agent.getInternalRotation(), tar_angle, 1.))
             {
-                auto path = map.shortest_path_to();
+                auto path = mapper.compute_path();
                 if (path.size() == 0)
                     break;
-                // TODO this is a hack. later, implement flag in map that tells if tar is the final target
+                // TODO this is a hack. later, implement flag in mapper that tells if tar is the final target
                 // or even better, implement a better algorithm
-                if (path.size() == 1 && dist_sq(point{agent.getX(), agent.getY()}, path.back()) <= TARGET_TOL_SQ && same_point(path.back(), map.tar))
+                if (path.size() == 1 && dist_sq(point{agent.getX(), agent.getY()}, path.back()) <= TARGET_TOL_SQ && same_point(path.back(), mapper.tar))
                 {
                     printf("Target reached.\n");
                     turnstate = FIND_BALL;
@@ -105,7 +105,7 @@ void RP::SimController::tic()
         case SURVEY_CW:
             if (angleCloseEnough(agent.getInternalRotation(), tar_angle, 0.5))
             {
-                auto tar_point = map.compute_next_point();
+                auto tar_point = mapper.compute_next_point();
                 // printf("target point: %f, %f\n", tar_point.x, tar_point.y);
                 tar_angle = atan2(tar_point.y - agent.getY(), tar_point.x - agent.getX()) * 180 / PI;
                 // printf("turning toward target %f\n", tar_angle);
@@ -140,7 +140,7 @@ void RP::SimController::tic()
     }
     else
     {
-        std::vector<point> path = map.shortest_path_to();
+        std::vector<point> path = mapper.compute_path();
         if (path.empty())
             return;
         if (timer.elapsed() > last_move_time)
@@ -166,7 +166,7 @@ void RP::SimController::tic()
 
 float RP::SimController::compute_target_angle()
 {
-    auto path = map.shortest_path_to();
+    auto path = mapper.compute_path();
     std::vector<point>::iterator next = path.begin();
 
     // prevent robot from getting stuck at one point

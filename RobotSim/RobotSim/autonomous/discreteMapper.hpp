@@ -13,3 +13,7 @@ idea: split entire map into grids (the smaller the grid size the more accurate b
 go thru each obstacle and "rasterize" them, painting grids that it passes through (likely as well as nearby grids,
 taking into account of the size of robot) as obstacles. At the end, construct massive graph from grid
 */
+#ifndef RP_DISCRETEMAPPER_HPP
+#define RP_DISCRETEMAPPER_HPP
+
+#endif
