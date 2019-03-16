@@ -1,9 +1,11 @@
-#include "autoController.hpp"
-#include "utils.hpp"
+#include "simController.hpp"
+#include "autonomous/utils.hpp"
 
 #define SURVEY 0 // whether to look around before moving
+constexpr float TARGET_TOL = 4.f; // tolerance distance for testing if we've reached target
+constexpr float TARGET_TOL_SQ = TARGET_TOL * TARGET_TOL;
 
-void RP::AutoController::start_auto()
+void RP::SimController::start_auto()
 {
     // timer.reset();
     point target = map.compute_next_point();
@@ -14,14 +16,14 @@ void RP::AutoController::start_auto()
 }
 
 // TODO turn to next obstacle first and then survey
-void RP::AutoController::init_turn()
+void RP::SimController::init_turn()
 {
     timer.reset();
     turnstate = TOWARD_TARGET;
     turning = true;
 }
 
-void RP::AutoController::turn_and_go()
+void RP::SimController::turn_and_go()
 {
     auto path = map.shortest_path_to();
     float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
@@ -34,14 +36,14 @@ void RP::AutoController::turn_and_go()
     {
         // TODO tune speed
         last_move_time = 0.3f + 0.05f * dist;
-        last_move_speed = std::min(0.2f + 0.1f * dist, 1.f);
+        last_move_speed = std::min(0.2f + 0.05f * dist, 1.f);
         printf("time: %f, speed: %f, dist: %f\n", last_move_time, last_move_speed, dist);
     }
     turning = false;
     timer.reset();
 }
 
-void RP::AutoController::tic()
+void RP::SimController::tic()
 {
     if (turning)
     {
@@ -65,7 +67,7 @@ void RP::AutoController::tic()
                     break;
                 // TODO this is a hack. later, implement flag in map that tells if tar is the final target
                 // or even better, implement a better algorithm
-                if (path.size() == 1 && dist_sq(point{agent.getX(), agent.getY()}, path.back()) <= 3 * 3 && same_point(path.back(), map.tar))
+                if (path.size() == 1 && dist_sq(point{agent.getX(), agent.getY()}, path.back()) <= TARGET_TOL_SQ && same_point(path.back(), map.tar))
                 {
                     printf("Target reached.\n");
                     turnstate = FIND_BALL;
@@ -162,7 +164,7 @@ void RP::AutoController::tic()
     }
 }
 
-float RP::AutoController::compute_target_angle()
+float RP::SimController::compute_target_angle()
 {
     auto path = map.shortest_path_to();
     std::vector<point>::iterator next = path.begin();
@@ -174,6 +176,6 @@ float RP::AutoController::compute_target_angle()
     return atan2(next->y - agent.getY(), next->x - agent.getX()) * 180 / PI;
 }
 
-void RP::AutoController::stop_auto()
+void RP::SimController::stop_auto()
 {
 }

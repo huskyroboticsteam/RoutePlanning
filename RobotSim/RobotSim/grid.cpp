@@ -12,7 +12,8 @@
 #include <math.h>
 
 #include "grid.hpp"
-#include "utils.hpp"
+#include "autonomous/utils.hpp"
+#include "ui.hpp"
 
 // creates a grid that can have obstacles and agents that it moves around
 // !!! NOTE !!!

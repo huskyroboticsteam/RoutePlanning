@@ -21,15 +21,15 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string>
+#include <queue>
 
 // Imports resourcePath() for macos
 #include "ResourcePath.hpp"
-
 #include "grid.hpp"
 #include "Simulator.hpp"
-#include "Map.hpp"
-#include "autoController.hpp"
-#include <queue>
+#include "autonomous/Map.hpp"
+#include "simController.hpp"
+#include "ui.hpp"
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
@@ -85,7 +85,7 @@ int main(int, char const **)
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Map map(sim.getpos(), grid.target, agent.bot_width);
 
-    RP::AutoController control(grid, agent, map);
+    RP::SimController control(grid, agent, map);
 
     while (window.isOpen())
     {

@@ -1,10 +1,10 @@
-#ifndef RP_AUTOCONTROLLLER
-#define RP_AUTOCONTROLLLER
+#ifndef RP_SIMCONTROLLLER
+#define RP_SIMCONTROLLLER
 
 #include "grid.hpp"
 #include "agent.hpp"
-#include "timer.hpp"
-#include "Map.hpp"
+#include "autonomous/timer.hpp"
+#include "autonomous/Map.hpp"
 
 // for how long robot should move until it re-calculates and turns again
 // TODO decrease this as robot gets closer to an obstacle
@@ -24,10 +24,10 @@ enum TurnState
     FIND_BALL,
     FINISHED,
 };
-class AutoController
+class SimController
 {
   public:
-    AutoController(Grid &grd, Agent &agt, Map &mp) : grid(grd), agent(agt), map(mp), speed(1.f) {};
+    SimController(Grid &grd, Agent &agt, Map &mp) : grid(grd), agent(agt), map(mp), speed(1.f) {};
     void start_auto();
     void tic();
     void stop_auto();

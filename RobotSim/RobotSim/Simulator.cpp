@@ -4,8 +4,10 @@
 #include <cctype>
 #include <cmath>
 #include <assert.h>
+
 #include "Simulator.hpp"
 #include "grid.hpp"
+#include "ui.hpp"
 
 #define DEBUG_MSG 0
 

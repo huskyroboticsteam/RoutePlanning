@@ -1,4 +1,5 @@
 #include "agent.hpp"
+#include "ui.hpp"
 
 Agent::Agent(unsigned int mapScale, float mapW, float mapH, float startX, float startY, float startR, float tSpeed, float rSpeed)
 {
