@@ -5,8 +5,9 @@ SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.
 _OBJECTS := $(SOURCES:.cpp=.o)
 OBJECTS := $(patsubst %,$(ODIR)/%,$(_OBJECTS))
 
-AUTO_ODIR := autonomous/obj
-AUTO_SOURCES := $(wildcard autonomous/*.cpp)
+AUTO_DIR := autonomous/
+AUTO_ODIR := $(AUTO_DIR)obj
+AUTO_SOURCES := $(wildcard $(AUTO_DIR)*.cpp)
 _AUTO_OBJECTS := $(notdir $(AUTO_SOURCES:.cpp=.o))
 AUTO_OBJECTS := $(patsubst %,$(AUTO_ODIR)/%,$(_AUTO_OBJECTS))
 
@@ -16,13 +17,13 @@ LINK := -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
 CFLAGS := -std=c++11 -g
 OUT := build/simulator.exe
 
-all: $(OUT)
+all: $(AUTO_DIR) $(OUT)
+
+$(AUTO_DIR): $(AUTO_SOURCES)
+	$(MAKE) -C $@
 
 $(ODIR)/%.o: $(SDIR)/%.cpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS) 
-
-$(AUTO_OBJECTS): $(AUTO_SOURCES)
-	$(MAKE) -C autonomous $(MAKECMDGOALS)
 
 $(OUT): $(OBJECTS) $(AUTO_OBJECTS)
 	$(CC) $(CFLAGS) $(AUTO_OBJECTS) $(OBJECTS) $(LINK) -o $(OUT)

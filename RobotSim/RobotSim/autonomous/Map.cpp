@@ -6,14 +6,8 @@
 #include <numeric>
 #include "Map.hpp"
 
-RP::Map::Map(const point &cpos, const point &tget, float bw) : cur(cpos), tar(tget), bot_width(bw)
+RP::Map::Map(const point &cpos, const point &tget, const Memorizer& mem, float bw) : cur(cpos), tar(tget), memorizer(mem), bot_width(bw)
 {
-}
-
-void RP::Map::add_obstacle(point coord1, point coord2)
-{
-    // obstacle o{};
-    obstacles.push_back(obstacle{coord1, coord2});
 }
 
 RP::point RP::Map::compute_next_point()
@@ -99,17 +93,8 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
     //     float SIDE_TOLERANCE = sqrt(diff.first * diff.first + diff.second * diff.second);
     // #undef R_METERS
     //</hack>
-    obstacles.clear();
-    obstacles.reserve(mem_obstacles.size());
-    for (const auto &o : mem_obstacles)
-        obstacles.emplace_back(obstacle{o.coord1, o.coord2});
+    const std::vector<line> obstacles = memorizer.obstacles_ref;
 
-    // printf("%d\n", obstacles.size());
-    // for (auto &n : nodes)
-    // {
-    //     n.dist_to = INFINITY;
-    //     n.connection.clear();
-    // }
     nodes.clear();
     create_node(cur);
     nodes[0].dist_to = 0.0f;
@@ -133,19 +118,19 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
         // TODO handle visited, intersections in edge chains (i.e. remove node and maybe edge)
         const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
-        int closest_index = get_closest_obstacle(curr_edge, bot_width);
+        int closest_index = get_closest_obstacle(curr_edge, bot_width, obstacles);
 
         if (closest_index != -1)
         {
-            obstacle &closest = obstacles.at(closest_index);
+            const line &closest = obstacles.at(closest_index);
             remove_edge(curr_edge->parent, curr_edge->child);
             // printf("removing %f, %f - %f, %f\n", nodes.at(curr_edge->parent).coord.x, nodes.at(curr_edge->parent).coord.y,
             // nodes.at(curr_edge->child).coord.x, nodes.at(curr_edge->child).coord.y);
             if (!visited[closest_index])
             {
                 // make copies of endponts
-                point end1 = closest.coord1;
-                point end2 = closest.coord2;
+                point end1 = closest.p;
+                point end2 = closest.q;
                 line closer = add_length_to_line_segment(end1, end2, side_tolerance);
                 line farther = add_length_to_line_segment(end1, end2, side_tolerance);
 
@@ -188,9 +173,9 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
             else
             {
                 /*
-                printf("visited (%f, %f) - (%f, %f)\n", obstacles[closest_index].coord1.x, 
-                    obstacles[closest_index].coord1.y, obstacles[closest_index].coord2.x,
-                obstacles[closest_index].coord2.y);
+                printf("visited (%f, %f) - (%f, %f)\n", obstacles[closest_index].p.x, 
+                    obstacles[closest_index].p.y, obstacles[closest_index].q.x,
+                obstacles[closest_index].q.y);
                 */
             }
         }
@@ -198,7 +183,7 @@ std::vector<RP::node> RP::Map::build_graph(point cur, point tar, float side_tole
     return nodes;
 }
 
-int RP::Map::get_closest_obstacle(eptr edge, float path_width)
+int RP::Map::get_closest_obstacle(eptr edge, float path_width, const std::vector<line>& obstacles)
 {
     float min_dist = INFINITY;
     int closest_index = -1;
@@ -207,7 +192,7 @@ int RP::Map::get_closest_obstacle(eptr edge, float path_width)
         const auto &obst = obstacles.at(i);
         point inters;
         if (seg_intersects_width(nd_coord(edge->parent),
-                                 nd_coord(edge->child), obst.coord1, obst.coord2, path_width, inters))
+                                 nd_coord(edge->child), obst.p, obst.q, path_width, inters))
         {
             float dist = dist_sq(inters, nd_coord(edge->parent));
             if (dist < min_dist)
@@ -218,118 +203,6 @@ int RP::Map::get_closest_obstacle(eptr edge, float path_width)
         }
     }
     return closest_index;
-}
-
-// return true if original and challenger are sufficiently different
-// so that they should be merged
-bool same_obstacle(RP::obstacle original, RP::obstacle challenger)
-{
-    if (RP::same_point(original.coord1, challenger.coord1))
-        return RP::same_point(original.coord2, challenger.coord2);
-    else
-        return RP::same_point(original.coord1, challenger.coord2) &&
-               RP::same_point(original.coord2, challenger.coord1);
-}
-
-void RP::Map::update(const std::list<obstacle> &new_obstacles)
-{
-    obstacle merged;
-    // bool debug = timer.elapsed() > 1;
-    bool debug = true;
-    if (debug)
-    {
-        // printf("Mem Count: %d\n", mem_obstacles.size());
-        // for (const obstacle& o : mem_obstacles) printf("mem (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
-        // printf("New Count: %d\n", new_obstacles.size());
-        // for (const obstacle& o : new_obstacles) printf("new (%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
-    }
-    /*
-    iterate over each new obstacle, try to merge it with existing obstacles
-    if they can merge (meaning, if they are colinear and overlapping), remove the old 
-    obstacles and add the new merged obstacle
-    */
-    for (const obstacle &newobs : new_obstacles)
-    {
-        // printf("(%f, %f), (%f, %f)\n", newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y);
-        merged = newobs;
-        bool should_add = true;
-        int nmerged = 0;
-        for (auto it_mobs = mem_obstacles.begin(); it_mobs != mem_obstacles.end();)
-        {
-            bool can_merge = false;
-            // if intersect/overlap
-            // merge obstacles, remove vobs and don't add newobs, and add merged obstacles
-            obstacle temp = merge(merged, *it_mobs, can_merge);
-            if (can_merge)
-            {
-                // printf("attempted merge: m(%f, %f) (%f, %f) and n(%f, %f) (%f, %f) -> t(%f, %f), (%f, %f)\n",
-                //                 it_mobs->coord1.x, it_mobs->coord1.y, it_mobs->coord2.x, it_mobs->coord2.y,
-                //                 newobs.coord1.x, newobs.coord1.y, newobs.coord2.x, newobs.coord2.y,
-                //                 temp.coord1.x, temp.coord1.y, temp.coord2.x, temp.coord2.y);
-                if (!same_obstacle(temp, *it_mobs))
-                {
-                    merged = temp;
-                    it_mobs = mem_obstacles.erase(it_mobs);
-                    nmerged++;
-                }
-                else
-                {
-                    should_add = false;
-                    // printf("Same obstacles t(%f, %f) - (%f, %f) and m(%f, %f) - (%f, %f). Don't merge.\n", temp.coord1.x, temp.coord1.y,
-                    //     temp.coord2.x, temp.coord2.y,
-                    //     it_mobs->coord1.x, it_mobs->coord1.y, it_mobs->coord2.x, it_mobs->coord2.y);
-                    break;
-                }
-            }
-            else
-            {
-                it_mobs++;
-            }
-        }
-        if (should_add)
-        {
-            // if (debug)
-            // printf("added\n");
-            mem_obstacles.emplace_back(merged);
-        }
-        if (debug)
-            timer.reset();
-    }
-}
-
-RP::obstacle RP::merge(const obstacle &o, const obstacle &p, bool &can_merge)
-{
-    bool colinear = orientation(o.coord1, o.coord2, p.coord1) == 0 &&
-                    orientation(o.coord1, o.coord2, p.coord2) == 0;
-    if (!colinear)
-    {
-        can_merge = false;
-        // printf("Not colinear\n");
-        return o;
-    }
-    can_merge = true;
-    // sort points in an arbitrary but consistent direction
-    point points[] = {o.coord1, o.coord2, p.coord1, p.coord2};
-    std::sort(points, points + 4, [](const point &p1, const point &p2) {
-        if (fabs(p1.x - p2.x) > 1e-3)
-            return fabs(p1.x) > fabs(p2.x);
-        else
-            return fabs(p1.y) > fabs(p2.y);
-    });
-    if (fabs(points[3].x - points[0].x) - 1e-2 > fabs(o.coord2.x - o.coord1.x) + fabs(p.coord2.x - p.coord1.x) ||
-        fabs(points[3].y - points[0].y) - 1e-2 > fabs(o.coord2.y - o.coord1.y) + fabs(p.coord2.y - p.coord1.y))
-    {
-        can_merge = false;
-        // printf("Colinear but not overlapping\n");
-        return o;
-    }
-    // printf("Merging\n");
-    // for (auto p : points)
-    // {
-    //     printf("(%f, %f), ", p.x, p.y);
-    // }
-    // printf("\n");
-    return obstacle{points[0], points[3]};
 }
 
 // for debugging. assert edges go in two directions
@@ -364,7 +237,7 @@ void RP::Map::prune_path(std::vector<int> &path, float tol)
     {
         // construct temporary edge
         auto e = eptr(new edge{path[i - 1], path[i + 1]});
-        if (get_closest_obstacle(e, tol) == -1)
+        if (get_closest_obstacle(e, tol, memorizer.obstacles_ref) == -1)
         {
             path.erase(path.begin() + i);
         }

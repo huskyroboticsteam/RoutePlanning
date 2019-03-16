@@ -13,7 +13,7 @@
 
 void debugmsg(const char *);
 
-RP::Simulator::Simulator(const std::list<Obstacle> &obstacleList, const Agent &agt,
+RP::Simulator::Simulator(const std::vector<Obstacle> &obstacleList, const Agent &agt,
                          simulator_config conf, float map_scale, float windowH) : raw_obstacles(obstacleList),
                                                                                   agent(agt), config(conf), scale(map_scale),
                                                                                   window_height(windowH),
@@ -193,7 +193,7 @@ void RP::Simulator::update_agent()
             point a = *it;
             if (++it == obs.endpoints.end())
                 break;
-            view_obstacles.push_back(obstacle{a, *it});
+            view_obstacles.push_back(line{a, *it});
         }
     }
     // for (auto & obs : view_obstacles)
@@ -284,10 +284,10 @@ void RP::Simulator::draw(sf::RenderTarget &target, sf::RenderStates states) cons
     target.draw(get_vertex_line(cur_pos, fov_lower, visColor, scale, window_height));
     target.draw(get_vertex_line(cur_pos, fov_upper, visColor, scale, window_height));
     std::list<sf::VertexArray> circleLines = getCircleLines(bearing, config.vision_dist, config.vision_angle, cur_pos, 10, VIEW_SHAPE_COLOR);
-    for (auto seg : circleLines)
+    for (const auto& seg : circleLines)
         target.draw(seg);
-    for (auto obst : view_obstacles)
-        target.draw(get_vertex_line(obst.coord1, obst.coord2, VISIBLE_OBST_COLOR, scale, window_height), states);
+    for (const auto& obst : view_obstacles)
+        target.draw(get_vertex_line(obst.p, obst.q, VISIBLE_OBST_COLOR, scale, window_height), states);
 }
 
 std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, float radius, float angle_spread, RP::point pos, int maxpts, sf::Color clr) const

@@ -1,9 +1,9 @@
 #ifndef ROVERPATHFINDING_SIMULATOR_H
 #define ROVERPATHFINDING_SIMULATOR_H
 
-#include <list>
 #include <string>
 #include <memory>
+#include <list>
 #include "obstacle.hpp"
 #include "agent.hpp"
 #include "autonomous/Map.hpp"
@@ -37,8 +37,8 @@ typedef std::shared_ptr<sim_obstacle> pobst;
 class Simulator : public sf::Drawable
 {
 public:
-  Simulator(const std::list<Obstacle> &obstacleList, const Agent &agent, simulator_config conf, float map_scale, float windowH);
-  const std::list<obstacle> &visible_obstacles() { return view_obstacles; };
+  Simulator(const std::vector<Obstacle> &obstacleList, const Agent &agent, simulator_config conf, float map_scale, float windowH);
+  const std::vector<line> &visible_obstacles() { return view_obstacles; };
   void update_agent();
   const point& getpos();
 
@@ -60,9 +60,9 @@ private:
 
   point target_pos;
   simulator_config config;
-  const std::list<Obstacle> &raw_obstacles;
-  std::list<pobst> all_obstacles;
-  std::list<obstacle> view_obstacles;
+  const std::vector<Obstacle> &raw_obstacles;
+  std::vector<pobst> all_obstacles;
+  std::vector<line> view_obstacles;
 
   virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
   std::list<sf::VertexArray> getCircleLines(float angular_pos, float radius, float angle_spread, point pos, int maxpts, sf::Color clr) const;

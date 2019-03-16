@@ -8,6 +8,6 @@ class Mapper
   public:
     Mapper(const point &origin, const point& target, float bot_size);
 
-    virtual void update(const std::list<obstacle>& new_obstacles);
+    virtual void update(const std::list<line>& new_obstacles);
 };
 } // namespace RP

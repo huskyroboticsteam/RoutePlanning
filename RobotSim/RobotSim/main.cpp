@@ -83,7 +83,8 @@ int main(int, char const **)
     agent.bot_width = 1.8f;
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-    RP::Map map(sim.getpos(), grid.target, agent.bot_width);
+    RP::Memorizer memorizer;
+    RP::Map map(sim.getpos(), grid.target, memorizer, agent.bot_width);
 
     RP::SimController control(grid, agent, map);
 
@@ -303,11 +304,11 @@ int main(int, char const **)
             }
         }
         sim.update_agent();
-        map.update(sim.visible_obstacles());
+        memorizer.add_obstacles(sim.visible_obstacles());
         window.draw(grid);
         window.draw(agent);
-        for (auto obst : map.memo_obstacles())
-            window.draw(get_vertex_line(obst.coord1, obst.coord2, SEEN_OBST_COLOR, gridScale, gridHeight));
+        for (auto obst : memorizer.obstacles_ref)
+            window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR, gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
 
