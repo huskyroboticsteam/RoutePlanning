@@ -9,9 +9,22 @@ from a new abtract Map.cpp
 */
 
 /*
-idea: split entire map into grids (the smaller the grid size the more accurate but also more expensive).
-go thru each obstacle and "rasterize" them, painting grids that it passes through (likely as well as nearby grids,
-taking into account of the size of robot) as obstacles. At the end, construct massive graph from grid
+Implementation notes:
+Use the QuadTree data structure, using the following splitting algorithm:
+
+    func make_quadtree(AABB):
+        if area of AABB < epsilon OR no obstacles within AABB:  # note there is some tolerance value here
+            return
+
+        foreach quadrant within AABB:
+            make_quadtree(quadrant)
+
+The center of each leaf node is a node in the final graph.
+
+Things I haven't figured out:
+- how to efficiently connect start/end node with a quadtree node (should be a search algorithm)
+- how to connect node with neighbors
+
 */
 #ifndef RP_DISCRETEMAPPER_HPP
 #define RP_DISCRETEMAPPER_HPP

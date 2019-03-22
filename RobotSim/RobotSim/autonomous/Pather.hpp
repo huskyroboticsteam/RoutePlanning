@@ -3,3 +3,8 @@
 
 // a good idea is to switch between Continuous and Discrete mapping based on the number and density of
 // obstacles
+
+namespace RP
+{
+    
+}

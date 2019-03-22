@@ -1,5 +1,8 @@
+#ifndef RP_MAPPER_HPP
+#define RP_MAPPER_HPP
+
 #include "utils.hpp"
-#include <list>
+#include <iterator>
 
 namespace RP
 {
@@ -10,10 +13,13 @@ class Mapper
 
     const point& cur;
     const point& tar;
-    virtual std::vector<RP::point> compute_path()=0;
     void set_pos(const point& cur);
     void set_tar(const point& tar);
     void set_tol(float tol);
-    void update_graph();
+    virtual void update_graph()=0;
+    // graph methods used for pather
+    virtual const std::vector<int>& neighbors(int node)=0;
 };
 } // namespace RP
+
+#endif
