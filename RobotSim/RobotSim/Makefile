@@ -22,7 +22,7 @@ all: $(AUTO_DIR) $(OUT)
 $(AUTO_DIR): $(AUTO_SOURCES)
 	$(MAKE) -C $@
 
-$(ODIR)/%.o: $(SDIR)/%.cpp
+$(ODIR)/%.o: $(SDIR)/%.cpp $(SDIR)/%.hpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS) 
 
 $(OUT): $(OBJECTS) $(AUTO_OBJECTS)
@@ -30,5 +30,6 @@ $(OUT): $(OBJECTS) $(AUTO_OBJECTS)
 
 .PHONY: clean
 clean:
-	rm $(OUT)
-	rm -rf obj/*
+	rm -f $(OUT)
+	rm -f obj/*
+	rm -f $(AUTO_DIR)obj/*

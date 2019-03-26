@@ -27,7 +27,6 @@
 #include "ResourcePath.hpp"
 #include "grid.hpp"
 #include "Simulator.hpp"
-#include "autonomous/splitMapper.hpp"
 #include "simController.hpp"
 #include "ui.hpp"
 
@@ -46,6 +45,8 @@ const sf::Color bgColor = sf::Color(0, 0, 0);
 #endif
 
 static inline sf::CircleShape getNode(RP::node, float scale, float height);
+
+void draw_qtree(sf::RenderWindow &win, RP::pqtree node, float scale, float height);
 
 int main(int, char const **)
 {
@@ -83,10 +84,9 @@ int main(int, char const **)
     agent.bot_width = 1.8f;
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-    RP::Memorizer memorizer;
-    RP::SplitMapper mapper(sim.getpos(), grid.target, memorizer.obstacles_ref, agent.bot_width);
+    RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_width);
 
-    RP::SimController control(grid, agent, mapper);
+    RP::SimController control(grid, agent, pather);
 
     while (window.isOpen())
     {
@@ -214,15 +214,11 @@ int main(int, char const **)
                     grid.rotateAgent(agent, -15.f);
                     break;
                 }
-                // case sf::Keyboard::J:
-                // {
-                //     for (const auto& o : sim.visible_obstacles())
-                //         printf("(%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
-                // }
-                case sf::Keyboard::B:
-                {
-                    mapper.breakpoint(); // temp; used for debug only
-                }
+                    // case sf::Keyboard::J:
+                    // {
+                    //     for (const auto& o : sim.visible_obstacles())
+                    //         printf("(%f, %f), (%f, %f)\n", o.coord1.x, o.coord1.y, o.coord2.x, o.coord2.y);
+                    // }
                 }
             }
         }
@@ -247,16 +243,17 @@ int main(int, char const **)
             }
         }
         window.clear(bgColor);
+        const RP::graph &dg = pather.d_graph();
         // draw nodes
-        if (showGraph && !mapper.d_nodes.empty())
+        if (showGraph && !dg.nodes.empty())
         {
-            std::vector<bool> visited(mapper.d_nodes.size(), false);
+            std::vector<bool> visited(dg.nodes.size(), false);
             std::queue<int> q;
             q.push(0);
             while (!q.empty())
             {
                 int ind = q.front();
-                const auto &nd = mapper.d_nodes[ind];
+                const auto &nd = dg.nodes[ind];
                 q.pop();
                 visited.at(ind) = true;
                 for (const RP::eptr edge : nd.connection)
@@ -264,7 +261,7 @@ int main(int, char const **)
                     if (!visited.at(edge->child))
                     {
                         q.push(edge->child);
-                        window.draw(get_vertex_line(nd.coord, mapper.d_nodes.at(edge->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                        window.draw(get_vertex_line(nd.coord, dg.nodes.at(edge->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
                     }
                 }
                 if (ind != 0)
@@ -275,39 +272,44 @@ int main(int, char const **)
         {
             control.tic();
             if (lazer)
-                grid.drawPath(mapper.compute_path(), agent);
+                grid.drawPath(pather.compute_path(), agent);
         }
         else
         {
             if (vroom)
             {
                 //grid.moveAgent(agent, agent.drive());
-                RP::point st_target = mapper.compute_next_point();
-                grid.moveAgent(agent, agent.driveTowards(st_target.x, st_target.y));
+                RP::point st_target = pather.compute_next_point();
+                if (st_target.x != INFINITY)
+                    grid.moveAgent(agent, agent.driveTowards(st_target.x, st_target.y));
             }
             // don't want to compute path twice
             if (spinny && lazer)
             {
-                auto path = mapper.compute_path();
+                auto path = pather.compute_path();
                 grid.rotateAgent(agent, agent.turnTowards(path.front().x, path.front().y));
-                grid.drawPath(mapper.compute_path(), agent);
+                grid.drawPath(pather.compute_path(), agent);
             }
             else
             {
                 if (spinny)
                 {
-                    RP::point st_target = mapper.compute_next_point();
-                    grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));
+                    RP::point st_target = pather.compute_next_point();
+                    if (st_target.x != INFINITY)
+                        grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));
                 }
                 if (lazer)
-                    grid.drawPath(mapper.compute_path(), agent);
+                    grid.drawPath(pather.compute_path(), agent);
             }
         }
         sim.update_agent();
-        memorizer.add_obstacles(sim.visible_obstacles());
+        pather.set_pos(sim.getpos());
+        pather.add_obstacles(sim.visible_obstacles());
+        RP::pqtree root = pather.debug_qtree_root();
+        draw_qtree(window, root, gridScale, gridHeight);
         window.draw(grid);
         window.draw(agent);
-        for (auto obst : memorizer.obstacles_ref)
+        for (auto obst : pather.mem_obstacles())
             window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR, gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
@@ -315,6 +317,26 @@ int main(int, char const **)
         window.display();
     }
     return EXIT_SUCCESS;
+}
+
+void draw_qtree(sf::RenderWindow &win, RP::pqtree node, float scale, float height)
+{
+    sf::RectangleShape rect;
+    rect.setSize(sf::Vector2f((node->max_x - node->min_x) * scale,
+                              (node->max_y - node->min_y) * scale));
+    rect.setOutlineColor(sf::Color(0, 255, 255));
+    rect.setOutlineThickness(1.f);
+    rect.setPosition((node->min_x + 1) * scale, (height - node->max_y) * scale);
+    sf::Color fillColor = node->is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
+    rect.setFillColor(fillColor);
+    win.draw(rect);
+    if (!node->is_leaf)
+    {
+        draw_qtree(win, node->topleft, scale, height);
+        draw_qtree(win, node->topright, scale, height);
+        draw_qtree(win, node->botleft, scale, height);
+        draw_qtree(win, node->botright, scale, height);
+    }
 }
 
 static inline sf::CircleShape getNode(RP::node nd, float scale, float height)

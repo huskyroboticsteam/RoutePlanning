@@ -1,11 +1,23 @@
 #include <algorithm>
 #include <cmath>
 #include <cassert>
+#include <cstdio>
 #include "utils.hpp"
 
 #define PI 3.14159265359
-#define FLOAT_TOL 1e-4 // floating point error tolerance. Set to high value for now
-                        // since we don't need too much precision
+#define FLOAT_TOL 1e-4 // floating point error tolerance. Set to high value for now \
+                       // since we don't need too much precision
+
+// RP::point::point() : x(0), y(0) {}
+
+// RP::point::point(float x, float y) : x(x), y(y)
+// {
+// }
+// RP::point::point(const point& other)
+// {
+//     x = other.x;
+//     y = other.y;
+// }
 
 bool RP::point::operator==(const point &p) const
 {
@@ -13,21 +25,30 @@ bool RP::point::operator==(const point &p) const
 }
 bool RP::point::operator!=(const point &p) const
 {
-    return !(*this == p);
+    return x != p.x || y != p.y;
 }
 
-RP::line::line(point inp, point inq) {
+// RP::point& RP::point::operator=(const point& other)
+// {
+//     x = other.x;
+//     y = other.y;
+//     return *this;
+// }
+
+RP::line::line(point inp, point inq)
+{
     p = inp;
     q = inq;
 }
-RP::line::line(float px, float py, float qx, float qy) {
+RP::line::line(float px, float py, float qx, float qy)
+{
     p.x = px;
     p.y = py;
     q.x = qx;
     q.y = qy;
 }
 
-bool RP::polarPoint::operator==(const polarPoint& p) const
+bool RP::polarPoint::operator==(const polarPoint &p) const
 {
     if (r == p.r)
         return normalize_angle(th) == normalize_angle(p.th);
@@ -36,7 +57,7 @@ bool RP::polarPoint::operator==(const polarPoint& p) const
     else
         return false;
 }
-bool RP::polarPoint::operator!=(const polarPoint& p) const
+bool RP::polarPoint::operator!=(const polarPoint &p) const
 {
     return !(*this == p);
 }
@@ -62,7 +83,8 @@ float RP::normalize_angle(float rad)
 float RP::normalize_angle_deg(float deg)
 {
     deg = fmod(deg, 360);
-    if (deg < 0) deg += 360;
+    if (deg < 0)
+        deg += 360;
     return deg;
 }
 
@@ -92,9 +114,9 @@ RP::point RP::intersection(point A, point B, point C, point D)
 
 //start, end, circle, and R are in lat/long coordinates
 bool RP::segment_intersects_circle(point start,
-                                                 point end,
-                                                 point circle,
-                                                 float R)
+                                   point end,
+                                   point circle,
+                                   float R)
 {
 
     point direction{end.x - start.x, end.y - start.y};
@@ -122,7 +144,7 @@ bool RP::segment_intersects_circle(point start,
 int RP::orientation(point p, point q, point r)
 {
     float v = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-    
+
     if (-1e-4 <= v && v <= 1e-4)
         return COLINEAR;
 
@@ -162,7 +184,6 @@ bool RP::segments_intersect(point p1, point p2, point q1, point q2)
     return (false);
 }
 
-
 // returns the intersection between ab and cd (I know it's confusing since
 // it's ordered differently from segments_intersect() and I won't attempt to
 // defend it). returned point is at {inf, inf} if no intersection exists
@@ -176,7 +197,7 @@ RP::point RP::segments_intersection(point a, point b, point c, point d)
     return x;
 }
 
-char RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_width, point& inters_out)
+bool RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_width, point &inters_out)
 {
     line p_line = line{p1, p2};
     line left = get_moved_line(p_line, p_width / 2, true);
@@ -185,14 +206,22 @@ char RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_wi
     line sides[4];
     for (int i = 0; i < 4; i++)
         sides[i] = line{ccw_points[i], ccw_points[(i + 1) % 4]};
+    return seg_intersects_rect(line{q1, q2}, sides, inters_out);
+}
+
+bool RP::seg_intersects_rect(line seg, line sides[4], point &inters_out)
+{
     point intersects[2];
     int inter_i = 0;
-    for (const line& side : sides)
+    for (int i = 0; i < 4; i++)
     {
-        if (segments_intersect(side.p, side.q, q1, q2))
+        if (inter_i > 2)
+            printf("hooo");
+        const line &side = sides[i];
+        if (segments_intersect(side.p, side.q, seg.p, seg.q))
         {
             assert(inter_i <= 2);
-            intersects[inter_i++] = segments_intersection(side.p, side.q, q1, q2);
+            intersects[inter_i++] = segments_intersection(side.p, side.q, seg.p, seg.q);
         }
     }
 
@@ -200,22 +229,20 @@ char RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_wi
     {
         bool within = true;
         // check if both points are inside p_line rectangle
-        for (const point& q : {q1, q2})
+        for (int i = 0; i < 4; i++)
         {
-            for (const line& side : sides)
+            const line &side = sides[i];
+            const point dir{seg.p.x - side.p.x, seg.p.y - side.p.y};
+            if (dot(get_ortho(side, true), dir) < 0)
             {
-                const point dir{q1.x - side.p.x, q1.y - side.p.y}; 
-                if (dot(get_ortho(side, true), dir) > 0)
-                {
-                    within = false;
-                    break;
-                }
+                within = false;
+                break;
             }
         }
         if (within)
         {
-            intersects[0] = q1;
-            intersects[1] = q2;
+            intersects[0] = seg.p;
+            intersects[1] = seg.q;
             inter_i = 2;
         }
     }
@@ -224,9 +251,10 @@ char RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_wi
     {
         if (inter_i == 1)
             inters_out = intersects[0];
-        else {
-            const point& int1 = intersects[0];
-            const point& int2 = intersects[1];
+        else
+        {
+            const point &int1 = intersects[0];
+            const point &int2 = intersects[1];
             inters_out = point{(int1.x + int2.x) / 2, (int1.y + int2.y) / 2};
         }
         return true;
@@ -234,7 +262,7 @@ char RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_wi
     return false;
 }
 
-float RP::dot(const point& u, const point& v)
+float RP::dot(const point &u, const point &v)
 {
     return u.x * v.x + u.y * v.y;
 }
@@ -254,7 +282,7 @@ void RP::move_line_toward_point(RP::line &side_points, RP::point pt, float d)
     side_points.q.y += dir.y;
 }
 
-RP::point RP::get_ortho(const RP::line& ln, bool ccw)
+RP::point RP::get_ortho(const RP::line &ln, bool ccw)
 {
     point dir{ln.q.x - ln.p.x, ln.q.y - ln.p.y};
     float t = dir.x;
@@ -275,7 +303,7 @@ RP::point RP::get_ortho(const RP::line& ln, bool ccw)
     return dir;
 }
 
-RP::line RP::get_moved_line(const RP::line& ln, float d, bool ccw)
+RP::line RP::get_moved_line(const RP::line &ln, float d, bool ccw)
 {
     point dir = get_ortho(ln, ccw);
     dir.x *= d;
@@ -285,7 +313,7 @@ RP::line RP::get_moved_line(const RP::line& ln, float d, bool ccw)
     ret.p.x += dir.x;
     ret.p.y += dir.y;
     ret.q.x += dir.x;
-    ret.q.y += dir.y;    
+    ret.q.y += dir.y;
     return ret;
 }
 

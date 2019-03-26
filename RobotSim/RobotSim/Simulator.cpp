@@ -308,7 +308,7 @@ std::list<sf::VertexArray> RP::Simulator::getCircleLines(float angular_pos, floa
     return ret;
 }
 
-const RP::point &RP::Simulator::getpos()
+RP::point RP::Simulator::getpos()
 {
     return cur_pos;
 }

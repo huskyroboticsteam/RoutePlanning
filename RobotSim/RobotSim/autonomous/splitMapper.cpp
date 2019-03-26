@@ -3,17 +3,57 @@
 #include <algorithm>
 #include <list>
 #include <cassert>
-#include <numeric>
 #include "splitMapper.hpp"
+#include "memorizer.hpp"
 
-RP::SplitMapper::SplitMapper(const point &orig, const point &tget, const std::vector<line>& allobst, float bw) : 
-    Mapper(orig, tget, bw), all_obstacles(allobst), bot_width(bw)
+RP::SplitMapper::SplitMapper(const point &orig, const point &tget, const std::vector<line> &allobst, float tolr) :
+Mapper(orig, tget, tolr), all_obstacles(allobst), need_rebuild(false)
 {
 }
 
-RP::point RP::SplitMapper::compute_next_point()
+// RP::point RP::SplitMapper::compute_next_point()
+// {
+//     return compute_path().front();
+// }
+
+void RP::SplitMapper::set_pos(point pos)
 {
-    return compute_path().front();
+    if (!same_point(cur, pos, 1e-4))
+    {
+        need_rebuild = true;
+        cur = pos;
+    }
+}
+
+void RP::SplitMapper::set_tar(point t)
+{
+    if (!same_point(t, tar, 1e-4))
+    {
+        need_rebuild = true;
+        tar = t;
+    }
+}
+
+void RP::SplitMapper::set_tol(float t)
+{
+    if (abs(tol - t) > 1e-4)
+    {
+        need_rebuild = true;
+        tol = t;
+    }
+}
+
+void RP::SplitMapper::new_obstacles(const std::vector<line> &new_obst)
+{
+    need_rebuild = true;
+}
+
+RP::graph RP::SplitMapper::get_graph()
+{
+    if (need_rebuild)
+        rebuild_graph(tol);
+
+    return mygraph;
 }
 
 RP::line RP::SplitMapper::add_length_to_line_segment(point p, point q, float length)
@@ -28,61 +68,7 @@ RP::line RP::SplitMapper::add_length_to_line_segment(point p, point q, float len
     return line{p1, p2};
 }
 
-RP::eptr RP::SplitMapper::add_edge(int parent, int child)
-{
-    float dist = std::sqrt(dist_sq(nodes[parent].coord, nodes[child].coord));
-
-    eptr p_to_c = eptr(new edge{parent, child, dist});
-    nodes[parent].connection.push_back(p_to_c);
-
-    eptr c_to_p = eptr(new edge{child, parent, dist});
-    nodes[child].connection.push_back(c_to_p);
-
-    return p_to_c;
-}
-
-void RP::SplitMapper::remove_edge(int parent, int child)
-{
-    assert(parent >= 0 && child >= 0);
-    auto &conn = nodes.at(parent).connection;
-    bool found = false;
-    for (int i = 0; i < conn.size(); i++)
-    {
-        if (conn.at(i)->child == child)
-        {
-            conn.erase(conn.begin() + i);
-            found = true;
-            break;
-        }
-    }
-    if (!found)
-        printf("WARNING: edge not removed. Parent: %d, child %d\n", parent, child);
-    found = false;
-    auto &conn2 = nodes.at(child).connection;
-    for (int i = 0; i < conn2.size(); i++)
-    {
-        if (conn2.at(i)->child == parent)
-        {
-            conn2.erase(conn2.begin() + i);
-            found = true;
-            break;
-        }
-    }
-    if (!found)
-        printf("WARNING: edge not removed (reverse). Parent: %d, child %d\n", parent, child);
-}
-
-int RP::SplitMapper::create_node(point coord)
-{
-    node n;
-    n.prev = -1;
-    n.dist_to = INFINITY;
-    n.coord = coord;
-    nodes.push_back(n);
-    return (nodes.size() - 1);
-}
-
-std::vector<RP::node> RP::SplitMapper::update_graph(point cur, point tar, float side_tolerance)
+void RP::SplitMapper::rebuild_graph(float side_tolerance)
 {
     //TODO(sasha): make R a constant - the following few lines are just a hack
     //             to get R to be in lat/lng units
@@ -95,14 +81,14 @@ std::vector<RP::node> RP::SplitMapper::update_graph(point cur, point tar, float 
     // #undef R_METERS
     //</hack>
 
-    nodes.clear();
-    create_node(cur);
-    nodes[0].dist_to = 0.0f;
-    create_node(tar);
-    eptr init_edge = add_edge(0, 1);
+    mygraph.clear();
+    mygraph.create_node(cur);
+    mygraph.nodes[0].dist_to = 0.0f;
+    mygraph.create_node(tar);
+    eptr init_edge = mygraph.add_edge(0, 1);
     if (all_obstacles.empty())
     {
-        return (nodes);
+        return;
     }
 
     // if obstacle has been visited from one side
@@ -115,15 +101,14 @@ std::vector<RP::node> RP::SplitMapper::update_graph(point cur, point tar, float 
     // for each safety node, find the obstacle closest to it
     while (!unprocessed_edges.empty())
     {
-        // TODO handle visited, intersections in edge chains (i.e. remove node and maybe edge)
         const eptr curr_edge = unprocessed_edges.front();
         unprocessed_edges.pop();
-        int closest_index = get_closest_obstacle(curr_edge, bot_width, all_obstacles);
+        int closest_index = get_closest_obstacle(curr_edge, tol, all_obstacles);
 
         if (closest_index != -1)
         {
             const line &closest = all_obstacles.at(closest_index);
-            remove_edge(curr_edge->parent, curr_edge->child);
+            mygraph.remove_edge(curr_edge->parent, curr_edge->child);
             // printf("removing %f, %f - %f, %f\n", nodes.at(curr_edge->parent).coord.x, nodes.at(curr_edge->parent).coord.y,
             // nodes.at(curr_edge->child).coord.x, nodes.at(curr_edge->child).coord.y);
             if (!visited[closest_index])
@@ -151,21 +136,21 @@ std::vector<RP::node> RP::SplitMapper::update_graph(point cur, point tar, float 
                 }
 
                 // create safety nodes
-                int branch1closer = create_node(closer.p);
-                int branch1farther = create_node(farther.p);
-                unprocessed_edges.push(add_edge(curr_edge->parent, branch1closer));
-                unprocessed_edges.push(add_edge(branch1closer, branch1farther));
-                unprocessed_edges.push(add_edge(branch1farther, curr_edge->child));
+                int branch1closer = mygraph.create_node(closer.p);
+                int branch1farther = mygraph.create_node(farther.p);
+                unprocessed_edges.push(mygraph.add_edge(curr_edge->parent, branch1closer));
+                unprocessed_edges.push(mygraph.add_edge(branch1closer, branch1farther));
+                unprocessed_edges.push(mygraph.add_edge(branch1farther, curr_edge->child));
 
-                int branch2closer = create_node(closer.q);
-                int branch2farther = create_node(farther.q);
-                unprocessed_edges.push(add_edge(curr_edge->parent, branch2closer));
-                unprocessed_edges.push(add_edge(branch2closer, branch2farther));
-                unprocessed_edges.push(add_edge(branch2farther, curr_edge->child));
+                int branch2closer = mygraph.create_node(closer.q);
+                int branch2farther = mygraph.create_node(farther.q);
+                unprocessed_edges.push(mygraph.add_edge(curr_edge->parent, branch2closer));
+                unprocessed_edges.push(mygraph.add_edge(branch2closer, branch2farther));
+                unprocessed_edges.push(mygraph.add_edge(branch2farther, curr_edge->child));
 
                 // special case for "vertical" obstacles
-                unprocessed_edges.push(add_edge(branch1closer, branch2closer));
-                unprocessed_edges.push(add_edge(branch1farther, branch2farther));
+                unprocessed_edges.push(mygraph.add_edge(branch1closer, branch2closer));
+                unprocessed_edges.push(mygraph.add_edge(branch1farther, branch2farther));
 
                 // set endpoints associated with obstacle as visited
                 visited.at(closest_index) = true;
@@ -180,10 +165,9 @@ std::vector<RP::node> RP::SplitMapper::update_graph(point cur, point tar, float 
             }
         }
     }
-    return nodes;
 }
 
-int RP::SplitMapper::get_closest_obstacle(eptr edge, float path_width, const std::vector<line>& obstacles)
+int RP::SplitMapper::get_closest_obstacle(eptr edge, float path_width, const std::vector<line> &obstacles) const
 {
     float min_dist = INFINITY;
     int closest_index = -1;
@@ -205,157 +189,8 @@ int RP::SplitMapper::get_closest_obstacle(eptr edge, float path_width, const std
     return closest_index;
 }
 
-// for debugging. assert edges go in two directions
-void assertGraph(std::vector<RP::node> nodes)
+bool RP::SplitMapper::path_good(int node1, int node2, float tol) const
 {
-    for (int parent = 0; parent < nodes.size(); parent++)
-    {
-        for (RP::eptr conn : nodes[parent].connection)
-        {
-            bool found = false;
-            for (RP::eptr connback : nodes[conn->child].connection)
-            {
-                if (connback->child == parent)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            assert(found);
-        }
-    }
-}
-
-// remove unnecessary nodes from the path (i.e. if removing it does
-// not introduce intersections) to increase stability and speed
-void RP::SplitMapper::prune_path(std::vector<int> &path, float tol)
-{
-    int i = 1;
-    path.insert(path.begin(), 0);
-
-    while (i < path.size() - 1)
-    {
-        // construct temporary edge
-        auto e = eptr(new edge{path[i - 1], path[i + 1]});
-        if (get_closest_obstacle(e, tol, all_obstacles) == -1)
-        {
-            path.erase(path.begin() + i);
-        }
-        else
-        {
-            i++;
-        }
-    }
-    path.erase(path.begin());
-}
-
-// RP::point RP::SplitMapper::ind_to_coord(int i) { return nodes[i].coord; };
-
-//TODO(sasha): Find heuristics and upgrade to A*
-// *low priority
-std::vector<RP::point> RP::SplitMapper::compute_path()
-{
-    float tolerances[]{2.f, 1.5f, 1.f, 0.5f, 0.f};
-    // size_t tol_len = arrlen(tolerances);
-    for (int tol_ind = 0; tol_ind < 5; tol_ind++)
-    {
-        float tol = tolerances[tol_ind];
-        // printf("%f\n", tol);
-        std::vector<node> nodes = update_graph(cur, tar, tol);
-
-#if 0
-    for(int i = 0; i < nodes.size(); i++)
-    {
-	std::cout << "Node " << i << " at (" << nodes[i].coord.first << ", " << nodes[i].coord.second << ") connected to: " << std::endl << '\t';
-	for(auto con : nodes[i].connection)
-	    std::cout << con.first << ' ';
-	std::cout << std::endl;
-    }
-#endif
-        auto cmp = [nodes](int l, int r) { return nodes[l].dist_to < nodes[r].dist_to; };
-        std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
-        q.push(0);
-        while (!q.empty())
-        {
-            int n = q.top();
-            q.pop();
-            
-            for (const eptr &e : nodes[n].connection)
-            {
-                float dist = nodes[n].dist_to + e->len;
-                if (dist < nodes[e->child].dist_to)
-                {
-                    nodes[e->child].prev = n;
-                    nodes[e->child].dist_to = dist;
-                    q.push(e->child);
-                }
-            }
-        }
-
-        std::vector<int> pathIndices;
-        int i = 1;
-        bool pathFound = true;
-        while (i != 0)
-        {
-            if (i == -1)
-            {
-                // printf("No path to target found. Resorting to node closest to target\n");
-                pathFound = false;
-                break;
-            }
-            node &n = nodes[i];
-            // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-            pathIndices.push_back(i);
-            i = n.prev;
-        }
-        // path not found. resort to node closest to target
-        if (!pathFound)
-        {
-            const node &tar = nodes[1];
-            std::vector<size_t> indices(nodes.size());
-            iota(indices.begin(), indices.end(), 0);
-            // sort by closest to tar
-            std::sort(indices.begin() + 2, indices.end(),
-                      [nodes, tar](size_t i, size_t j) {
-                          return dist_sq(nodes[i].coord, tar.coord) < dist_sq(nodes[j].coord, tar.coord);
-                      });
-
-            assertGraph(nodes);
-            int i = -1;
-            for (auto it = indices.begin() + 2; it != indices.end(); it++)
-            {
-                // if (*it == 3)
-                //     printf("biatch");
-                pathIndices.clear();
-                i = *it;
-                while (i != 0)
-                {
-                    if (i < 0)
-                        break;
-                    node &n = nodes[i];
-                    // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-                    pathIndices.push_back(i);
-                    i = n.prev;
-                }
-                if (i >= 0)
-                    break;
-            }
-
-            if (i < 0)
-            {
-                // printf("No path found for tolerance %f. Decreasing tolerance.\n", tol);
-                continue;
-            }
-        }
-        std::reverse(pathIndices.begin(), pathIndices.end());
-        prune_path(pathIndices, tol + 1.f);
-        std::vector<point> result;
-        
-        for (int ind : pathIndices)
-            result.push_back(nodes[ind].coord);
-
-        return (result);
-    }
-    printf("WARNING: completely trapped.\n");
-    return std::vector<point>();
+    auto e = eptr(new edge{node1, node2});
+    return get_closest_obstacle(e, tol, all_obstacles) == -1;
 }

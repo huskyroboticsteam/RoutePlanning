@@ -40,7 +40,7 @@ public:
   Simulator(const std::vector<Obstacle> &obstacleList, const Agent &agent, simulator_config conf, float map_scale, float windowH);
   const std::vector<line> &visible_obstacles() { return view_obstacles; };
   void update_agent();
-  const point& getpos();
+  point getpos();
 
 private:
   std::vector<point> intersection_with_arc(const point &p, const point &q, const point &lower_point, const point &upper_point);
