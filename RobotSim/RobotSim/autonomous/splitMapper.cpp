@@ -7,7 +7,7 @@
 #include "memorizer.hpp"
 
 RP::SplitMapper::SplitMapper(const point &orig, const point &tget, const std::vector<line> &allobst, float tolr) :
-Mapper(orig, tget, tolr), all_obstacles(allobst), need_rebuild(false)
+Mapper(orig, tget, tolr, allobst), need_rebuild(false)
 {
 }
 

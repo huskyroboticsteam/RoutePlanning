@@ -26,7 +26,7 @@ class Pather
     void set_pos(const point& pos);
     void set_tar(const point& tar);
 
-    pqtree debug_qtree_root() const { return fineMapper.qtree_root; }
+    pqtree debug_qtree_root() const { return fineMapper.get_qtree_root(); }
 
   private:
     Memorizer memorizer;

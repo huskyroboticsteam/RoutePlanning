@@ -36,7 +36,7 @@ struct graph
 class Mapper
 {
 public:
-  Mapper(point origin, point target, float tolerance);
+  Mapper(point origin, point target, float tolerance, const std::vector<line>& all_obstacles);
   const point& cur_point = cur;
   const point& tar_point = tar;
   const graph& d_graph = mygraph;
@@ -55,6 +55,7 @@ protected:
   point tar;
   graph mygraph;
   float tol;
+  const std::vector<line> &all_obstacles;
 };
 } // namespace RP
 

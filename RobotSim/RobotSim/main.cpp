@@ -32,7 +32,7 @@
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
-#define WINDOW_SCALE 0.5f
+#define WINDOW_SCALE 1.f
 #elif __APPLE__
 const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
@@ -46,7 +46,7 @@ const sf::Color bgColor = sf::Color(0, 0, 0);
 
 static inline sf::CircleShape getNode(RP::node, float scale, float height);
 
-void draw_qtree(sf::RenderWindow &win, RP::pqtree node, float scale, float height);
+void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode& node, float scale, float height);
 
 int main(int, char const **)
 {
@@ -127,7 +127,7 @@ int main(int, char const **)
                     std::cout << "9   -- Draw algorithm path" << std::endl;
                     std::cout << "Up/Down    -- Teleport robot 0.5m forward or back" << std::endl;
                     std::cout << "Left/Right -- Teleport robot 15 degrees left or right" << std::endl;
-                    break;
+                   break;
                 }
                 case sf::Keyboard::P:
                 {
@@ -305,7 +305,7 @@ int main(int, char const **)
         sim.update_agent();
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
-        RP::pqtree root = pather.debug_qtree_root();
+        const RP::QTreeNode& root = *pather.debug_qtree_root();
         draw_qtree(window, root, gridScale, gridHeight);
         window.draw(grid);
         window.draw(agent);
@@ -319,23 +319,23 @@ int main(int, char const **)
     return EXIT_SUCCESS;
 }
 
-void draw_qtree(sf::RenderWindow &win, RP::pqtree node, float scale, float height)
+void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode& node, float scale, float height)
 {
     sf::RectangleShape rect;
-    rect.setSize(sf::Vector2f((node->max_x - node->min_x) * scale,
-                              (node->max_y - node->min_y) * scale));
+    rect.setSize(sf::Vector2f((node.max_x - node.min_x) * scale,
+                              (node.max_y - node.min_y) * scale));
     rect.setOutlineColor(sf::Color(0, 255, 255));
     rect.setOutlineThickness(1.f);
-    rect.setPosition((node->min_x + 1) * scale, (height - node->max_y) * scale);
-    sf::Color fillColor = node->is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
+    rect.setPosition((node.min_x + 1) * scale, (height - node.max_y) * scale);
+    sf::Color fillColor = node.is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
     rect.setFillColor(fillColor);
     win.draw(rect);
-    if (!node->is_leaf)
+    if (!node.is_leaf)
     {
-        draw_qtree(win, node->topleft, scale, height);
-        draw_qtree(win, node->topright, scale, height);
-        draw_qtree(win, node->botleft, scale, height);
-        draw_qtree(win, node->botright, scale, height);
+        draw_qtree(win, *node.topleft, scale, height);
+        draw_qtree(win, *node.topright, scale, height);
+        draw_qtree(win, *node.botleft, scale, height);
+        draw_qtree(win, *node.botright, scale, height);
     }
 }
 

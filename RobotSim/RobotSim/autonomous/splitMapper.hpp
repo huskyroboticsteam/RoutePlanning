@@ -33,7 +33,6 @@ private:
   // return index of closest obstacle that intersects with edge. If doesn't exist return -1
   int get_closest_obstacle(eptr edge, float path_width, const std::vector<line> &obstacles) const;
 
-  const std::vector<line> &all_obstacles;
   bool debugging = false;
 };
 } // namespace RP
