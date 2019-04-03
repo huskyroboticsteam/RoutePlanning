@@ -4,7 +4,13 @@ ODIR := obj
 SOURCES := utils.cpp mapper.cpp timer.cpp memorizer.cpp splitMapper.cpp quadMapper.cpp pather.cpp
 _OBJECTS := $(SOURCES:.cpp=.o)
 OBJECTS := $(patsubst %,$(ODIR)/%,$(_OBJECTS))
-CFLAGS := -std=c++11 -g
+DEBUG := 1
+
+ifeq ($(DEBUG), 1)
+CFLAGS := -std=c++11 -Wall -g
+else
+CFLAGS := -std=c++11 -O3
+endif
 
 all: $(OBJECTS)
 

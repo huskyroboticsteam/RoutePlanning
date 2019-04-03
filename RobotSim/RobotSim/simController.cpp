@@ -9,6 +9,7 @@ void RP::SimController::start_auto()
 {
     printf("autonomous started\n");
     // timer.reset();
+    pather.compute_path();
     point target = pather.get_cur_next_point();
     if (target.x == INFINITY)
         return;
@@ -31,6 +32,7 @@ void RP::SimController::init_turn()
 
 void RP::SimController::turn_and_go()
 {
+    pather.compute_path();
     auto path = pather.get_cur_path();
     float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
     if (path.size() == 1)
@@ -41,8 +43,8 @@ void RP::SimController::turn_and_go()
     else
     {
         // TODO tune speed
-        last_move_time = 0.3f + 0.05f * dist;
-        last_move_speed = std::min(0.25f + 0.03f * dist, 1.f);
+        last_move_time = 0.4f + 0.01f * dist;
+        last_move_speed = std::min(0.4f + 0.01f * dist, 1.f);
         printf("time: %f, speed: %f, dist: %f\n", last_move_time, last_move_speed, dist);
     }
     turning = false;

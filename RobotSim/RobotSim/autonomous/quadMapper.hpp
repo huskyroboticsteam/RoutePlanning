@@ -54,7 +54,6 @@ struct QTreeNode
       sides[3] = line{point{min_x, max_y}, point{min_x, min_y}};
       center_coord = point{(minx + maxx) / 2.f, (miny + maxy) / 2.f};
     }
-    int id;
     int depth;
     float min_x;
     float min_y;
@@ -67,6 +66,7 @@ struct QTreeNode
     pqtree botleft;
     pqtree botright;
     pqtree parent;
+    int id;
     line sides[4];
     point center_coord;
 
@@ -100,6 +100,8 @@ class QuadMapper : public Mapper
     float field_width;
     float field_height;
     bool new_tnode_added;
+    bool cur_changed;
+    bool tar_changed;
 
     // create a new qtnode, store it in qtnodes and assign its index as id
     pqtree create_qtnode(float minx, float miny, float maxx, float maxy, int depth);
