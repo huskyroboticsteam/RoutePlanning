@@ -49,7 +49,7 @@ private:
 
   void init_turn();
   void turn_and_go();
-  float compute_target_angle();
+  float get_target_angle();
 };
 } // namespace RP
 

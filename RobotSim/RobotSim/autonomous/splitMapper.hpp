@@ -20,7 +20,7 @@ public:
   virtual void set_tol(float tol) override;
   virtual void new_obstacles(const std::vector<line>& obstacles) override;
   // graph methods used for pather
-  virtual graph get_graph() override;
+  virtual void compute_graph() override;
   virtual bool path_good(int node1, int node2, float tol) const override;
 
 private:

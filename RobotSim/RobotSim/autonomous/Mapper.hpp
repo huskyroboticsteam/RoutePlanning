@@ -46,7 +46,8 @@ public:
   virtual void set_tol(float tol) = 0;
   virtual void new_obstacles(const std::vector<line>& obstacles) = 0;
   // graph methods used for pather. nodes[0] is always current node, nodes[1] is always target
-  virtual graph get_graph() = 0;
+  virtual void compute_graph() = 0;
+  graph get_graph();
   // returns true if the path is unobstructed by obstacles
   virtual bool path_good(int node1, int node2, float tol) const =0;
 

@@ -44,6 +44,8 @@ const sf::Color bgColor = sf::Color(255, 255, 255);
 const sf::Color bgColor = sf::Color(0, 0, 0);
 #endif
 
+constexpr float RECOMPUTE_COOLDOWN = 1.5f; // time between recomputation of the path/graph
+
 static inline sf::CircleShape getNode(RP::node, float scale, float height);
 
 void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode& node, float scale, float height);
@@ -70,6 +72,7 @@ int main(int, char const **)
 
     // states
     bool showGraph = false;
+    RP::Timer recompute_timer;
 
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
@@ -255,13 +258,13 @@ int main(int, char const **)
                 int ind = q.front();
                 const auto &nd = dg.nodes[ind];
                 q.pop();
-                visited.at(ind) = true;
+                visited[ind] = true;
                 for (const RP::eptr edge : nd.connection)
                 {
-                    if (!visited.at(edge->child))
+                    if (!visited[edge->child])
                     {
                         q.push(edge->child);
-                        window.draw(get_vertex_line(nd.coord, dg.nodes.at(edge->child).coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                        window.draw(get_vertex_line(nd.coord, dg.nodes[edge->child].coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
                     }
                 }
                 if (ind != 0)
@@ -272,39 +275,44 @@ int main(int, char const **)
         {
             control.tic();
             if (lazer)
-                grid.drawPath(pather.compute_path(), agent);
+                grid.drawPath(pather.get_cur_path(), agent);
         }
         else
         {
             if (vroom)
             {
                 //grid.moveAgent(agent, agent.drive());
-                RP::point st_target = pather.compute_next_point();
+                RP::point st_target = pather.get_cur_next_point();
                 if (st_target.x != INFINITY)
                     grid.moveAgent(agent, agent.driveTowards(st_target.x, st_target.y));
             }
-            // don't want to compute path twice
+
             if (spinny && lazer)
             {
-                auto path = pather.compute_path();
+                auto path = pather.get_cur_path();
                 grid.rotateAgent(agent, agent.turnTowards(path.front().x, path.front().y));
-                grid.drawPath(pather.compute_path(), agent);
+                grid.drawPath(path, agent);
             }
             else
             {
                 if (spinny)
                 {
-                    RP::point st_target = pather.compute_next_point();
+                    RP::point st_target = pather.get_cur_next_point();
                     if (st_target.x != INFINITY)
                         grid.rotateAgent(agent, agent.turnTowards(st_target.x, st_target.y));
                 }
                 if (lazer)
-                    grid.drawPath(pather.compute_path(), agent);
+                    grid.drawPath(pather.get_cur_path(), agent);
             }
         }
         sim.update_agent();
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
+        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
+        {
+            recompute_timer.reset();
+            pather.compute_path();
+        }
         const RP::QTreeNode& root = *pather.debug_qtree_root();
         draw_qtree(window, root, gridScale, gridHeight);
         window.draw(grid);

@@ -6,13 +6,13 @@
 
 RP::Pather::Pather(point origin, point target, point max_point, float tolerance) : roughMapper(origin, target, memorizer.obstacles_ref, tolerance),
            fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6, tolerance),
-           curMapper(fineMapper), cur(origin), tar(target), max_pt(max_point), tol(tolerance)
+           cur(origin), tar(target), max_pt(max_point), tol(tolerance)
 {
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
 // *low priority
-std::vector<RP::point> RP::Pather::compute_path()
+void RP::Pather::compute_path()
 {
     float tolerances[]{2.f, 1.5f, 1.f, 0.5f, 0.f};
     // size_t tol_len = arrlen(tolerances);
@@ -20,8 +20,9 @@ std::vector<RP::point> RP::Pather::compute_path()
     {
         float tol = tolerances[tol_ind];
         // printf("%f\n", tol);
-        curMapper.set_tol(tol);
-        graph g = curMapper.get_graph();
+        fineMapper.set_tol(tol);
+        fineMapper.compute_graph();
+        graph g = fineMapper.get_graph();
 
 #if 0
     for(int i = 0; i < nodes.size(); i++)
@@ -102,7 +103,6 @@ std::vector<RP::point> RP::Pather::compute_path()
 
             if (i < 0)
             {
-                // printf("No path found for tolerance %f. Decreasing tolerance.\n", tol);
                 continue;
             }
         }
@@ -112,18 +112,18 @@ std::vector<RP::point> RP::Pather::compute_path()
 
         for (int ind : pathIndices)
             result.push_back(g.nodes[ind].coord);
-        return (result);
+        cur_path = (result);
+        return;
     }
     printf("WARNING: completely trapped.\n");
-    return std::vector<point>();
+    cur_path = std::vector<point>();
 }
 
-RP::point RP::Pather::compute_next_point()
+RP::point RP::Pather::get_cur_next_point()
 {
-    const auto path = compute_path();
-    if (path.size() == 0)
+    if (cur_path.size() == 0)
         return point{INFINITY, INFINITY};
-    return path.front();
+    return cur_path.front();
 }
 
 /* TODO: re-implement this */
@@ -136,7 +136,7 @@ void RP::Pather::prune_path(std::vector<int> &path, float tol)
 
     while (i < path.size() - 1)
     {
-        if (curMapper.path_good(path[i - 1], path[i + 1], tol))
+        if (fineMapper.path_good(path[i - 1], path[i + 1], tol))
         {
             path.erase(path.begin() + i);
         }
@@ -151,12 +151,12 @@ void RP::Pather::prune_path(std::vector<int> &path, float tol)
 void RP::Pather::add_obstacles(const std::vector<line> &obstacles)
 {
     memorizer.add_obstacles(obstacles);
-    curMapper.new_obstacles(obstacles);
+    fineMapper.new_obstacles(obstacles);
 }
 
 const RP::graph &RP::Pather::d_graph() const
 {
-    return curMapper.d_graph;
+    return fineMapper.d_graph;
 }
 
 const std::vector<RP::line> &RP::Pather::mem_obstacles() const
@@ -164,14 +164,19 @@ const std::vector<RP::line> &RP::Pather::mem_obstacles() const
     return memorizer.obstacles_ref;
 }
 
+const std::vector<RP::point> &RP::Pather::get_cur_path() const
+{
+    return cur_path;
+}
+
 void RP::Pather::set_pos(const point &p)
 {
     cur = p;
-    curMapper.set_pos(p);
+    fineMapper.set_pos(p);
 }
 
 void RP::Pather::set_tar(const point &t)
 {
     tar = t;
-    curMapper.set_tar(t);
+    fineMapper.set_tar(t);
 }

@@ -215,12 +215,10 @@ bool RP::seg_intersects_rect(line seg, line sides[4], point &inters_out)
     int inter_i = 0;
     for (int i = 0; i < 4; i++)
     {
-        if (inter_i > 2)
-            printf("hooo");
         const line &side = sides[i];
         if (segments_intersect(side.p, side.q, seg.p, seg.q))
         {
-            assert(inter_i <= 2);
+            // assert(inter_i <= 2);
             intersects[inter_i++] = segments_intersection(side.p, side.q, seg.p, seg.q);
         }
     }

@@ -11,11 +11,6 @@ Mapper(orig, tget, tolr, allobst), need_rebuild(false)
 {
 }
 
-// RP::point RP::SplitMapper::compute_next_point()
-// {
-//     return compute_path().front();
-// }
-
 void RP::SplitMapper::set_pos(point pos)
 {
     if (!same_point(cur, pos, 1e-4))
@@ -48,12 +43,10 @@ void RP::SplitMapper::new_obstacles(const std::vector<line> &new_obst)
     need_rebuild = true;
 }
 
-RP::graph RP::SplitMapper::get_graph()
+void RP::SplitMapper::compute_graph()
 {
     if (need_rebuild)
         rebuild_graph(tol);
-
-    return mygraph;
 }
 
 RP::line RP::SplitMapper::add_length_to_line_segment(point p, point q, float length)

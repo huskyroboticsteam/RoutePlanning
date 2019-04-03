@@ -18,9 +18,10 @@ class Pather
     Pather(point origin, point target, point max_point, float tol);
     const point& cur_point = cur;
     const point& tar_point = tar;
-    std::vector<point> compute_path();
-    point compute_next_point();
+    void compute_path();
     const std::vector<line>& mem_obstacles() const;
+    point get_cur_next_point();
+    const std::vector<point>& get_cur_path() const;
     void add_obstacles(const std::vector<line> &obstacles);
     const graph& d_graph() const;
     void set_pos(const point& pos);
@@ -32,11 +33,11 @@ class Pather
     Memorizer memorizer;
     SplitMapper roughMapper;
     QuadMapper fineMapper;
-    Mapper& curMapper;
     point cur;
     point tar;
     float tol;
     point max_pt;
+    std::vector<point> cur_path;
 
     void prune_path(std::vector<int> &path, float tol);
 };

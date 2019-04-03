@@ -1,5 +1,6 @@
 #include "quadMapper.hpp"
 #include <queue>
+#include <cassert>
 
 // get code from https://geidav.wordpress.com/2017/12/02/advanced-octrees-4-finding-neighbor-nodes/
 // kinda know how it works but not didn't exactly go into it -gary
@@ -83,7 +84,7 @@ RP::pqtree RP::QuadMapper::create_qtnode(float minx, float miny, float maxx, flo
 
 RP::QuadMapper::QuadMapper(const point &cur_pos, const point &target, const std::vector<line> &allobst,
                            float fwidth, float fheight, int max_d, float tolerance) : Mapper(cur_pos, target, tolerance, allobst),
-                           max_depth(max_d), field_width(fwidth), field_height(fheight), new_tnode_added(false)
+                                                                                      max_depth(max_d), field_width(fwidth), field_height(fheight), new_tnode_added(true)
 {
     root = create_qtnode(0, 0, field_width, field_height, 1);
 }
@@ -91,19 +92,25 @@ RP::QuadMapper::QuadMapper(const point &cur_pos, const point &target, const std:
 void RP::QuadMapper::set_pos(point c)
 {
     cur = c;
-    mygraph.nodes[0].connection.clear();
-    pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
-    if (cur_node)
-        mygraph.add_edge(0, cur_node->id + 2);
+    if (!mygraph.nodes.empty())
+    {
+        mygraph.nodes[0].connection.clear();
+        pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
+        if (cur_node)
+            mygraph.add_edge(0, cur_node->id + 2);
+    }
 }
 
 void RP::QuadMapper::set_tar(point t)
 {
     tar = t;
-    mygraph.nodes[1].connection.clear();
-    pqtree tar_node = get_enclosing_node(mygraph.nodes[1].coord);
-    if (tar_node)
-        mygraph.add_edge(1, tar_node->id + 2);
+    if (!mygraph.nodes.empty())
+    {
+        mygraph.nodes[1].connection.clear();
+        pqtree tar_node = get_enclosing_node(mygraph.nodes[1].coord);
+        if (tar_node)
+            mygraph.add_edge(1, tar_node->id + 2);
+    }
 }
 
 void RP::QuadMapper::set_tol(float t)
@@ -253,7 +260,7 @@ bool RP::QuadMapper::obs_in_node(const line &obs, pqtree tnode)
     return seg_intersects_rect(obs, tnode->sides, placeholder);
 }
 
-RP::graph RP::QuadMapper::get_graph()
+void RP::QuadMapper::compute_graph()
 {
     // if more performance needed, modify path graph as new obstacles are added
     // instead of remaking it
@@ -262,10 +269,30 @@ RP::graph RP::QuadMapper::get_graph()
         make_path_graph();
         new_tnode_added = false;
     }
-    return mygraph;
 }
 
 bool RP::QuadMapper::path_good(int node1, int node2, float tol) const
 {
-    return false;
+    line path_seg{mygraph.nodes[node1].coord, mygraph.nodes[node2].coord};
+    point dont_care;
+    std::queue<pqtree> q;
+    q.push(root);
+    while (!q.empty())
+    {
+        pqtree nd = q.front();
+        q.pop();
+        if (seg_intersects_rect(path_seg, nd->sides, dont_care))
+        {
+            if (nd->is_blocked)
+                return false;
+            if (!nd->is_leaf)
+            {
+                q.push(nd->topleft);
+                q.push(nd->topright);
+                q.push(nd->botleft);
+                q.push(nd->botright);
+            }
+        }
+    }
+    return true;
 }

@@ -66,3 +66,7 @@ void RP::graph::clear()
 {
     nodes.clear();
 }
+
+RP::graph RP::Mapper::get_graph() {
+    return mygraph;
+}
