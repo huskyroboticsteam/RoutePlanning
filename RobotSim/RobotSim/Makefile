@@ -4,6 +4,7 @@ ODIR := obj
 SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp
 _OBJECTS := $(SOURCES:.cpp=.o)
 OBJECTS := $(patsubst %,$(ODIR)/%,$(_OBJECTS))
+DEBUG ?= 1
 
 AUTO_DIR := autonomous/
 AUTO_ODIR := $(AUTO_DIR)obj
@@ -14,13 +15,18 @@ AUTO_OBJECTS := $(patsubst %,$(AUTO_ODIR)/%,$(_AUTO_OBJECTS))
 SFML := C:/SFML-2.5.1/
 INC := -I$(SFML)include
 LINK := -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
-CFLAGS := -std=c++11 -g
+
+ifeq ($(DEBUG), 1)
+CFLAGS := -std=c++11 -Wall -g
+else
+CFLAGS := -std=c++11 -DNDEBUG -O3
+endif
 OUT := build/simulator.exe
 
 all: $(AUTO_DIR) $(OUT)
 
 $(AUTO_DIR): $(AUTO_SOURCES)
-	$(MAKE) -C $@
+	$(MAKE) -C $@ DEBUG=$(DEBUG)
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(SDIR)/%.hpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS) 

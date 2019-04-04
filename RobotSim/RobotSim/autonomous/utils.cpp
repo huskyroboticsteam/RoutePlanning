@@ -211,14 +211,14 @@ bool RP::seg_intersects_width(point p1, point p2, point q1, point q2, float p_wi
 
 bool RP::seg_intersects_rect(line seg, line sides[4], point &inters_out)
 {
-    point intersects[2];
+    point intersects[4];
     int inter_i = 0;
     for (int i = 0; i < 4; i++)
     {
         const line &side = sides[i];
         if (segments_intersect(side.p, side.q, seg.p, seg.q))
         {
-            // assert(inter_i <= 2);
+            assert(inter_i <= 4);
             intersects[inter_i++] = segments_intersection(side.p, side.q, seg.p, seg.q);
         }
     }

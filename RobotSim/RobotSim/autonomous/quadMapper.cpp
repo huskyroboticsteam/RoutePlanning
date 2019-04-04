@@ -72,6 +72,7 @@ RP::pqtree RP::QTreeNode::get_neighbor_ge(Direction dir)
         return parent->topright.get() == this ? nd->topleft : nd->botleft;
     default:
         printf("WARNING: unrecognized direction argument in QTreeNode::get_neighbor_ge()\n");
+        return nullptr;
     }
 }
 
@@ -92,25 +93,13 @@ RP::QuadMapper::QuadMapper(const point &cur_pos, const point &target, const std:
 void RP::QuadMapper::set_pos(point c)
 {
     cur = c;
-    if (!mygraph.nodes.empty())
-    {
-        mygraph.nodes[0].connection.clear();
-        pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
-        if (cur_node)
-            mygraph.add_edge(0, cur_node->id + 2);
-    }
+    cur_changed = true;
 }
 
 void RP::QuadMapper::set_tar(point t)
 {
     tar = t;
-    if (!mygraph.nodes.empty())
-    {
-        mygraph.nodes[1].connection.clear();
-        pqtree tar_node = get_enclosing_node(mygraph.nodes[1].coord);
-        if (tar_node)
-            mygraph.add_edge(1, tar_node->id + 2);
-    }
+    tar_changed = true;
 }
 
 void RP::QuadMapper::set_tol(float t)
@@ -268,6 +257,24 @@ void RP::QuadMapper::compute_graph()
     {
         make_path_graph();
         new_tnode_added = false;
+    }
+
+    if (cur_changed)
+    {
+        cur_changed = false;
+        mygraph.nodes[0].connection.clear();
+        pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
+        if (cur_node)
+            mygraph.add_edge(0, cur_node->id + 2);
+    }
+
+    if (tar_changed)
+    {
+        tar_changed = false;
+        mygraph.nodes[1].connection.clear();
+        pqtree tar_node = get_enclosing_node(mygraph.nodes[1].coord);
+        if (tar_node)
+            mygraph.add_edge(1, tar_node->id + 2);
     }
 }
 

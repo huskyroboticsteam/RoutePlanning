@@ -311,7 +311,7 @@ int main(int, char const **)
         if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
         {
             recompute_timer.reset();
-            pather.compute_path();
+            //pather.compute_path();
         }
         const RP::QTreeNode& root = *pather.debug_qtree_root();
         draw_qtree(window, root, gridScale, gridHeight);
