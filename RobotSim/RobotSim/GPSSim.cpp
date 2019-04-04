@@ -30,7 +30,3 @@ RP::point RP::GPSSim::convertToLatLng(float lat, float lng, float dir, float dis
 		return p;
 }
 
-int main() {    
-    return 0;
-}
-

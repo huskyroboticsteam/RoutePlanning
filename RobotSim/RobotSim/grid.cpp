@@ -12,6 +12,8 @@
 #include <math.h>
 
 #include "grid.hpp"
+#include "autonomous/utils.hpp"
+#include "ui.hpp"
 
 // creates a grid that can have obstacles and agents that it moves around
 // !!! NOTE !!!
@@ -100,28 +102,40 @@ bool Grid::drawPath(std::vector<RP::point> path, Agent &agent) {
     path.insert(path.begin(), RP::point{agent.getX(), agent.getY()});
     
     for (int i = 0; i < path.size() - 1; i++) {
+
+        RP::line line{path.at(i), path.at(i+1)};
+        RP::line sides[]{RP::get_moved_line(line, agent.bot_width / 2, true),
+            RP::get_moved_line(line, agent.bot_width / 2, false)};
         
-        float x1 = path.at(i).x + 1;
-        float y1 = height - path.at(i).y;
-        float x2 = path.at(i + 1).x + 1;
-        float y2 = height - path.at(i + 1).y;
-        
-        // std::cout << x1 << "," << y1 << std::endl;
-        // std::cout << x2 << "," << y2 << std::endl;
-        
-        x1 *= scale;
-        y1 *= scale;
-        x2 *= scale;
-        y2 *= scale;
-        
-        sf::Vertex start(sf::Vector2f(x1, y1));
-        sf::Vertex end(sf::Vector2f(x2, y2));
-        
-        start.color = sf::Color::Blue;
-        end.color = sf::Color::Blue;
-        
-        currentPath.append(start);
-        currentPath.append(end);
+        for (RP::line& side : sides)
+        {            
+            // float x1 = path.at(i).x + 1;
+            // float y1 = height - path.at(i).y;
+            // float x2 = path.at(i + 1).x + 1;
+            // float y2 = height - path.at(i + 1).y;
+            
+            // std::cout << x1 << "," << y1 << std::endl;
+            // std::cout << x2 << "," << y2 << std::endl;
+            
+            // x1 *= scale;
+            // y1 *= scale;
+            // x2 *= scale;
+            // y2 *= scale;
+
+            side.p.x = (side.p.x + 1) * scale;
+            side.q.x = (side.q.x + 1) * scale;
+            side.p.y = (height - side.p.y) * scale;
+            side.q.y = (height - side.q.y) * scale;
+            
+            sf::Vertex start(sf::Vector2f(side.p.x, side.p.y));
+            sf::Vertex end(sf::Vector2f(side.q.x, side.q.y));
+            
+            start.color = sf::Color::Blue;
+            end.color = sf::Color::Blue;
+            
+            currentPath.append(start);
+            currentPath.append(end);
+        }
     }
     
     return true;
@@ -241,7 +255,7 @@ bool Grid::boxCollision(std::array<RP::line, 4> box, RP::line line)
 // returns false if there will be no collisions
 // is not very sophisticated (simply checks target location instead of path), TODO make better
 // currently only checks the map borders
-bool Grid::willCollide(Agent &agent, float dx, float dy, float dr)
+bool Grid::willCollide(Agent& agent, float dx, float dy, float dr)
 {
     if (noclip)
         return false;

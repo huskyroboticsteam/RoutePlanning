@@ -16,7 +16,7 @@
 #include <math.h>
 #include <array>
 
-#include "utils.hpp"
+#include "autonomous/utils.hpp"
 
 #define PI 3.141592654
 
@@ -39,6 +39,8 @@ public:
     float turnTowards(float targetAngle);
     float turnTowards(float targetX, float targetY);
     void scaleSpeed(float ss);
+
+    float bot_width;
     
     std::array<RP::polarPoint, 4> getHitBox() { return hitBox; }
     
@@ -63,7 +65,6 @@ private:
     float rotation;
     float transSpeed;
     float rotSpeed;
-    float speedScale;
     
     // stores the four corners of the hitbox as polar coordinates (r, θ)
     // r is in meters, θ is in radians

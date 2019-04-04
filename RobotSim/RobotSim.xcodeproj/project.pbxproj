@@ -1,0 +1,429 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		932B4CA32254509F0017F5DA /* simController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 932B4CA12254509F0017F5DA /* simController.cpp */; };
+		932B4CA42254509F0017F5DA /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 932B4CA22254509F0017F5DA /* ui.cpp */; };
+		933E520C21B76B8700CE6194 /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 933E520B21B76B8700CE6194 /* grid.cpp */; };
+		933E520E21B76D2800CE6194 /* obstacle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 933E520D21B76D2800CE6194 /* obstacle.cpp */; };
+		937650562197AA50000897B2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 937650552197AA50000897B2 /* main.cpp */; };
+		93834EF922559E600071E119 /* WorldCommunicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93834EF422559E600071E119 /* WorldCommunicator.cpp */; };
+		93834EFA22559E600071E119 /* GPSSim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93834EF522559E600071E119 /* GPSSim.cpp */; };
+		9386DF2F21BC41F1008C3C07 /* agent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9386DF2E21BC41F1008C3C07 /* agent.cpp */; };
+		938FE9EE225455B3000897B7 /* quadMapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9EA225455B3000897B7 /* quadMapper.cpp */; };
+		938FE9EF225455B3000897B7 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9ED225455B3000897B7 /* utils.cpp */; };
+		938FE9F0225455B3000897B7 /* pather.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E4225455B2000897B7 /* pather.cpp */; };
+		938FE9F1225455B3000897B7 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E9225455B3000897B7 /* timer.cpp */; };
+		938FE9F2225455B3000897B7 /* splitMapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E1225455B2000897B7 /* splitMapper.cpp */; };
+		938FE9F3225455B3000897B7 /* memorizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9EC225455B3000897B7 /* memorizer.cpp */; };
+		938FE9F4225455B3000897B7 /* mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E7225455B3000897B7 /* mapper.cpp */; };
+		938FE9F72254561A000897B7 /* maze.txt in Resources */ = {isa = PBXBuildFile; fileRef = 938FE9F62254561A000897B7 /* maze.txt */; };
+		938FE9FB2254564D000897B7 /* obstacles.txt in Resources */ = {isa = PBXBuildFile; fileRef = 938FE9FA2254564C000897B7 /* obstacles.txt */; };
+		9390223222389540002B5D34 /* hellyeah.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9390222F2238953F002B5D34 /* hellyeah.txt */; };
+		9390223422389540002B5D34 /* obstacle_course.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9390223122389540002B5D34 /* obstacle_course.txt */; };
+		9393454B21E5A9D9005CF43C /* Simulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9393454A21E5A9D9005CF43C /* Simulator.cpp */; };
+		93FAC75B21F80BA800C5E20C /* HuskyRoboticsLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 93FAC75A21F80BA800C5E20C /* HuskyRoboticsLogo.png */; };
+		93FAC78221F80EBD00C5E20C /* ResourcePath.mm in Sources */ = {isa = PBXBuildFile; fileRef = 93FAC78121F80EBD00C5E20C /* ResourcePath.mm */; };
+		93FAC78521F8143000C5E20C /* temp_obstacles.txt in Resources */ = {isa = PBXBuildFile; fileRef = 93FAC78321F8143000C5E20C /* temp_obstacles.txt */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		932B4C9E2254509F0017F5DA /* ui.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ui.hpp; sourceTree = "<group>"; };
+		932B4C9F2254509F0017F5DA /* simController.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simController.hpp; sourceTree = "<group>"; };
+		932B4CA02254509F0017F5DA /* main.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = main.hpp; sourceTree = "<group>"; };
+		932B4CA12254509F0017F5DA /* simController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simController.cpp; sourceTree = "<group>"; };
+		932B4CA22254509F0017F5DA /* ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ui.cpp; sourceTree = "<group>"; };
+		933E520B21B76B8700CE6194 /* grid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = grid.cpp; sourceTree = "<group>"; };
+		933E520D21B76D2800CE6194 /* obstacle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = obstacle.cpp; sourceTree = "<group>"; };
+		9376504D2197AA50000897B2 /* RobotSim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RobotSim.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		937650512197AA50000897B2 /* RobotSim-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "RobotSim-Info.plist"; sourceTree = "<group>"; };
+		937650552197AA50000897B2 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		93834EF422559E600071E119 /* WorldCommunicator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WorldCommunicator.cpp; path = RobotSim/WorldCommunicator.cpp; sourceTree = SOURCE_ROOT; };
+		93834EF522559E600071E119 /* GPSSim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GPSSim.cpp; path = RobotSim/GPSSim.cpp; sourceTree = SOURCE_ROOT; };
+		93834EF722559E600071E119 /* GPSSim.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GPSSim.hpp; path = RobotSim/GPSSim.hpp; sourceTree = SOURCE_ROOT; };
+		93834EF822559E600071E119 /* WorldCommunicator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WorldCommunicator.hpp; path = RobotSim/WorldCommunicator.hpp; sourceTree = SOURCE_ROOT; };
+		9386DF2E21BC41F1008C3C07 /* agent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = agent.cpp; sourceTree = "<group>"; };
+		938FE9E0225455B2000897B7 /* splitMapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = splitMapper.hpp; sourceTree = "<group>"; };
+		938FE9E1225455B2000897B7 /* splitMapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = splitMapper.cpp; sourceTree = "<group>"; };
+		938FE9E2225455B2000897B7 /* memorizer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = memorizer.hpp; sourceTree = "<group>"; };
+		938FE9E3225455B2000897B7 /* timer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = timer.hpp; sourceTree = "<group>"; };
+		938FE9E4225455B2000897B7 /* pather.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pather.cpp; sourceTree = "<group>"; };
+		938FE9E5225455B2000897B7 /* pather.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pather.hpp; sourceTree = "<group>"; };
+		938FE9E6225455B3000897B7 /* quadMapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = quadMapper.hpp; sourceTree = "<group>"; };
+		938FE9E7225455B3000897B7 /* mapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mapper.cpp; sourceTree = "<group>"; };
+		938FE9E8225455B3000897B7 /* mapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mapper.hpp; sourceTree = "<group>"; };
+		938FE9E9225455B3000897B7 /* timer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timer.cpp; sourceTree = "<group>"; };
+		938FE9EA225455B3000897B7 /* quadMapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = quadMapper.cpp; sourceTree = "<group>"; };
+		938FE9EB225455B3000897B7 /* utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = utils.hpp; sourceTree = "<group>"; };
+		938FE9EC225455B3000897B7 /* memorizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = memorizer.cpp; sourceTree = "<group>"; };
+		938FE9ED225455B3000897B7 /* utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		938FE9F62254561A000897B7 /* maze.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = maze.txt; path = Resources/maze.txt; sourceTree = "<group>"; };
+		938FE9FA2254564C000897B7 /* obstacles.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = obstacles.txt; path = Resources/obstacles.txt; sourceTree = "<group>"; };
+		9390222F2238953F002B5D34 /* hellyeah.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = hellyeah.txt; path = Resources/hellyeah.txt; sourceTree = "<group>"; };
+		9390223122389540002B5D34 /* obstacle_course.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = obstacle_course.txt; path = Resources/obstacle_course.txt; sourceTree = "<group>"; };
+		9393454521E5A9C8005CF43C /* agent.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = agent.hpp; sourceTree = "<group>"; };
+		9393454621E5A9D8005CF43C /* grid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = grid.hpp; sourceTree = "<group>"; };
+		9393454721E5A9D8005CF43C /* Simulator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Simulator.hpp; sourceTree = "<group>"; };
+		9393454921E5A9D8005CF43C /* obstacle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = obstacle.hpp; sourceTree = "<group>"; };
+		9393454A21E5A9D9005CF43C /* Simulator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Simulator.cpp; sourceTree = "<group>"; };
+		93FAC75A21F80BA800C5E20C /* HuskyRoboticsLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = HuskyRoboticsLogo.png; path = Resources/HuskyRoboticsLogo.png; sourceTree = "<group>"; };
+		93FAC77E21F80E4F00C5E20C /* ResourcePath.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ResourcePath.hpp; sourceTree = "<group>"; };
+		93FAC78121F80EBD00C5E20C /* ResourcePath.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ResourcePath.mm; sourceTree = "<group>"; };
+		93FAC78321F8143000C5E20C /* temp_obstacles.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = temp_obstacles.txt; path = Resources/temp_obstacles.txt; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		937650492197AA50000897B2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		937650432197AA50000897B2 = {
+			isa = PBXGroup;
+			children = (
+				9376504F2197AA50000897B2 /* RobotSim */,
+				9376504E2197AA50000897B2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9376504E2197AA50000897B2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9376504D2197AA50000897B2 /* RobotSim.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9376504F2197AA50000897B2 /* RobotSim */ = {
+			isa = PBXGroup;
+			children = (
+				938FE9F5225455D7000897B7 /* autonomous */,
+				9393454521E5A9C8005CF43C /* agent.hpp */,
+				9386DF2E21BC41F1008C3C07 /* agent.cpp */,
+				9393454621E5A9D8005CF43C /* grid.hpp */,
+				933E520B21B76B8700CE6194 /* grid.cpp */,
+				932B4CA02254509F0017F5DA /* main.hpp */,
+				937650552197AA50000897B2 /* main.cpp */,
+				93834EF522559E600071E119 /* GPSSim.cpp */,
+				93834EF722559E600071E119 /* GPSSim.hpp */,
+				9393454921E5A9D8005CF43C /* obstacle.hpp */,
+				933E520D21B76D2800CE6194 /* obstacle.cpp */,
+				93FAC77E21F80E4F00C5E20C /* ResourcePath.hpp */,
+				93FAC78121F80EBD00C5E20C /* ResourcePath.mm */,
+				932B4CA12254509F0017F5DA /* simController.cpp */,
+				932B4C9F2254509F0017F5DA /* simController.hpp */,
+				9393454721E5A9D8005CF43C /* Simulator.hpp */,
+				9393454A21E5A9D9005CF43C /* Simulator.cpp */,
+				932B4CA22254509F0017F5DA /* ui.cpp */,
+				932B4C9E2254509F0017F5DA /* ui.hpp */,
+				93834EF422559E600071E119 /* WorldCommunicator.cpp */,
+				93834EF822559E600071E119 /* WorldCommunicator.hpp */,
+				937650572197AA50000897B2 /* Resources */,
+				937650502197AA50000897B2 /* Supporting Files */,
+			);
+			path = RobotSim;
+			sourceTree = "<group>";
+		};
+		937650502197AA50000897B2 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				937650512197AA50000897B2 /* RobotSim-Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		937650572197AA50000897B2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9390223122389540002B5D34 /* obstacle_course.txt */,
+				9390222F2238953F002B5D34 /* hellyeah.txt */,
+				938FE9FA2254564C000897B7 /* obstacles.txt */,
+				938FE9F62254561A000897B7 /* maze.txt */,
+				93FAC78321F8143000C5E20C /* temp_obstacles.txt */,
+				93FAC75A21F80BA800C5E20C /* HuskyRoboticsLogo.png */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		938FE9F5225455D7000897B7 /* autonomous */ = {
+			isa = PBXGroup;
+			children = (
+				938FE9E7225455B3000897B7 /* mapper.cpp */,
+				938FE9E8225455B3000897B7 /* mapper.hpp */,
+				938FE9EC225455B3000897B7 /* memorizer.cpp */,
+				938FE9E2225455B2000897B7 /* memorizer.hpp */,
+				938FE9E4225455B2000897B7 /* pather.cpp */,
+				938FE9E5225455B2000897B7 /* pather.hpp */,
+				938FE9EA225455B3000897B7 /* quadMapper.cpp */,
+				938FE9E6225455B3000897B7 /* quadMapper.hpp */,
+				938FE9E1225455B2000897B7 /* splitMapper.cpp */,
+				938FE9E0225455B2000897B7 /* splitMapper.hpp */,
+				938FE9E9225455B3000897B7 /* timer.cpp */,
+				938FE9E3225455B2000897B7 /* timer.hpp */,
+				938FE9ED225455B3000897B7 /* utils.cpp */,
+				938FE9EB225455B3000897B7 /* utils.hpp */,
+			);
+			path = autonomous;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9376504C2197AA50000897B2 /* RobotSim */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 937650622197AA50000897B2 /* Build configuration list for PBXNativeTarget "RobotSim" */;
+			buildPhases = (
+				937650482197AA50000897B2 /* Sources */,
+				937650492197AA50000897B2 /* Frameworks */,
+				9376504A2197AA50000897B2 /* Resources */,
+				9376504B2197AA50000897B2 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RobotSim;
+			productName = RobotSim;
+			productReference = 9376504D2197AA50000897B2 /* RobotSim.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		937650442197AA50000897B2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "Husky Robotics";
+				TargetAttributes = {
+					9376504C2197AA50000897B2 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = 937650472197AA50000897B2 /* Build configuration list for PBXProject "RobotSim" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 937650432197AA50000897B2;
+			productRefGroup = 9376504E2197AA50000897B2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9376504C2197AA50000897B2 /* RobotSim */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9376504A2197AA50000897B2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9390223422389540002B5D34 /* obstacle_course.txt in Resources */,
+				93FAC75B21F80BA800C5E20C /* HuskyRoboticsLogo.png in Resources */,
+				93FAC78521F8143000C5E20C /* temp_obstacles.txt in Resources */,
+				9390223222389540002B5D34 /* hellyeah.txt in Resources */,
+				938FE9F72254561A000897B7 /* maze.txt in Resources */,
+				938FE9FB2254564D000897B7 /* obstacles.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9376504B2197AA50000897B2 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "# This shell script simply copies required SFML dylibs/frameworks into the application bundle frameworks folder.\n# If you're using static libraries (which is not recommended) you should remove this script from your project.\n\n# SETTINGS\nSFML_DEPENDENCIES_INSTALL_PREFIX=\"/Users/SFML/Desktop/packaging/tmp/install/Library/Frameworks\"\nCMAKE_INSTALL_FRAMEWORK_PREFIX=\"/Users/SFML/Desktop/packaging/tmp/install/Library/Frameworks\"\nCMAKE_INSTALL_LIB_PREFIX=\"/Users/SFML/Desktop/packaging/tmp/install/Library/Frameworks/lib\"\nFRAMEWORKS_FULL_PATH=\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/\"\n\n# Are we building a project that uses frameworks or dylibs?\ncase \"$SFML_BINARY_TYPE\" in\n    DYLIBS)\n        frameworks=\"false\"\n        ;;\n    *)\n        frameworks=\"true\"\n        ;;\nesac\n\n# Echoes to stderr\nerror () # $* message to display\n{\n    echo $* 1>&2\n    exit 2\n}\n\nassert () # $1 is a boolean, $2...N is an error message\n{\n    if [ $# -lt 2 ]\n    then\n        error \"Internal error in assert: not enough args\"\n    fi\n\n    if [ $1 -ne 0 ]\n    then\n        shift\n        error \"$*\"\n    fi\n}\n\nforce_remove () # $@ is some paths\n{\n    test $# -ge 1\n    assert $? \"force_remove() requires at least one parameter\"\n    rm -fr $@\n    assert $? \"couldn't remove $@\"\n}\n\ncopy () # $1 is a source, $2 is a destination\n{\n    test $# -eq 2\n    assert $? \"copy() requires two parameters\"\n    ditto \"$1\" \"$2\"\n    assert $? \"couldn't copy $1 to $2\"\n}\n\nrequire () # $1 is a SFML module like 'system' or 'audio'\n{\n    dest=\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/\"\n\n    if [ -z \"$1\" ]\n    then\n        error \"require() requires one parameter!\"\n    else\n        # clean potentially old stuff\n        force_remove \"$dest/libsfml-$1\"*\n        force_remove \"$dest/sfml-$1.framework\"\n\n        # copy SFML libraries\n        if [ \"$frameworks\" = \"true\" ]\n        then\n            source=\"$CMAKE_INSTALL_FRAMEWORK_PREFIX/sfml-$1.framework\"\n            target=\"sfml-$1.framework\"\n        elif [ \"$SFML_LINK_DYLIBS_SUFFIX\" = \"-d\" ]\n        then\n            source=\"$CMAKE_INSTALL_LIB_PREFIX/libsfml-$1-d.dylib\"\n            target=\"`readlink $source`\"\n        else\n            source=\"$CMAKE_INSTALL_LIB_PREFIX/libsfml-$1.dylib\"\n            target=\"`readlink $source`\"\n        fi\n\n        copy \"$source\" \"$dest/$target\"\n\n        # copy extra dependencies\n        if [ \"$1\" = \"audio\" ]\n        then\n            # copy \"FLAC\" \"ogg\" \"vorbis\" \"vorbisenc\" \"vorbisfile\" \"OpenAL\" frameworks too\n            for f in \"FLAC\" \"ogg\" \"vorbis\" \"vorbisenc\" \"vorbisfile\" \"OpenAL\"\n            do\n                copy \"$SFML_DEPENDENCIES_INSTALL_PREFIX/$f.framework\" \"$dest/$f.framework\"\n            done\n        elif [ \"$1\" = \"graphics\" ]\n        then\n            copy \"$SFML_DEPENDENCIES_INSTALL_PREFIX/freetype.framework\" \"$dest/freetype.framework\"\n        fi\n    fi\n}\n\nif [ -n \"$SFML_SYSTEM\" ]\nthen\n    require \"system\"\nfi\n\nif [ -n \"$SFML_AUDIO\" ]\nthen\n    require \"audio\"\nfi\n\nif [ -n \"$SFML_NETWORK\" ]\nthen\n    require \"network\"\nfi\n\nif [ -n \"$SFML_WINDOW\" ]\nthen\n    require \"window\"\nfi\n\nif [ -n \"$SFML_GRAPHICS\" ]\nthen\n    require \"graphics\"\nfi\n\n                \n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		937650482197AA50000897B2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				933E520E21B76D2800CE6194 /* obstacle.cpp in Sources */,
+				938FE9F0225455B3000897B7 /* pather.cpp in Sources */,
+				938FE9EF225455B3000897B7 /* utils.cpp in Sources */,
+				938FE9F2225455B3000897B7 /* splitMapper.cpp in Sources */,
+				9386DF2F21BC41F1008C3C07 /* agent.cpp in Sources */,
+				9393454B21E5A9D9005CF43C /* Simulator.cpp in Sources */,
+				938FE9EE225455B3000897B7 /* quadMapper.cpp in Sources */,
+				937650562197AA50000897B2 /* main.cpp in Sources */,
+				938FE9F3225455B3000897B7 /* memorizer.cpp in Sources */,
+				932B4CA32254509F0017F5DA /* simController.cpp in Sources */,
+				932B4CA42254509F0017F5DA /* ui.cpp in Sources */,
+				938FE9F4225455B3000897B7 /* mapper.cpp in Sources */,
+				93FAC78221F80EBD00C5E20C /* ResourcePath.mm in Sources */,
+				933E520C21B76B8700CE6194 /* grid.cpp in Sources */,
+				938FE9F1225455B3000897B7 /* timer.cpp in Sources */,
+				93834EFA22559E600071E119 /* GPSSim.cpp in Sources */,
+				93834EF922559E600071E119 /* WorldCommunicator.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		937650602197AA50000897B2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
+				FRAMEWORK_SEARCH_PATHS = (
+					/Library/Frameworks/,
+					"$(inherited)",
+				);
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/,
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"$(SFML_SYSTEM)",
+					"$(SFML_WINDOW)",
+					"$(SFML_GRAPHICS)",
+					"$(SFML_AUDIO)",
+					"$(SFML_NETWORK)",
+				);
+				SFML_AUDIO = "";
+				SFML_BINARY_TYPE = FRAMEWORKS;
+				SFML_GRAPHICS = "$(SFML_LINK_PREFIX) sfml-graphics$(SFML_LINK_SUFFIX)";
+				SFML_LINK_DYLIBS_PREFIX = "-l";
+				SFML_LINK_DYLIBS_SUFFIX = "";
+				SFML_LINK_FRAMEWORKS_PREFIX = "-framework";
+				SFML_LINK_FRAMEWORKS_SUFFIX = "";
+				SFML_LINK_PREFIX = "$(SFML_LINK_$(SFML_BINARY_TYPE)_PREFIX)";
+				SFML_LINK_SUFFIX = "$(SFML_LINK_$(SFML_BINARY_TYPE)_SUFFIX)";
+				SFML_NETWORK = "";
+				SFML_SYSTEM = "$(SFML_LINK_PREFIX) sfml-system$(SFML_LINK_SUFFIX)";
+				SFML_WINDOW = "$(SFML_LINK_PREFIX) sfml-window$(SFML_LINK_SUFFIX)";
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Debug;
+		};
+		937650612197AA50000897B2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
+				FRAMEWORK_SEARCH_PATHS = (
+					/Library/Frameworks/,
+					"$(inherited)",
+				);
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib/,
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"$(SFML_SYSTEM)",
+					"$(SFML_WINDOW)",
+					"$(SFML_GRAPHICS)",
+					"$(SFML_AUDIO)",
+					"$(SFML_NETWORK)",
+				);
+				SFML_AUDIO = "";
+				SFML_BINARY_TYPE = FRAMEWORKS;
+				SFML_GRAPHICS = "$(SFML_LINK_PREFIX) sfml-graphics$(SFML_LINK_SUFFIX)";
+				SFML_LINK_DYLIBS_PREFIX = "-l";
+				SFML_LINK_DYLIBS_SUFFIX = "";
+				SFML_LINK_FRAMEWORKS_PREFIX = "-framework";
+				SFML_LINK_FRAMEWORKS_SUFFIX = "";
+				SFML_LINK_PREFIX = "$(SFML_LINK_$(SFML_BINARY_TYPE)_PREFIX)";
+				SFML_LINK_SUFFIX = "$(SFML_LINK_$(SFML_BINARY_TYPE)_SUFFIX)";
+				SFML_NETWORK = "";
+				SFML_SYSTEM = "$(SFML_LINK_PREFIX) sfml-system$(SFML_LINK_SUFFIX)";
+				SFML_WINDOW = "$(SFML_LINK_PREFIX) sfml-window$(SFML_LINK_SUFFIX)";
+				SUPPORTED_PLATFORMS = macosx;
+			};
+			name = Release;
+		};
+		937650632197AA50000897B2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INFOPLIST_FILE = "RobotSim/RobotSim-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		937650642197AA50000897B2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INFOPLIST_FILE = "RobotSim/RobotSim-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		937650472197AA50000897B2 /* Build configuration list for PBXProject "RobotSim" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				937650602197AA50000897B2 /* Debug */,
+				937650612197AA50000897B2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		937650622197AA50000897B2 /* Build configuration list for PBXNativeTarget "RobotSim" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				937650632197AA50000897B2 /* Debug */,
+				937650642197AA50000897B2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 937650442197AA50000897B2 /* Project object */;
+}

@@ -3,45 +3,34 @@
 
 #include <utility>
 #include <vector>
-#include <SFML/Graphics.hpp>
+// #include <SFML/Graphics.hpp>
 // #include "Map.hpp"
+#define COLINEAR 0
+#define CLOCKWISE 1
+#define COUNTERCLOCKWISE 2
 
-#define THEME 0 // 0 is normal, 1 is HACKERMODE
-
-#define TARGET_COLOR sf::Color:Red;
-#if THEME
-#define PATH_COLOR sf::Color::Yellow 
-#define OBST_COLOR sf::Color(82, 165, 46)
-#define VISIBLE_OBST_COLOR sf::Color(178, 255, 145)
-#define SEEN_OBST_COLOR sf::Color::Green
-#define VIEW_SHAPE_COLOR sf::Color::White
-#else
-#define PATH_COLOR sf::Color(115, 92, 196);
-#define OBST_COLOR sf::Color::Black
-#define VISIBLE_OBST_COLOR sf::Color::Green
-#define SEEN_OBST_COLOR sf::Color(58, 201, 0)
-#define VIEW_SHAPE_COLOR sf::Color::Blue
-#endif
-
-//#define float double // YOU ARE GOING TO HELL
- 
 typedef unsigned int uint;
 
 namespace RP
 {
     struct point
     {
+        // point();
+        // point(float x, float y);
+        // point(const point &other);
         float x;
         float y;
-        bool operator==(const point& p) const;
-        bool operator!=(const point& p) const;
+        bool operator==(const point &p) const;
+        bool operator!=(const point &p) const;
+        // point &operator=(const point &other);
+        // point &operator=(const point&& other);
     };
     struct line
     {
         point p;
         point q;
-        
-        line() { };
+
+        line(){};
         line(point p, point q);
         line(float px, float py, float qx, float qy);
     };
@@ -49,12 +38,12 @@ namespace RP
     {
         // radius (in meters)
         float r;
-        
+
         // the angle (in radians) counterclockwise from the positive x axis
         float th;
-        
-        bool operator==(const polarPoint& p) const;
-        bool operator!=(const polarPoint& p) const;
+
+        bool operator==(const polarPoint &p) const;
+        bool operator!=(const polarPoint &p) const;
     };
 
     // normalize angle (in radians) to between 0 and 2PI
@@ -75,11 +64,30 @@ namespace RP
     //Tells if three points are on a line segment
     bool on_segment(point p, point q, point r);
 
-    //Returns true if segment p1q1 intersects p2q2
+    //Returns true if segment p1p2 intersects q1q2. p1p2
     bool segments_intersect(point p1, point p2, point q1, point q2);
 
     // intersection() but constrained by segment length
     point segments_intersection(point a, point b, point c, point d);
+
+    // return normalized orthogonal to ln. If countercw, [ln.p, ln.q, ret] is countercw
+    point get_ortho(const line &ln, bool countercw);
+
+    float dot(const point &u, const point &v);
+
+    // exactly the same as segments_intersect except line p1p2 now has width p_width.
+    // see the definition for inters_out below
+    bool seg_intersects_width(point p1, point p2, point q1, point q2, float p_width, point &inters_out);
+
+    // helper method for seg_intersects_width and also used for more general cases
+    // inters_out is the output variable for the intersection. If there are two intersections,
+    // inters_out is set to the average of the two points. If there is no intersection,
+    // inters_out is not modified
+    bool seg_intersects_rect(line seg, line rect[4], point& inters_out);
+
+    void move_line_toward_point(RP::line &side_points, RP::point cur, float dist);
+
+    line get_moved_line(const line &ln, float dist, bool countercw);
 
     //check if point a is on segment pq
     bool within_segment(point p, point q, point a);
@@ -109,14 +117,16 @@ namespace RP
     //Find angle of p relative to origin, where positive x-axis is 0 radians.
     float relative_angle(point origin, point p);
     bool same_point(const point &p, const point &q, float = 1e-6);
-    bool closeEnough(float a, float b, float tol=1e-6);
-    bool angleCloseEnough(float deg1, float deg2, float degtol=0.5f);
+    bool closeEnough(float a, float b, float tol = 1e-6);
+    bool angleCloseEnough(float deg1, float deg2, float degtol = 0.5f);
 
-    //Find if o and p are parallel AND overlap. If they do, can merge is set to true and
-    // return a merged obstacle; else, can_merge is set to false
-    
+    template <class T>
+    inline size_t arrlen(T *arr)
+    {
+        if (sizeof(arr) == 0)
+            return 0;
+        return sizeof(arr) / sizeof(*arr);
+    }
 } // namespace RP
-
-sf::VertexArray get_vertex_line(RP::point p, RP::point q, sf::Color c, float scale, float window_height);
 
 #endif

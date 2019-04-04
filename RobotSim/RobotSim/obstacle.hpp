@@ -11,7 +11,9 @@
 #include <SFML/Graphics.hpp>
 #include <stdio.h>
 #include <iostream>
-#include "utils.hpp"
+
+#include "autonomous/utils.hpp"
+#include "ui.hpp"
 
 class Obstacle : public sf::Drawable {
 public:

@@ -22,19 +22,19 @@
 #include <time.h>
 #include <string>
 #include <cmath>
+#include <queue>
 
 // Imports resourcePath() for macos
 #include "ResourcePath.hpp"
-
 #include "grid.hpp"
 #include "Simulator.hpp"
-#include "Map.hpp"
-#include "autoController.hpp"
 #include "WorldCommunicator.hpp"
+#include "simController.hpp"
+#include "ui.hpp"
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
-#define WINDOW_SCALE 0.5f
+#define WINDOW_SCALE 1.f
 #elif __APPLE__
 const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
@@ -43,17 +43,24 @@ const std::string RESOURCE_DIR = resourcePath();
 // ---------------------------------------- //
 // ---------- Internal Variables ---------- //
 // ---------------------------------------- //
-Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
 const sf::Color bgColor = sf::Color(255, 255, 255);
 
+constexpr float RECOMPUTE_COOLDOWN = 1.5f; // time between recomputation of the path/graph
+
+static inline sf::CircleShape getNode(RP::node, float scale, float height);
+
+void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode& node, float scale, float height);
+
+Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
 float gridScale = grid.retrieveScale();
+float gridWidth = grid.retrieveWidth();
 float gridHeight = grid.retrieveHeight();
-Agent agent(gridScale, grid.retrieveWidth(), gridHeight, RP::point{2, 2});
+Agent agent(gridScale, gridWidth, gridHeight, RP::point{2.5f, 2.5f}, 45.f);
 
 RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-RP::Map map(sim.getpos(), grid.target);
+RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_width);
 
-RP::AutoController control(grid, agent, map);
+RP::SimController control(grid, agent, pather);
 
 WorldCommunicator worldCommunicator;
 static float goalDirection;
@@ -116,6 +123,15 @@ int main(int, char const **)
     sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(60);
     
+    // ADDITIONAL SETUP FROM INIT
+    agent.bot_width = 1.8f;
+    grid.target = RP::point{35.f, 35.f};
+    // END ADDITIONAL SETUP
+    
+    // states
+    bool showGraph = false;
+    RP::Timer recompute_timer;
+
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
     {
@@ -223,33 +239,99 @@ int main(int, char const **)
             turn(1);
         }
         
+        window.clear(bgColor);
+        const RP::graph &dg = pather.d_graph();
+        // draw nodes
+        if (showGraph && !dg.nodes.empty())
+        {
+            std::vector<bool> visited(dg.nodes.size(), false);
+            std::queue<int> q;
+            q.push(0);
+            while (!q.empty())
+            {
+                int ind = q.front();
+                const auto &nd = dg.nodes[ind];
+                q.pop();
+                visited[ind] = true;
+                for (const RP::eptr edge : nd.connection)
+                {
+                    if (!visited[edge->child])
+                    {
+                        q.push(edge->child);
+                        window.draw(get_vertex_line(nd.coord, dg.nodes[edge->child].coord, GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                    }
+                }
+                if (ind != 0)
+                    window.draw(getNode(nd, gridScale, gridHeight));
+            }
+        }
+        
+        if (lazer)
+            grid.drawPath(pather.get_cur_path(), agent);
         if (auton)
             control.tic();
-        if (lazer)
-            grid.drawPath(map.shortest_path_to(), agent);
         
         sim.update_agent();
-        map.update(sim.visible_obstacles());
 		
+        
 		float change = 0.0;
 		worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
 		goalDirection += change;
 		goalDirection = (int)goalDirection%360;
-		turnTo(goalDirection);
-		move(toMove);
+		//turnTo(goalDirection);
+		//move(toMove);
 		
-		
-		
-        window.clear(bgColor);
+        
+        pather.set_pos(sim.getpos());
+        pather.add_obstacles(sim.visible_obstacles());
+        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
+        {
+            recompute_timer.reset();
+            //pather.compute_path();
+        }
+        const RP::QTreeNode& root = *pather.debug_qtree_root();
+        draw_qtree(window, root, gridScale, gridHeight);
+
+        
         window.draw(grid);
         window.draw(agent);
-        for (auto obst : map.memo_obstacles())
-            window.draw(get_vertex_line(obst.coord1, obst.coord2, SEEN_OBST_COLOR, gridScale, gridHeight));
+        for (auto obst : pather.mem_obstacles())
+            window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR, gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
+
         window.display();
     }
     // ---------- End of 60 FPS Update Loop ---------- //
 
     return EXIT_SUCCESS;
+}
+
+void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode& node, float scale, float height)
+{
+    sf::RectangleShape rect;
+    rect.setSize(sf::Vector2f((node.max_x - node.min_x) * scale,
+                              (node.max_y - node.min_y) * scale));
+    rect.setOutlineColor(sf::Color(0, 255, 255));
+    rect.setOutlineThickness(1.f);
+    rect.setPosition((node.min_x + 1) * scale, (height - node.max_y) * scale);
+    sf::Color fillColor = node.is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
+    rect.setFillColor(fillColor);
+    win.draw(rect);
+    if (!node.is_leaf)
+    {
+        draw_qtree(win, *node.topleft, scale, height);
+        draw_qtree(win, *node.topright, scale, height);
+        draw_qtree(win, *node.botleft, scale, height);
+        draw_qtree(win, *node.botright, scale, height);
+    }
+}
+
+static inline sf::CircleShape getNode(RP::node nd, float scale, float height)
+{
+    sf::CircleShape circle(5);
+    circle.setOrigin(5, 5);
+    circle.setFillColor(GRAPH_NODE_COLOR);
+    circle.setPosition((nd.coord.x + 1) * scale, (height - nd.coord.y) * scale);
+    return circle;
 }

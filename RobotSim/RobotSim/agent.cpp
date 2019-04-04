@@ -1,6 +1,8 @@
 #include "agent.hpp"
+#include "ui.hpp"
 
-Agent::Agent(float gScale, float gWidth, float gHeight, RP::point startPos, float startR, float tSpeed, float rSpeed) : speedScale(1.f)
+Agent::Agent(float gScale, float gWidth, float gHeight, RP::point startPos, float startR, float tSpeed, float rSpeed)
+
 {
     // internal position stored in meters
     xPos = startPos.x;
@@ -25,14 +27,14 @@ Agent::Agent(float gScale, float gWidth, float gHeight, RP::point startPos, floa
     shapeBase.setOrigin(agentWidth / 2.f, agentLength / 2.f);
     shapeBase.setFillColor(BASE_COLOR);
     shapeBase.setPosition((xPos + 1) * scale, (mapHeight - yPos) * scale);
-    shapeBase.setRotation(90 + startR);
+    shapeBase.setRotation(90 - startR);
 
     // this is a triangle, drawn on top of the rectangle
     shapeTop = sf::CircleShape(agentWidth / 2.f, 3);
     shapeTop.setOrigin(agentWidth / 2.f, agentWidth / 2.f);
     shapeTop.setFillColor(TOP_COLOR);
     shapeTop.setPosition((xPos + 1) * scale, (mapHeight - yPos) * scale);
-    shapeTop.setRotation(90 + startR);
+    shapeTop.setRotation(90 - startR);
 
     // the hitbox is stored as four vectors in polar coordinates
     // each vector corresponds to the displacement of one vertex from the center of the agent
@@ -78,7 +80,6 @@ float Agent::rotateTowards(float x, float y)
 float Agent::drive(float speed) {
     float dx = transSpeed * speed * cos(rotation * PI / 180);
     float dy = transSpeed * speed * sin(rotation * PI / 180);
-    speed *= speedScale;
     
     //move(dx, dy);
     return transSpeed * speed; // ds
@@ -112,7 +113,7 @@ float Agent::turnTowards(float targetAngle) {
     
     float rDiff = targetAngle - rotation;
     
-    float speed = 1.f * speedScale * 1000;
+    float speed = 1000;
     
     if (fabs(rDiff) < 60)
         speed = fabs(rDiff) / 60.f;
@@ -144,11 +145,6 @@ void Agent::rotate(float dr)
     // SFML rotation (clockwise) is opposite of internal rotation (counter-clockwise)
     shapeBase.rotate(-dr);
     shapeTop.rotate(-dr);
-}
-
-void Agent::scaleSpeed(float ss)
-{
-    speedScale = ss;
 }
 
 // erases the path drawn so far
