@@ -1,7 +1,7 @@
 CC := g++
 SDIR := .
 ODIR := obj
-SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp
+SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp WorldCommunicator.cpp
 _OBJECTS := $(SOURCES:.cpp=.o)
 OBJECTS := $(patsubst %,$(ODIR)/%,$(_OBJECTS))
 DEBUG ?= 1
@@ -9,12 +9,13 @@ DEBUG ?= 1
 AUTO_DIR := autonomous/
 AUTO_ODIR := $(AUTO_DIR)obj
 AUTO_SOURCES := $(wildcard $(AUTO_DIR)*.cpp)
+AUTO_HEADERS := $(AUTO_SOURCES:.cpp=.hpp)
 _AUTO_OBJECTS := $(notdir $(AUTO_SOURCES:.cpp=.o))
 AUTO_OBJECTS := $(patsubst %,$(AUTO_ODIR)/%,$(_AUTO_OBJECTS))
 
 SFML := C:/SFML-2.5.1/
 INC := -I$(SFML)include
-LINK := -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system
+LINK := -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lpthread
 
 ifeq ($(DEBUG), 1)
 CFLAGS := -std=c++11 -Wall -g
@@ -25,7 +26,7 @@ OUT := build/simulator.exe
 
 all: $(AUTO_DIR) $(OUT)
 
-$(AUTO_DIR): $(AUTO_SOURCES)
+$(AUTO_DIR): $(AUTO_SOURCES) $(AUTO_HEADERS)
 	$(MAKE) -C $@ DEBUG=$(DEBUG)
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(SDIR)/%.hpp
