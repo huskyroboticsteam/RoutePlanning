@@ -38,7 +38,7 @@ void WorldCommunicator::update(const RP::point& position, const float& rotation,
 		float fudged_rotation = rotation + magError * ((float)rand()/(float)RAND_MAX);
 		std::vector<unsigned char> data(sizeof(float));
 		memcpy(&data[0], &rotation, sizeof(float));
-		std::cout << "Fudged rotation: " << fudged_rotation << std::endl;
+		//std::cout << "Fudged rotation: " << fudged_rotation << std::endl;
 		if(send_action(data, magId)) {
 			//std::cout << "Sent a magnetometer packet" << std::endl;
 		}
