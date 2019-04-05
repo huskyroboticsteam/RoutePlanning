@@ -1,10 +1,14 @@
 CC := g++
 SDIR := .
 ODIR := obj
-SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp WorldCommunicator.cpp
-_OBJECTS := $(SOURCES:.cpp=.o)
-OBJECTS := $(patsubst %,$(ODIR)/%,$(_OBJECTS))
+COMMON_SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp 
+NET_SOURCES := Simulator.cpp
+_COMMON_OBJECTS := $(COMMON_SOURCES:.cpp=.o)
+_NET_OBJECTS := $(NET_SOURCES:.cpp=.o)
+COMMON_OBJECTS := $(patsubst %,$(ODIR)/%,$(_COMMON_OBJECTS))
+NET_OBJECTS := $(patsubst %,$(ODIR)/%,$(_NET_OBJECTS))
 DEBUG ?= 1
+LOCAL ?= 0
 
 AUTO_DIR := autonomous/
 AUTO_ODIR := $(AUTO_DIR)obj
@@ -22,6 +26,15 @@ CFLAGS := -std=c++11 -Wall -g
 else
 CFLAGS := -std=c++11 -DNDEBUG -O3
 endif
+
+ifeq ($(LOCAL), 1)
+SOURCES := $(COMMON_SOURCES)
+OBJECTS := $(COMMON_OBJECTS)
+CFLAGS := $(CFLAGS) -DNO_NETWORKING
+else
+SOURCES := $(COMMON_SOURCES) $(NET_SOURCES)
+OBJECTS := $(COMMON_OBJECTS) $(NET_OBJECTS)
+endif
 OUT := build/simulator.exe
 
 all: $(AUTO_DIR) $(OUT)
@@ -34,6 +47,8 @@ $(ODIR)/%.o: $(SDIR)/%.cpp $(SDIR)/%.hpp
 
 $(OUT): $(OBJECTS) $(AUTO_OBJECTS)
 	$(CC) $(CFLAGS) $(AUTO_OBJECTS) $(OBJECTS) $(LINK) -o $(OUT)
+
+print-%  : ; @echo $* = $($*)
 
 .PHONY: clean
 clean:

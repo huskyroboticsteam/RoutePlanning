@@ -27,7 +27,9 @@
 // Imports resourcePath() for macos
 #include "ResourcePath.hpp"
 #include "Simulator.hpp"
+#ifndef NO_NETWORKING
 #include "WorldCommunicator.hpp"
+#endif
 #include "grid.hpp"
 #include "simController.hpp"
 #include "ui.hpp"
@@ -59,7 +61,14 @@ float gridWidth = grid.retrieveWidth();
 float gridHeight = grid.retrieveHeight();
 Agent agent(gridScale, gridWidth, gridHeight, RP::point{2.5f, 2.5f}, 45.f);
 
+RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
+RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_width);
+
+RP::SimController control(grid, agent, pather);
+
+#ifndef NO_NETWORKING
 WorldCommunicator worldCommunicator;
+#endif
 static float goalDirection;
 static float toMove;
 // ---------------------------------------- //
@@ -272,15 +281,15 @@ int main(int, char const **) {
             control.tic();
 
         sim.update_agent();
-
-        float change = 0.0;
-        worldCommunicator.update(currentPosition(), currentRotation(), change,
-                                 toMove);
-        goalDirection += change;
-        goalDirection = (int)goalDirection % 360;
-        // turnTo(goalDirection);
-        // move(toMove);
-
+        
+		float change = 0.0;
+#ifndef NO_NETWORKING
+		worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+#endif
+		goalDirection += change;
+		goalDirection = (int)goalDirection%360;
+		//turnTo(goalDirection);
+		//move(toMove);
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
         if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN) {
