@@ -28,7 +28,9 @@
 #include "ResourcePath.hpp"
 #include "grid.hpp"
 #include "Simulator.hpp"
+#ifndef NO_NETWORKING
 #include "WorldCommunicator.hpp"
+#endif
 #include "simController.hpp"
 #include "ui.hpp"
 
@@ -62,7 +64,9 @@ RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_wi
 
 RP::SimController control(grid, agent, pather);
 
+#ifndef NO_NETWORKING
 WorldCommunicator worldCommunicator;
+#endif
 static float goalDirection;
 static float toMove;
 // ---------------------------------------- //
@@ -275,7 +279,9 @@ int main(int, char const **)
 		
         
 		float change = 0.0;
+#ifndef NO_NETWORKING
 		worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+#endif
 		goalDirection += change;
 		goalDirection = (int)goalDirection%360;
 		//turnTo(goalDirection);
