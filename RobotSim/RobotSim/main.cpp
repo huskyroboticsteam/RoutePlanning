@@ -34,7 +34,7 @@
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
-#define WINDOW_SCALE 1.f
+#define WINDOW_SCALE .5f
 #elif __APPLE__
 const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
