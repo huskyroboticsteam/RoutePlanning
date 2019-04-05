@@ -173,6 +173,7 @@ int main(int, char const **)
                         std::cout << "O   -- Import obstacles from obstacles.txt" << std::endl;
                         std::cout << "U   -- Complete autonomous mode" << std::endl;
                         std::cout << "N   -- Toggle clipping" << std::endl;
+                        std::cout << "E   -- Show pathing graph" << std::endl;
                         std::cout << "0   -- Toggle robot path" << std::endl;
                         std::cout << "9   -- Draw algorithm path" << std::endl;
                         break;
@@ -203,6 +204,10 @@ int main(int, char const **)
                     }
                     case sf::Keyboard::N : {
                         grid.toggleClipping();
+                        break;
+                    }
+                    case sf::Keyboard::E : {
+                        showGraph = !showGraph;
                         break;
                     }
                     case sf::Keyboard::Num9 : {
