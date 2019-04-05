@@ -31,3 +31,6 @@ RobotSim/Robotsim/Resources/obstacles.txt
 RobotSim/RobotSim/testMutex.cpp
 *.o
 *.out
+RobotSim/RobotSim/callgrind.out.347
+RobotSim/RobotSim/callgrind.out.403
+RobotSim/RobotSim/callgrind.out.460
