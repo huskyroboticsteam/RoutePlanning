@@ -61,15 +61,12 @@ float gridWidth = grid.retrieveWidth();
 float gridHeight = grid.retrieveHeight();
 Agent agent(gridScale, gridWidth, gridHeight, RP::point{2.5f, 2.5f}, 45.f);
 
-<<<<<<< HEAD
 RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
 RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_width);
 
 RP::SimController control(grid, agent, pather);
 
 #ifndef NO_NETWORKING
-=======
->>>>>>> cd21429e0349faad53f71da9185296531ffddf4e
 WorldCommunicator worldCommunicator;
 #endif
 static float goalDirection;
@@ -284,8 +281,6 @@ int main(int, char const **) {
             control.tic();
 
         sim.update_agent();
-<<<<<<< HEAD
-		
         
 		float change = 0.0;
 #ifndef NO_NETWORKING
@@ -295,19 +290,6 @@ int main(int, char const **) {
 		goalDirection = (int)goalDirection%360;
 		//turnTo(goalDirection);
 		//move(toMove);
-		
-        
-=======
-
-        float change = 0.0;
-        worldCommunicator.update(currentPosition(), currentRotation(), change,
-                                 toMove);
-        goalDirection += change;
-        goalDirection = (int)goalDirection % 360;
-        // turnTo(goalDirection);
-        // move(toMove);
-
->>>>>>> cd21429e0349faad53f71da9185296531ffddf4e
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
         if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN) {
