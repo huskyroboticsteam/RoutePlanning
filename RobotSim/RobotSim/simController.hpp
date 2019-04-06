@@ -32,12 +32,14 @@ public:
   // called every some fixed (hopefully) time step
   void tic();
   void stop_auto();
+  const bool& just_updated = _just_updated;
 
 private:
   Grid &grid;
   Agent &agent;
   Pather &pather;
   Timer timer;
+  bool _just_updated; // whether path was updated in the last call to tic()
 
   float speed;
   float orig_angle; // angle before turning

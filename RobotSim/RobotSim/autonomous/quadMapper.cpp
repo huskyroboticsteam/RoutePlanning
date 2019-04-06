@@ -1,6 +1,7 @@
 #include "quadMapper.hpp"
 #include <queue>
 #include <cassert>
+#include <cmath>
 
 // get code from https://geidav.wordpress.com/2017/12/02/advanced-octrees-4-finding-neighbor-nodes/
 // kinda know how it works but not didn't exactly go into it -gary
@@ -85,36 +86,55 @@ RP::pqtree RP::QuadMapper::create_qtnode(float minx, float miny, float maxx, flo
 
 RP::QuadMapper::QuadMapper(const point &cur_pos, const point &target, const std::vector<line> &allobst,
                            float fwidth, float fheight, int max_d, float tolerance) : Mapper(cur_pos, target, tolerance, allobst),
-                                                                                      max_depth(max_d), field_width(fwidth), field_height(fheight), new_tnode_added(true)
+                                                                                      max_depth(max_d), field_width(fwidth), field_height(fheight),
+                                                                                      cur_changed(true), tar_changed(true)
 {
+    init_graph();
     root = create_qtnode(0, 0, field_width, field_height, 1);
+    qt2graph(root);
 }
 
 void RP::QuadMapper::set_pos(point c)
 {
     cur = c;
+    mygraph.nodes[0].coord = c;
     cur_changed = true;
 }
 
 void RP::QuadMapper::set_tar(point t)
 {
     tar = t;
+    mygraph.nodes[1].coord = t;
     tar_changed = true;
 }
 
 void RP::QuadMapper::set_tol(float t)
 {
-    tol = t;
-    qtnodes.clear();
-    root = create_qtnode(0, 0, field_width, field_height, 1);
-    new_obstacles(all_obstacles);
+    if (t != tol)
+    {
+        tol = t;
+        qtnodes.clear();
+        init_graph();
+        root = create_qtnode(0, 0, field_width, field_height, 1);
+        qt2graph(root);
+        new_obstacles(all_obstacles);
+    }
+}
+
+void RP::QuadMapper::init_graph()
+{
+    mygraph.clear();
+    mygraph.create_node(cur);
+    mygraph.nodes[0].dist_to = 0.f;
+    mygraph.create_node(tar);
 }
 
 void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
 {
     std::queue<pqtree> q;
-    for (const line &obs : obstacles)
+    for (const line &o : obstacles)
     {
+        const line obs = add_length_to_line_segment(o.p, o.q, tol);
         q.push(root);
         while (!q.empty())
         {
@@ -127,13 +147,15 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
                 if (nd->depth >= max_depth)
                 {
                     nd->is_blocked = true;
+                    if (nd->graph_id != -1)
+                        for (const auto &pair : mygraph.nodes[nd->graph_id].connection)
+                            mygraph.remove_edge(pair.second->parent, pair.second->child);
                 }
                 else
                 {
                     if (nd->is_leaf)
                     {
                         nd->is_leaf = false;
-                        new_tnode_added = true;
                         // split node
                         float mid_x = (nd->min_x + nd->max_x) / 2;
                         float mid_y = (nd->min_y + nd->max_y) / 2;
@@ -150,6 +172,21 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
                         nd->topright = create_qtnode(mid_x, mid_y, nd->max_x,
                                                      nd->max_y, next_depth);
                         nd->topright->parent = nd;
+
+                        // already in graph
+                        if (nd->graph_id != -1)
+                            removed_nodes.insert(nd->qt_id);
+                        else
+                        {
+                            auto it = new_nodes.find(nd->qt_id);
+                            assert(it != new_nodes.end());
+                            new_nodes.erase(it);
+                        }
+
+                        new_nodes.insert(nd->topleft->qt_id);
+                        new_nodes.insert(nd->topright->qt_id);
+                        new_nodes.insert(nd->botleft->qt_id);
+                        new_nodes.insert(nd->botright->qt_id);
                     }
                     q.push(nd->botleft);
                     q.push(nd->botright);
@@ -163,8 +200,8 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
 
 RP::pqtree RP::QuadMapper::get_enclosing_node(point coord) const
 {
-    if (coord.x > root->max_x || coord.x < root->min_x || coord.y > root->max_y ||
-        coord.y < root->min_y)
+    if (coord.x - 1e-6 > root->max_x || coord.x + 1e-6 < root->min_x || coord.y - 1e-6 > root->max_y ||
+        coord.y + 1e-6 < root->min_y)
     {
         printf("WARNING: coord not enclosed in root node in QuadMapper.\n");
         return pqtree(nullptr);
@@ -196,48 +233,6 @@ RP::pqtree RP::QuadMapper::get_enclosing_node(point coord) const
     return cn;
 }
 
-void RP::QuadMapper::make_path_graph()
-{
-    mygraph.clear();
-    mygraph.create_node(cur);
-    mygraph.nodes[0].dist_to = 0.f;
-    mygraph.create_node(tar);
-
-    // copy quadtree nodes to graph
-    // optimize by skipping this step if necessary
-    size_t nqt = qtnodes.size();
-    for (auto it = qtnodes.begin(); it != qtnodes.end(); it++)
-        mygraph.create_node((*it)->center_coord);
-
-    bool *visited = new bool[nqt]();
-    for (size_t i = 0; i < nqt; i++)
-    {
-        if (!qtnodes[i]->is_leaf || qtnodes[i]->is_blocked)
-            continue;
-        for (Direction d : {UP, DOWN, LEFT, RIGHT})
-        {
-            pqtree n = qtnodes[i]->get_neighbor_ge(d);
-            if (!n || !n->is_leaf || n->is_blocked)
-                continue;
-            if (!visited[n->id] || n->depth < qtnodes[i]->depth)
-            {
-                // +2 for offset created by cur and tar
-                mygraph.add_edge(i + 2, n->id + 2);
-            }
-        }
-        visited[i] = true;
-    }
-
-    pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
-    pqtree tar_node = get_enclosing_node(mygraph.nodes[1].coord);
-    if (!cur_node || !tar_node)
-        return;
-    mygraph.add_edge(0, cur_node->id + 2);
-    mygraph.add_edge(1, tar_node->id + 2);
-
-    delete[] visited;
-}
-
 RP::pqtree RP::QuadMapper::get_qtree_root() const
 {
     return root;
@@ -249,32 +244,118 @@ bool RP::QuadMapper::obs_in_node(const line &obs, pqtree tnode)
     return seg_intersects_rect(obs, tnode->sides, placeholder);
 }
 
+static inline bool equal(float a, float b)
+{
+    return fabs(a - b) < 1e-5;
+}
+
+int RP::QuadMapper::qt2graph(pqtree qtn)
+{
+    qtn->graph_id = mygraph.create_node(qtn->center_coord);
+    return qtn->graph_id;
+}
+
 void RP::QuadMapper::compute_graph()
 {
-    // if more performance needed, modify path graph as new obstacles are added
-    // instead of remaking it
-    if (new_tnode_added)
+    bool update = !new_nodes.empty();
+    if (update)
     {
-        make_path_graph();
-        new_tnode_added = false;
+        int nedges_added = 0;
+        for (int ni : new_nodes)
+            qt2graph(qtnodes[ni]);
+        size_t nqt = qtnodes.size();
+        bool *visited = new bool[nqt]();
+        for (int rm : removed_nodes)
+        {
+            pqtree rmd = qtnodes[rm];
+            // TODO handle situation where neighbors aren't leaves anymore
+            // simply create method for getting children in a direction.
+            // my god this is so simple jesus christ
+            // but I can't do this anymore so I'll do it next time
+            for (const auto &pair : mygraph.nodes[rmd->graph_id].connection)
+            {
+                // re-connect old node's neighbors to new nodes
+                pqtree nb = qtnodes[pair.second->child];
+                Direction dir;
+                if (equal(nb->max_x, rmd->min_x))
+                {
+                    dir = LEFT;
+                }
+                else if (equal(nb->min_x, rmd->max_x))
+                {
+                    dir = RIGHT;
+                }
+                else if (equal(nb->max_y, rmd->min_y))
+                {
+                    dir = DOWN;
+                }
+                else
+                {
+                    dir = UP;
+                }
+                pqtree newone = nb->get_neighbor_ge(dir);
+                // only add if new node is bigger than nb
+                if (newone && newone->is_leaf && !newone->is_blocked && newone->depth > nb->depth)
+                {
+                    assert(new_nodes.find(newone->qt_id) != new_nodes.end());
+                    nedges_added++;
+                    assert(!nb->is_blocked);
+                    assert(!newone->is_blocked);
+                    mygraph.add_edge(newone->graph_id, nb->graph_id);
+                    visited[nb->qt_id] = true;
+                }
+                // good night my sweet prince
+                mygraph.remove_edge(pair.second->parent, pair.second->child);
+            }
+        }
+
+        for (int ni : new_nodes)
+        {
+            if (qtnodes[ni]->is_blocked)
+                continue;
+            for (Direction d : {UP, DOWN, LEFT, RIGHT})
+            {
+                pqtree n = qtnodes[ni]->get_neighbor_ge(d);
+                if (!n || !n->is_leaf || n->is_blocked)
+                    continue;
+                if (!visited[n->qt_id] || n->depth < qtnodes[ni]->depth)
+                {
+                    nedges_added++;
+                    assert(!qtnodes[ni]->is_blocked);
+                    assert(!n->is_blocked);
+                    mygraph.add_edge(qtnodes[ni]->graph_id, n->graph_id);
+                }
+            }
+        }
+        new_nodes.clear();
+        removed_nodes.clear();
     }
 
-    if (cur_changed)
+    if (cur_changed || update)
     {
         cur_changed = false;
-        mygraph.nodes[0].connection.clear();
+        if (!mygraph.nodes[0].connection.empty())
+        {
+            assert(mygraph.nodes[0].connection.size() == 1);
+            mygraph.remove_edge(0, mygraph.nodes[0].connection.begin()->first);
+        }
         pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
+        printf("cur node %f, %f\n", cur_node->center_coord.x, cur_node->center_coord.y);
         if (cur_node)
-            mygraph.add_edge(0, cur_node->id + 2);
+            mygraph.add_edge(0, cur_node->graph_id);
     }
 
-    if (tar_changed)
+    if (tar_changed || update)
     {
         tar_changed = false;
-        mygraph.nodes[1].connection.clear();
+        if (!mygraph.nodes[1].connection.empty())
+        {
+            assert(mygraph.nodes[1].connection.size() == 1);
+            mygraph.remove_edge(1, mygraph.nodes[1].connection.begin()->first);
+        }
         pqtree tar_node = get_enclosing_node(mygraph.nodes[1].coord);
         if (tar_node)
-            mygraph.add_edge(1, tar_node->id + 2);
+            mygraph.add_edge(1, tar_node->graph_id);
     }
 }
 

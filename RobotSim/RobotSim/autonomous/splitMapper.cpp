@@ -49,18 +49,6 @@ void RP::SplitMapper::compute_graph()
         rebuild_graph(tol);
 }
 
-RP::line RP::SplitMapper::add_length_to_line_segment(point p, point q, float length)
-{
-    std::pair<float, float> pq = std::make_pair(q.x - p.x, q.y - p.y); //vector
-    float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second);
-    pq.first = length * pq.first / pq_len;
-    pq.second = length * pq.second / pq_len;
-
-    point p1 = point{q.x + pq.first, q.y + pq.second};
-    point p2 = point{p.x - pq.first, p.y - pq.second};
-    return line{p1, p2};
-}
-
 void RP::SplitMapper::rebuild_graph(float side_tolerance)
 {
     //TODO(sasha): make R a constant - the following few lines are just a hack

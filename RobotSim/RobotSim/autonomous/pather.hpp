@@ -15,7 +15,7 @@ namespace RP
 class Pather
 {
   public:
-    Pather(point origin, point target, point max_point, float tol);
+    Pather(point origin, point target, point max_point);
     const point& cur_point = cur;
     const point& tar_point = tar;
     void compute_path();

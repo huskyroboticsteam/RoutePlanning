@@ -7,8 +7,8 @@
 //  Created by Tadeusz Pforte on 11/13/18.
 //  Copyright © 2018 Husky Robotics. All rights reserved.
 //
-#ifndef ROBOTSIM_AGENT_H
-#define ROBOTSIM_AGENT_H
+#ifndef ROBOTSIM_AGENT_HPP
+#define ROBOTSIM_AGENT_HPP
 
 #include <SFML/Graphics.hpp>
 #include <stdio.h>

@@ -36,7 +36,7 @@
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
-#define WINDOW_SCALE .5f
+#define WINDOW_SCALE 1.f
 #elif __APPLE__
 const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
@@ -61,11 +61,6 @@ float gridWidth = grid.retrieveWidth();
 float gridHeight = grid.retrieveHeight();
 Agent agent(gridScale, gridWidth, gridHeight, RP::point{2.5f, 2.5f}, 45.f);
 
-RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_width);
-
-RP::SimController control(grid, agent, pather);
-
 #ifndef NO_NETWORKING
 WorldCommunicator worldCommunicator;
 #endif
@@ -85,23 +80,31 @@ void move(float speed) { grid.moveAgent(agent, agent.drive(speed)); }
 // speed should be between 1 and -1, where negative is counterclockwise
 void turn(float speed) { grid.rotateAgent(agent, agent.turn(speed)); }
 
-void turnTo(float goalDirection) {
+void turnTo(float goalDirection)
+{
     // std::cout << "goal direction: " << goalDirection << std::endl;
     // std::cout << "internal direction: " << agent.getInternalRotation() <<
     // std::endl;
-    if (abs(goalDirection - agent.getInternalRotation()) > 1.0) {
-        if (goalDirection > agent.getInternalRotation()) {
+    if (abs(goalDirection - agent.getInternalRotation()) > 1.0)
+    {
+        if (goalDirection > agent.getInternalRotation())
+        {
             turn(-1);
-        } else {
+        }
+        else
+        {
             turn(1);
         }
-    } else {
+    }
+    else
+    {
         turn(0);
     }
 }
 // returns the current position of the robot, in meters, relative to the grid
 // origin x and y increase to the right and to the top respectively
-static RP::point currentPosition() {
+static RP::point currentPosition()
+{
     return RP::point{agent.getX(), agent.getY()};
 }
 
@@ -113,12 +116,14 @@ static float currentRotation() { return agent.getInternalRotation(); }
 // returns all the obstacles currently visible to the robot
 // note that these may be partial obstacles
 // TODO may return an RP::obstacle depending on implementation
-static std::vector<RP::line> currentObstaclesInView() {
+static std::vector<RP::line> currentObstaclesInView()
+{
     // TODO
 }
 // ---------------------------------------- //
 
-int main(int, char const **) {
+int main(int, char const **)
+{
     sf::RenderWindow window(
         sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE),
         "Robot Simulator");
@@ -129,8 +134,7 @@ int main(int, char const **) {
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent,
                       RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-    RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f},
-                      agent.bot_width);
+    RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f});
     RP::SimController control(grid, agent, pather);
     // END ADDITIONAL SETUP
 
@@ -139,7 +143,8 @@ int main(int, char const **) {
     RP::Timer recompute_timer;
 
     sf::Image icon;
-    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png")) {
+    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
+    {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     }
 
@@ -160,16 +165,21 @@ int main(int, char const **) {
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
     // ---------------------------------------- //
-    while (window.isOpen()) {
+    while (window.isOpen())
+    {
         sf::Event event;
-        while (window.pollEvent(event)) {
+        while (window.pollEvent(event))
+        {
             // Close window on X or Cmd+W
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            else if (event.type == sf::Event::KeyPressed) {
-                switch (event.key.code) {
-                case sf::Keyboard::H: {
+            else if (event.type == sf::Event::KeyPressed)
+            {
+                switch (event.key.code)
+                {
+                case sf::Keyboard::H:
+                {
                     std::cout << "Help Menu: " << std::endl;
                     std::cout
                         << "P   -- Returns the internal position of the robot"
@@ -184,25 +194,29 @@ int main(int, char const **) {
                     std::cout << "9   -- Draw algorithm path" << std::endl;
                     break;
                 }
-                case sf::Keyboard::P: {
+                case sf::Keyboard::P:
+                {
                     std::cout << "Internal Position: (" << agent.getX() << ","
                               << agent.getY() << ") at "
                               << agent.getInternalRotation() << " degrees"
                               << std::endl;
                     break;
                 }
-                case sf::Keyboard::G: {
+                case sf::Keyboard::G:
+                {
                     grid.toggleGrid();
                     break;
                 }
-                case sf::Keyboard::O: {
+                case sf::Keyboard::O:
+                {
                     grid.obstacleList.clear();
                     grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
                     // grid.addBorderObstacles();
                     std::cout << "Added obstacles" << std::endl;
                     break;
                 }
-                case sf::Keyboard::U: {
+                case sf::Keyboard::U:
+                {
                     auton = !auton;
                     if (auton)
                         control.start_auto();
@@ -210,92 +224,118 @@ int main(int, char const **) {
                         control.stop_auto();
                     break;
                 }
-                case sf::Keyboard::N: {
+                case sf::Keyboard::N:
+                {
                     grid.toggleClipping();
                     break;
                 }
-                case sf::Keyboard::E: {
+                case sf::Keyboard::E:
+                {
                     showGraph = !showGraph;
                     break;
                 }
-                case sf::Keyboard::Num9: {
+                case sf::Keyboard::Num9:
+                {
                     if (lazer)
                         grid.drawPath();
                     lazer = !lazer;
                     break;
                 }
-                case sf::Keyboard::Num0: {
+                case sf::Keyboard::Num0:
+                {
                     agent.togglePath();
                     break;
                 }
-                default: { std::cout << "Command not recognized" << std::endl; }
+                default:
+                {
+                    // std::cout << "Command not recognized" << std::endl;
+                }
                 }
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
             // move forwards
             move(1);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
             // move backwards
             move(-1);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
             // turn left
             turn(-1);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
             // turn right
             turn(1);
         }
 
         window.clear(bgColor);
-        const RP::graph &dg = pather.d_graph();
-        // draw nodes
-        if (showGraph && !dg.nodes.empty()) {
-            std::vector<bool> visited(dg.nodes.size(), false);
-            std::queue<int> q;
-            q.push(0);
-            while (!q.empty()) {
-                int ind = q.front();
-                const auto &nd = dg.nodes[ind];
-                q.pop();
-                visited[ind] = true;
-                for (const RP::eptr edge : nd.connection) {
-                    if (!visited[edge->child]) {
-                        q.push(edge->child);
-                        window.draw(get_vertex_line(
-                            nd.coord, dg.nodes[edge->child].coord,
-                            GRAPH_EDGE_COLOR, gridScale, gridHeight));
-                    }
-                }
-                if (ind != 0)
-                    window.draw(getNode(nd, gridScale, gridHeight));
-            }
-        }
-
         if (lazer)
             grid.drawPath(pather.get_cur_path(), agent);
         if (auton)
             control.tic();
 
         sim.update_agent();
-        
-		float change = 0.0;
+
+        float change = 0.0;
 #ifndef NO_NETWORKING
-		worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+        worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
 #endif
-		goalDirection += change;
-		goalDirection = (int)goalDirection%360;
-		//turnTo(goalDirection);
-		//move(toMove);
+        goalDirection += change;
+        goalDirection = (int)goalDirection % 360;
+        //turnTo(goalDirection);
+        //move(toMove);
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
-        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN) {
+        bool graph_updated = false;
+        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
+        {
             recompute_timer.reset();
             pather.compute_path();
+            graph_updated = true;
         }
+
+        if (auton && control.just_updated)
+            graph_updated = true;
+
+        // if (graph_updated)
+        // {
+            // TODO only traverse graph if updated
+            const RP::graph &dg = pather.d_graph();
+            // draw nodes
+            if (showGraph && !dg.nodes.empty())
+            {
+                std::vector<bool> visited(dg.nodes.size(), false);
+                std::queue<int> q;
+                q.push(0);
+                while (!q.empty())
+                {
+                    int ind = q.front();
+                    const auto &nd = dg.nodes[ind];
+                    q.pop();
+                    visited[ind] = true;
+                    for (const auto &pair : nd.connection)
+                    {
+                        const RP::eptr &edge = pair.second;
+                        if (!visited[edge->child])
+                        {
+                            q.push(edge->child);
+                            window.draw(get_vertex_line(
+                                nd.coord, dg.nodes[edge->child].coord,
+                                GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                        }
+                    }
+                    if (ind != 0)
+                        window.draw(getNode(nd, gridScale, gridHeight));
+                }
+            }
+        // }
         const RP::QTreeNode &root = *pather.debug_qtree_root();
         draw_qtree(window, root, gridScale, gridHeight);
 
@@ -315,7 +355,8 @@ int main(int, char const **) {
 }
 
 void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
-                float height) {
+                float height)
+{
     sf::RectangleShape rect;
     rect.setSize(sf::Vector2f((node.max_x - node.min_x) * scale,
                               (node.max_y - node.min_y) * scale));
@@ -326,7 +367,8 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
         node.is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
     rect.setFillColor(fillColor);
     win.draw(rect);
-    if (!node.is_leaf) {
+    if (!node.is_leaf)
+    {
         draw_qtree(win, *node.topleft, scale, height);
         draw_qtree(win, *node.topright, scale, height);
         draw_qtree(win, *node.botleft, scale, height);
@@ -334,7 +376,8 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
     }
 }
 
-static inline sf::CircleShape getNode(RP::node nd, float scale, float height) {
+static inline sf::CircleShape getNode(RP::node nd, float scale, float height)
+{
     sf::CircleShape circle(5);
     circle.setOrigin(5, 5);
     circle.setFillColor(GRAPH_NODE_COLOR);
