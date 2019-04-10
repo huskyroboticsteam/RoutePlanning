@@ -23,7 +23,6 @@
 class Agent : public sf::Drawable, public sf::Transformable {
 public:
     Agent(float gScale, float gWidth, float gHeight, RP::point startPos = {0, 0}, float startR = 0.f, float tSpeed = 0.18, float rSpeed = 2.5);
-    void move(float dx, float dy);
     void rotate(float dr);
     void clearPath();
     void togglePath();
@@ -39,6 +38,9 @@ public:
     float turnTowards(float targetAngle);
     float turnTowards(float targetX, float targetY);
     void scaleSpeed(float ss);
+    
+    void resetTo(RP::point newPos, float newRotation = 0.f);
+    void move(float dx, float dy);
 
     float bot_width;
     
@@ -59,6 +61,7 @@ private:
     sf::RectangleShape shapeBase;
     sf::CircleShape shapeTop;
     sf::VertexArray path;
+    
     
     float xPos;
     float yPos;

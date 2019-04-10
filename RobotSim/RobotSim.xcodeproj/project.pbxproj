@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		932006EC225D87BE00BBA574 /* DejaVuSans.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 932006EB225D87BE00BBA574 /* DejaVuSans.ttf */; };
 		932B4CA32254509F0017F5DA /* simController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 932B4CA12254509F0017F5DA /* simController.cpp */; };
 		932B4CA42254509F0017F5DA /* ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 932B4CA22254509F0017F5DA /* ui.cpp */; };
 		933E520C21B76B8700CE6194 /* grid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 933E520B21B76B8700CE6194 /* grid.cpp */; };
@@ -33,6 +34,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		932006EB225D87BE00BBA574 /* DejaVuSans.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = DejaVuSans.ttf; path = Resources/DejaVuSans.ttf; sourceTree = "<group>"; };
 		932B4C9E2254509F0017F5DA /* ui.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ui.hpp; sourceTree = "<group>"; };
 		932B4C9F2254509F0017F5DA /* simController.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simController.hpp; sourceTree = "<group>"; };
 		932B4CA02254509F0017F5DA /* main.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = main.hpp; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 		937650572197AA50000897B2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				932006EB225D87BE00BBA574 /* DejaVuSans.ttf */,
 				9390223122389540002B5D34 /* obstacle_course.txt */,
 				9390222F2238953F002B5D34 /* hellyeah.txt */,
 				938FE9FA2254564C000897B7 /* obstacles.txt */,
@@ -236,6 +239,7 @@
 				9390223422389540002B5D34 /* obstacle_course.txt in Resources */,
 				93FAC75B21F80BA800C5E20C /* HuskyRoboticsLogo.png in Resources */,
 				93FAC78521F8143000C5E20C /* temp_obstacles.txt in Resources */,
+				932006EC225D87BE00BBA574 /* DejaVuSans.ttf in Resources */,
 				9390223222389540002B5D34 /* hellyeah.txt in Resources */,
 				938FE9F72254561A000897B7 /* maze.txt in Resources */,
 				938FE9FB2254564D000897B7 /* obstacles.txt in Resources */,

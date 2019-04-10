@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string>
 #include <time.h>
+#include <chrono>
 
 // Imports resourcePath() for macos
 #include "ResourcePath.hpp"
@@ -47,8 +48,7 @@ const std::string RESOURCE_DIR = resourcePath();
 // ---------------------------------------- //
 const sf::Color bgColor = sf::Color(255, 255, 255);
 
-constexpr float RECOMPUTE_COOLDOWN =
-    1.5f; // time between recomputation of the path/graph
+constexpr float RECOMPUTE_COOLDOWN = 1.5f; // time between recomputation of the path/graph
 
 static inline sf::CircleShape getNode(RP::node, float scale, float height);
 
@@ -59,7 +59,11 @@ Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
 float gridScale = grid.retrieveScale();
 float gridWidth = grid.retrieveWidth();
 float gridHeight = grid.retrieveHeight();
-Agent agent(gridScale, gridWidth, gridHeight, RP::point{2.5f, 2.5f}, 45.f);
+
+RP::point agentInitPos{2.5f, 2.5f};
+float agentInitRot = 45.f;
+
+Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);
 
 RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
 RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_width);
@@ -119,10 +123,16 @@ static std::vector<RP::line> currentObstaclesInView() {
 // ---------------------------------------- //
 
 int main(int, char const **) {
-    sf::RenderWindow window(
-        sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE),
-        "Robot Simulator");
+    sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(60);
+    
+    sf::Font font;
+    if (!font.loadFromFile(RESOURCE_DIR + "DejaVuSans.ttf"))
+        std::cout << "Failed to load font" << std::endl;
+    
+    sf::Text fpsCounter(" 0 fps", font, 24);
+    fpsCounter.setFillColor(sf::Color::Black);
+    fpsCounter.move(2.f, 2.f);
 
     // ADDITIONAL SETUP FROM INIT
     agent.bot_width = 1.8f;
@@ -156,6 +166,17 @@ int main(int, char const **) {
     // agent.scaleSpeed(2.f);
     grid.target = RP::point{35.f, 35.f};
     // END INIT
+    
+    // fps tracker
+    unsigned int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::cout << now << std::endl;
+    int frameCount = 0;
+    bool gibFPS = true;
+    
+    unsigned int screenWidth = sf::VideoMode::getDesktopMode().width;
+    unsigned int screenHeight = sf::VideoMode::getDesktopMode().height;
+    
+    std::cout << "screen is " << screenWidth << "x" << screenHeight << std::endl;
 
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
@@ -174,14 +195,15 @@ int main(int, char const **) {
                     std::cout
                         << "P   -- Returns the internal position of the robot"
                         << std::endl;
-                    std::cout << "G   -- Toggle grid" << std::endl;
-                    std::cout << "O   -- Import obstacles from obstacles.txt"
-                              << std::endl;
-                    std::cout << "U   -- Complete autonomous mode" << std::endl;
-                    std::cout << "N   -- Toggle clipping" << std::endl;
-                    std::cout << "E   -- Show pathing graph" << std::endl;
-                    std::cout << "0   -- Toggle robot path" << std::endl;
-                    std::cout << "9   -- Draw algorithm path" << std::endl;
+                    std::cout << "G      -- Toggle grid" << std::endl;
+                    std::cout << "O      -- Import obstacles from obstacles.txt" << std::endl;
+                    std::cout << "U      -- Complete autonomous mode" << std::endl;
+                    std::cout << "N      -- Toggle clipping" << std::endl;
+                    std::cout << "E      -- Show pathing graph" << std::endl;
+                    std::cout << "0      -- Toggle robot path" << std::endl;
+                    std::cout << "1      -- Toggle fps counter" << std::endl;
+                    std::cout << "9      -- Draw algorithm path" << std::endl;
+                    std::cout << "Ctrl-= -- Resets the board" << std::endl;
                     break;
                 }
                 case sf::Keyboard::P: {
@@ -214,18 +236,22 @@ int main(int, char const **) {
                     grid.toggleClipping();
                     break;
                 }
-                case sf::Keyboard::E: {
+                case sf::Keyboard::E : {
                     showGraph = !showGraph;
                     break;
                 }
-                case sf::Keyboard::Num9: {
+                case sf::Keyboard::Num9 : {
                     if (lazer)
                         grid.drawPath();
                     lazer = !lazer;
                     break;
                 }
-                case sf::Keyboard::Num0: {
+                case sf::Keyboard::Num0 : {
                     agent.togglePath();
+                    break;
+                }
+                case sf::Keyboard::Num1 : {
+                    gibFPS = !gibFPS;
                     break;
                 }
                 default: { std::cout << "Command not recognized" << std::endl; }
@@ -248,6 +274,13 @@ int main(int, char const **) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
             // turn right
             turn(1);
+        }
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal) &&
+            (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+             sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))) {
+            // reset everything
+                std::cout << "beep boop reset not implemented" << std::endl;
         }
 
         window.clear(bgColor);
@@ -307,6 +340,21 @@ int main(int, char const **) {
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
 
+        
+        if (frameCount == 12) {
+            int lastFrame = now;
+            now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            
+            double avgFrameTime = (now - lastFrame) / 12.0;
+            
+            fpsCounter.setString(std::to_string((int) (1000.0 / avgFrameTime)) + " fps");
+            frameCount = 0;
+        }
+        frameCount++;
+        
+        if (gibFPS)
+            window.draw(fpsCounter);
+        
         window.display();
     }
     // ---------- End of 60 FPS Update Loop ---------- //
