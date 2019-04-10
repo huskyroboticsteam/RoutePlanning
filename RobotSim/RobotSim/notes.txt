@@ -24,3 +24,26 @@ graph.
 * actually, split get_graph() into compute_graph() and get_graph(), where only in compute_graph()
   do I recompute the graph (if necessary). get_graph() only returns the last computed graph
 * same for compute_path() probably
+
+Pseudocode
+----
+func new_obstacles()
+    ....
+    new_nodes := set()
+    removed_nodes := set()
+
+    main_loop for adding obstacles:
+    .... when node is split into four children
+
+        if node not in new_nodes:
+            removed_nodes.add(node) // only remove if already present
+        else:
+            new_nodes.remove(node)
+        end
+        
+        add children to new_nodes...
+    loop end
+
+    foreach node in new_nodes:
+        // TODO add neighbors
+end

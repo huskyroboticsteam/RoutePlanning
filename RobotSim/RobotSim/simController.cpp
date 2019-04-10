@@ -10,6 +10,7 @@ void RP::SimController::start_auto()
     printf("autonomous started\n");
     // timer.reset();
     pather.compute_path();
+    _just_updated = true;
     point target = pather.get_cur_next_point();
     if (target.x == INFINITY)
         return;
@@ -25,6 +26,7 @@ void RP::SimController::init_turn()
 {
     timer.reset();
     pather.compute_path();
+    _just_updated = true;
     tar_angle = get_target_angle();
     turnstate = TOWARD_TARGET;
     turning = true;
@@ -33,6 +35,7 @@ void RP::SimController::init_turn()
 void RP::SimController::turn_and_go()
 {
     pather.compute_path();
+    _just_updated = true;
     auto path = pather.get_cur_path();
     float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
     if (path.size() == 1)
@@ -53,6 +56,7 @@ void RP::SimController::turn_and_go()
 
 void RP::SimController::tic()
 {
+    _just_updated = false;
     if (turning)
     {
         switch (turnstate)
@@ -119,6 +123,7 @@ void RP::SimController::tic()
             {
                 // printf("reached turning target of %f\n", tar_angle);
                 pather.compute_path();
+                _just_updated = true;
                 tar_angle = get_target_angle();
                 if (angleCloseEnough(agent.getInternalRotation(), tar_angle, 0.5))
                 {

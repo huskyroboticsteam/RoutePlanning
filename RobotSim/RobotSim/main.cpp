@@ -28,7 +28,7 @@
 // Imports resourcePath() for macos
 #include "ResourcePath.hpp"
 #include "Simulator.hpp"
-#ifndef NO_NETWORKING
+#ifndef LOCAL
 #include "WorldCommunicator.hpp"
 #endif
 #include "grid.hpp"
@@ -37,7 +37,7 @@
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
-#define WINDOW_SCALE .5f
+#define WINDOW_SCALE 1.f
 #elif __APPLE__
 const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
@@ -65,12 +65,7 @@ float agentInitRot = 45.f;
 
 Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);
 
-RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f}, agent.bot_width);
-
-RP::SimController control(grid, agent, pather);
-
-#ifndef NO_NETWORKING
+#ifndef LOCAL
 WorldCommunicator worldCommunicator;
 #endif
 static float goalDirection;
@@ -89,23 +84,31 @@ void move(float speed) { grid.moveAgent(agent, agent.drive(speed)); }
 // speed should be between 1 and -1, where negative is counterclockwise
 void turn(float speed) { grid.rotateAgent(agent, agent.turn(speed)); }
 
-void turnTo(float goalDirection) {
+void turnTo(float goalDirection)
+{
     // std::cout << "goal direction: " << goalDirection << std::endl;
     // std::cout << "internal direction: " << agent.getInternalRotation() <<
     // std::endl;
-    if (abs(goalDirection - agent.getInternalRotation()) > 1.0) {
-        if (goalDirection > agent.getInternalRotation()) {
+    if (abs(goalDirection - agent.getInternalRotation()) > 1.0)
+    {
+        if (goalDirection > agent.getInternalRotation())
+        {
             turn(-1);
-        } else {
+        }
+        else
+        {
             turn(1);
         }
-    } else {
+    }
+    else
+    {
         turn(0);
     }
 }
 // returns the current position of the robot, in meters, relative to the grid
 // origin x and y increase to the right and to the top respectively
-static RP::point currentPosition() {
+static RP::point currentPosition()
+{
     return RP::point{agent.getX(), agent.getY()};
 }
 
@@ -117,7 +120,8 @@ static float currentRotation() { return agent.getInternalRotation(); }
 // returns all the obstacles currently visible to the robot
 // note that these may be partial obstacles
 // TODO may return an RP::obstacle depending on implementation
-static std::vector<RP::line> currentObstaclesInView() {
+static std::vector<RP::line> currentObstaclesInView()
+{
     // TODO
 }
 // ---------------------------------------- //
@@ -139,8 +143,7 @@ int main(int, char const **) {
     grid.target = RP::point{35.f, 35.f};
     RP::Simulator sim(grid.obstacleList, agent,
                       RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
-    RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f},
-                      agent.bot_width);
+    RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f});
     RP::SimController control(grid, agent, pather);
     // END ADDITIONAL SETUP
 
@@ -149,9 +152,11 @@ int main(int, char const **) {
     RP::Timer recompute_timer;
 
     sf::Image icon;
-    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png")) {
+    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
+    {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     }
+    sf::RenderTexture g_rendertexture;
 
     // setting toggles
     bool lazer = false;
@@ -181,97 +186,114 @@ int main(int, char const **) {
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
     // ---------------------------------------- //
-    while (window.isOpen()) {
+    while (window.isOpen())
+    {
         sf::Event event;
-        while (window.pollEvent(event)) {
+        while (window.pollEvent(event))
+        {
             // Close window on X or Cmd+W
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            else if (event.type == sf::Event::KeyPressed) {
-                switch (event.key.code) {
-                case sf::Keyboard::H: {
-                    std::cout << "Help Menu: " << std::endl;
-                    std::cout
-                        << "P   -- Returns the internal position of the robot"
-                        << std::endl;
-                    std::cout << "G      -- Toggle grid" << std::endl;
-                    std::cout << "O      -- Import obstacles from obstacles.txt" << std::endl;
-                    std::cout << "U      -- Complete autonomous mode" << std::endl;
-                    std::cout << "N      -- Toggle clipping" << std::endl;
-                    std::cout << "E      -- Show pathing graph" << std::endl;
-                    std::cout << "0      -- Toggle robot path" << std::endl;
-                    std::cout << "1      -- Toggle fps counter" << std::endl;
-                    std::cout << "9      -- Draw algorithm path" << std::endl;
-                    std::cout << "Ctrl-= -- Resets the board" << std::endl;
-                    break;
-                }
-                case sf::Keyboard::P: {
-                    std::cout << "Internal Position: (" << agent.getX() << ","
-                              << agent.getY() << ") at "
-                              << agent.getInternalRotation() << " degrees"
-                              << std::endl;
-                    break;
-                }
-                case sf::Keyboard::G: {
-                    grid.toggleGrid();
-                    break;
-                }
-                case sf::Keyboard::O: {
-                    grid.obstacleList.clear();
-                    grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
-                    // grid.addBorderObstacles();
-                    std::cout << "Added obstacles" << std::endl;
-                    break;
-                }
-                case sf::Keyboard::U: {
-                    auton = !auton;
-                    if (auton)
-                        control.start_auto();
-                    else
-                        control.stop_auto();
-                    break;
-                }
-                case sf::Keyboard::N: {
-                    grid.toggleClipping();
-                    break;
-                }
-                case sf::Keyboard::E : {
-                    showGraph = !showGraph;
-                    break;
-                }
-                case sf::Keyboard::Num9 : {
-                    if (lazer)
-                        grid.drawPath();
-                    lazer = !lazer;
-                    break;
-                }
-                case sf::Keyboard::Num0 : {
-                    agent.togglePath();
-                    break;
-                }
-                case sf::Keyboard::Num1 : {
-                    gibFPS = !gibFPS;
-                    break;
-                }
-                default: { std::cout << "Command not recognized" << std::endl; }
+            else if (event.type == sf::Event::KeyPressed)
+            {
+                switch (event.key.code)
+                {
+                    case sf::Keyboard::H:
+                    {
+                        std::cout << "Help Menu: " << std::endl;
+                        std::cout
+                            << "P   -- Returns the internal position of the robot"
+                            << std::endl;
+                        std::cout << "G      -- Toggle grid" << std::endl;
+                        std::cout << "O      -- Import obstacles from obstacles.txt" << std::endl;
+                        std::cout << "U      -- Complete autonomous mode" << std::endl;
+                        std::cout << "N      -- Toggle clipping" << std::endl;
+                        std::cout << "E      -- Show pathing graph" << std::endl;
+                        std::cout << "0      -- Toggle robot path" << std::endl;
+                        std::cout << "1      -- Toggle fps counter" << std::endl;
+                        std::cout << "9      -- Draw algorithm path" << std::endl;
+                        std::cout << "Ctrl-= -- Resets the board" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::P:
+                    {
+                        std::cout << "Internal Position: (" << agent.getX() << ","
+                                  << agent.getY() << ") at "
+                                  << agent.getInternalRotation() << " degrees"
+                                  << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::G:
+                    {
+                        grid.toggleGrid();
+                        break;
+                    }
+                    case sf::Keyboard::O:
+                    {
+                        grid.obstacleList.clear();
+                        grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
+                        // grid.addBorderObstacles();
+                        std::cout << "Added obstacles" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::U:
+                    {
+                        auton = !auton;
+                        if (auton)
+                            control.start_auto();
+                        else
+                            control.stop_auto();
+                        break;
+                    }
+                    case sf::Keyboard::N:
+                    {
+                        grid.toggleClipping();
+                        break;
+                    }
+                    case sf::Keyboard::E : {
+                        showGraph = !showGraph;
+                        break;
+                    }
+                    case sf::Keyboard::Num9 : {
+                        if (lazer)
+                            grid.drawPath();
+                        lazer = !lazer;
+                        break;
+                    }
+                    case sf::Keyboard::Num0 : {
+                        agent.togglePath();
+                        break;
+                    }
+                    case sf::Keyboard::Num1 : {
+                        gibFPS = !gibFPS;
+                        break;
+                    }
+                    default : {
+                        std::cout << "Command not recognized" << std::endl;
+                        break;
+                    }
                 }
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
             // move forwards
             move(1);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
             // move backwards
             move(-1);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
             // turn left
             turn(-1);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
             // turn right
             turn(1);
         }
@@ -284,56 +306,74 @@ int main(int, char const **) {
         }
 
         window.clear(bgColor);
-        const RP::graph &dg = pather.d_graph();
-        // draw nodes
-        if (showGraph && !dg.nodes.empty()) {
-            std::vector<bool> visited(dg.nodes.size(), false);
-            std::queue<int> q;
-            q.push(0);
-            while (!q.empty()) {
-                int ind = q.front();
-                const auto &nd = dg.nodes[ind];
-                q.pop();
-                visited[ind] = true;
-                for (const RP::eptr edge : nd.connection) {
-                    if (!visited[edge->child]) {
-                        q.push(edge->child);
-                        window.draw(get_vertex_line(
-                            nd.coord, dg.nodes[edge->child].coord,
-                            GRAPH_EDGE_COLOR, gridScale, gridHeight));
-                    }
-                }
-                if (ind != 0)
-                    window.draw(getNode(nd, gridScale, gridHeight));
-            }
-        }
-
         if (lazer)
             grid.drawPath(pather.get_cur_path(), agent);
         if (auton)
             control.tic();
 
         sim.update_agent();
-        
-		float change = 0.0;
-#ifndef NO_NETWORKING
-		worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+
+        float change = 0.0;
+#ifndef LOCAL
+        worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
 #endif
-		goalDirection += change;
-		goalDirection = (int)goalDirection%360;
-		//turnTo(goalDirection);
-		//move(toMove);
+        goalDirection += change;
+        goalDirection = (int)goalDirection % 360;
+        //turnTo(goalDirection);
+        //move(toMove);
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
-        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN) {
+        bool graph_updated = false;
+        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
+        {
             recompute_timer.reset();
             pather.compute_path();
+            graph_updated = true;
+        }
+
+        if (graph_updated)
+        {
+            g_rendertexture.clear();
+            g_rendertexture.create(window.getSize().x, window.getSize().y);
+            // use https://www.sfml-dev.org/tutorials/2.5/graphics-draw.php#off-screen-drawing
+            const RP::graph &dg = pather.d_graph();
+            // draw nodes
+            if (showGraph && !dg.nodes.empty())
+            {
+                std::vector<bool> visited(dg.nodes.size(), false);
+                std::queue<int> q;
+                q.push(0);
+                while (!q.empty())
+                {
+                    int ind = q.front();
+                    const auto &nd = dg.nodes[ind];
+                    q.pop();
+                    visited[ind] = true;
+                    for (const auto &pair : nd.connection)
+                    {
+                        const RP::eptr &edge = pair.second;
+                        if (!visited[edge->child])
+                        {
+                            q.push(edge->child);
+                            g_rendertexture.draw(get_vertex_line(
+                                nd.coord, dg.nodes[edge->child].coord,
+                                GRAPH_EDGE_COLOR, gridScale, gridHeight));
+                        }
+                    }
+                    if (ind != 0)
+                        g_rendertexture.draw(getNode(nd, gridScale, gridHeight));
+                }
+                g_rendertexture.display();
+            }
         }
         const RP::QTreeNode &root = *pather.debug_qtree_root();
         draw_qtree(window, root, gridScale, gridHeight);
 
         window.draw(grid);
         window.draw(agent);
+        const sf::Texture& texture = g_rendertexture.getTexture();
+        sf::Sprite graph_sprite(texture);
+        //window.draw(graph_sprite);
         for (auto obst : pather.mem_obstacles())
             window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR,
                                         gridScale, gridHeight));
@@ -363,7 +403,8 @@ int main(int, char const **) {
 }
 
 void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
-                float height) {
+                float height)
+{
     sf::RectangleShape rect;
     rect.setSize(sf::Vector2f((node.max_x - node.min_x) * scale,
                               (node.max_y - node.min_y) * scale));
@@ -374,7 +415,8 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
         node.is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
     rect.setFillColor(fillColor);
     win.draw(rect);
-    if (!node.is_leaf) {
+    if (!node.is_leaf)
+    {
         draw_qtree(win, *node.topleft, scale, height);
         draw_qtree(win, *node.topright, scale, height);
         draw_qtree(win, *node.botleft, scale, height);
@@ -382,7 +424,8 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
     }
 }
 
-static inline sf::CircleShape getNode(RP::node nd, float scale, float height) {
+static inline sf::CircleShape getNode(RP::node nd, float scale, float height)
+{
     sf::CircleShape circle(5);
     circle.setOrigin(5, 5);
     circle.setFillColor(GRAPH_NODE_COLOR);

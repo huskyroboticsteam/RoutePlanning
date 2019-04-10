@@ -4,9 +4,9 @@
 #include <algorithm>
 #include <cmath>
 
-RP::Pather::Pather(point origin, point target, point max_point, float tolerance) : roughMapper(origin, target, memorizer.obstacles_ref, tolerance),
-           fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6, tolerance),
-           cur(origin), tar(target), max_pt(max_point), tol(tolerance)
+RP::Pather::Pather(point origin, point target, point max_point) : roughMapper(origin, target, memorizer.obstacles_ref),
+           fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6),
+           cur(origin), tar(target), max_pt(max_point)
 {
 }
 
@@ -14,9 +14,9 @@ RP::Pather::Pather(point origin, point target, point max_point, float tolerance)
 // *low priority
 void RP::Pather::compute_path()
 {
-    float tolerances[]{2.f, 1.5f, 1.f, 0.5f, 0.f};
+    float tolerances[]{0.5f, 0.25f, 0.125f, 0.f};
     // size_t tol_len = arrlen(tolerances);
-    for (int tol_ind = 0; tol_ind < 5; tol_ind++)
+    for (int tol_ind = 0; tol_ind < 4; tol_ind++)
     {
         float tol = tolerances[tol_ind];
         // printf("%f\n", tol);
@@ -41,14 +41,14 @@ void RP::Pather::compute_path()
             int n = q.top();
             q.pop();
 
-            for (const eptr &e : g.nodes[n].connection)
+            for (const auto& pair : g.nodes[n].connection)
             {
-                float dist = g.nodes[n].dist_to + e->len;
-                if (dist < g.nodes[e->child].dist_to)
+                float dist = g.nodes[n].dist_to + pair.second->len;
+                if (dist < g.nodes[pair.second->child].dist_to)
                 {
-                    g.nodes[e->child].prev = n;
-                    g.nodes[e->child].dist_to = dist;
-                    q.push(e->child);
+                    g.nodes[pair.second->child].prev = n;
+                    g.nodes[pair.second->child].dist_to = dist;
+                    q.push(pair.second->child);
                 }
             }
         }
@@ -131,7 +131,7 @@ RP::point RP::Pather::get_cur_next_point()
 // not introduce intersections) to increase stability and speed
 void RP::Pather::prune_path(std::vector<int> &path, float tol)
 {
-    int i = 1;
+    unsigned int i = 1;
     path.insert(path.begin(), 0);
 
     while (i < path.size() - 1)

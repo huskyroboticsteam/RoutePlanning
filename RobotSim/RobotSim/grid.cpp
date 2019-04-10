@@ -101,7 +101,7 @@ bool Grid::drawPath(std::vector<RP::point> path, Agent &agent) {
     currentPath.clear();
     path.insert(path.begin(), RP::point{agent.getX(), agent.getY()});
     
-    for (int i = 0; i < path.size() - 1; i++) {
+    for (unsigned int i = 0; i < path.size() - 1; i++) {
 
         RP::line line{path.at(i), path.at(i+1)};
         RP::line sides[]{RP::get_moved_line(line, agent.bot_width / 2, true),
@@ -260,8 +260,8 @@ bool Grid::willCollide(Agent& agent, float dx, float dy, float dr)
     if (noclip)
         return false;
 
-    int xQuadrant = agent.getX() / 4;
-    int yQuadrant = agent.getY() / 4;
+    // int xQuadrant = agent.getX() / 4;
+    // int yQuadrant = agent.getY() / 4;
 
     std::array<RP::polarPoint, 4> hitbox = agent.getHitBox();
     std::array<RP::line, 4> hitboxLines;

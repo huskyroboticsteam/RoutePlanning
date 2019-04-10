@@ -8,7 +8,7 @@ _NET_OBJECTS := $(NET_SOURCES:.cpp=.o)
 COMMON_OBJECTS := $(patsubst %,$(ODIR)/%,$(_COMMON_OBJECTS))
 NET_OBJECTS := $(patsubst %,$(ODIR)/%,$(_NET_OBJECTS))
 DEBUG ?= 1
-LOCAL ?= 0
+LOCAL ?= 1
 
 AUTO_DIR := autonomous/
 AUTO_ODIR := $(AUTO_DIR)obj

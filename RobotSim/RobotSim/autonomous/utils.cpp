@@ -5,8 +5,9 @@
 #include "utils.hpp"
 
 #define PI 3.14159265359
-#define FLOAT_TOL 1e-4 // floating point error tolerance. Set to high value for now \
-                       // since we don't need too much precision
+// floating point error tolerance. Set to high value for now 
+// since we don't need too much precision
+#define FLOAT_TOL 1e-4 
 
 // RP::point::point() : x(0), y(0) {}
 
@@ -299,6 +300,18 @@ RP::point RP::get_ortho(const RP::line &ln, bool ccw)
     dir.x *= 1 / norm;
     dir.y *= 1 / norm;
     return dir;
+}
+
+RP::line RP::add_length_to_line_segment(point p, point q, float length)
+{
+    std::pair<float, float> pq = std::make_pair(q.x - p.x, q.y - p.y); //vector
+    float pq_len = sqrt(pq.first * pq.first + pq.second * pq.second);
+    pq.first = length * pq.first / pq_len;
+    pq.second = length * pq.second / pq_len;
+
+    point p1 = point{q.x + pq.first, q.y + pq.second};
+    point p2 = point{p.x - pq.first, p.y - pq.second};
+    return line{p1, p2};
 }
 
 RP::line RP::get_moved_line(const RP::line &ln, float d, bool ccw)

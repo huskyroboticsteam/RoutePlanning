@@ -3,6 +3,7 @@
 
 #include "utils.hpp"
 #include <memory>
+#include <map>
 
 namespace RP
 {
@@ -20,7 +21,7 @@ struct node
   int prev;
   float dist_to;
   point coord;
-  std::vector<eptr> connection;
+  std::map<int, eptr> connection;
 };
 
 struct graph

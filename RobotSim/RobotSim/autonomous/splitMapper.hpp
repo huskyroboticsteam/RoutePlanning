@@ -25,7 +25,6 @@ public:
 
 private:
   bool need_rebuild;
-  line add_length_to_line_segment(point p, point q, float length); //Returns a pair of points that are "length" away from the ends of segment pq
   // TODO make this override
   void rebuild_graph(float tol); //Builds the graph using the obstacles so that the shortest path gets calculated
   Timer timer;                                                     // for debugging
