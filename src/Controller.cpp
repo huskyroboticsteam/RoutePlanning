@@ -111,6 +111,7 @@ void Controller::update() {
         filter.step(u, z);
         curr_lat = filter.getX()(1);
         curr_lng = filter.getX()(2);
+        std::cout << "Kalman says: lat: " << curr_lat << " lng: " << curr_lng << std::endl;
         // std::cout << "Controller got a packet" << std::endl;
         point nextPoint{0.0, 0.0};
         if (state == FOLLOW_PATH) {
