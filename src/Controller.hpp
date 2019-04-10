@@ -2,6 +2,7 @@
 #include <deque>
 #include "Map.hpp"
 #include "Server.hpp"
+#include "RobotEKF.h"
 namespace RP
 {
     class Controller
@@ -27,5 +28,6 @@ namespace RP
             bool in_spiral_radius();
             bool found_ball();
             RP::point convertToLatLng(float dist, float dir);
+            RobotEKF filter;
     };
 }
