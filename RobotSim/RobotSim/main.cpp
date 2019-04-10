@@ -23,11 +23,12 @@
 #include <stdlib.h>
 #include <string>
 #include <time.h>
+#include <chrono>
 
 // Imports resourcePath() for macos
 #include "ResourcePath.hpp"
 #include "Simulator.hpp"
-#ifndef NO_NETWORKING
+#ifndef LOCAL
 #include "WorldCommunicator.hpp"
 #endif
 #include "grid.hpp"
@@ -36,7 +37,7 @@
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
-#define WINDOW_SCALE 1.f
+#define WINDOW_SCALE .5f
 #elif __APPLE__
 const std::string RESOURCE_DIR = resourcePath();
 #define WINDOW_SCALE 1.f
@@ -47,8 +48,7 @@ const std::string RESOURCE_DIR = resourcePath();
 // ---------------------------------------- //
 const sf::Color bgColor = sf::Color(255, 255, 255);
 
-constexpr float RECOMPUTE_COOLDOWN =
-    1.5f; // time between recomputation of the path/graph
+constexpr float RECOMPUTE_COOLDOWN = 1.5f; // time between recomputation of the path/graph
 
 static inline sf::CircleShape getNode(RP::node, float scale, float height);
 
@@ -59,9 +59,13 @@ Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
 float gridScale = grid.retrieveScale();
 float gridWidth = grid.retrieveWidth();
 float gridHeight = grid.retrieveHeight();
-Agent agent(gridScale, gridWidth, gridHeight, RP::point{2.5f, 2.5f}, 45.f);
 
-#ifndef NO_NETWORKING
+RP::point agentInitPos{2.5f, 2.5f};
+float agentInitRot = 45.f;
+
+Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);
+
+#ifndef LOCAL
 WorldCommunicator worldCommunicator;
 #endif
 static float goalDirection;
@@ -122,12 +126,17 @@ static std::vector<RP::line> currentObstaclesInView()
 }
 // ---------------------------------------- //
 
-int main(int, char const **)
-{
-    sf::RenderWindow window(
-        sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE),
-        "Robot Simulator");
+int main(int, char const **) {
+    sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(60);
+    
+    sf::Font font;
+    if (!font.loadFromFile(RESOURCE_DIR + "DejaVuSans.ttf"))
+        std::cout << "Failed to load font" << std::endl;
+    
+    sf::Text fpsCounter(" 0 fps", font, 24);
+    fpsCounter.setFillColor(sf::Color::Black);
+    fpsCounter.move(2.f, 2.f);
 
     // ADDITIONAL SETUP FROM INIT
     agent.bot_width = 1.8f;
@@ -162,6 +171,17 @@ int main(int, char const **)
     // agent.scaleSpeed(2.f);
     grid.target = RP::point{35.f, 35.f};
     // END INIT
+    
+    // fps tracker
+    unsigned int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    std::cout << now << std::endl;
+    int frameCount = 0;
+    bool gibFPS = true;
+    
+    unsigned int screenWidth = sf::VideoMode::getDesktopMode().width;
+    unsigned int screenHeight = sf::VideoMode::getDesktopMode().height;
+    
+    std::cout << "screen is " << screenWidth << "x" << screenHeight << std::endl;
 
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
@@ -179,78 +199,80 @@ int main(int, char const **)
             {
                 switch (event.key.code)
                 {
-                case sf::Keyboard::H:
-                {
-                    std::cout << "Help Menu: " << std::endl;
-                    std::cout
-                        << "P   -- Returns the internal position of the robot"
-                        << std::endl;
-                    std::cout << "G   -- Toggle grid" << std::endl;
-                    std::cout << "O   -- Import obstacles from obstacles.txt"
-                              << std::endl;
-                    std::cout << "U   -- Complete autonomous mode" << std::endl;
-                    std::cout << "N   -- Toggle clipping" << std::endl;
-                    std::cout << "E   -- Show pathing graph" << std::endl;
-                    std::cout << "0   -- Toggle robot path" << std::endl;
-                    std::cout << "9   -- Draw algorithm path" << std::endl;
-                    break;
-                }
-                case sf::Keyboard::P:
-                {
-                    std::cout << "Internal Position: (" << agent.getX() << ","
-                              << agent.getY() << ") at "
-                              << agent.getInternalRotation() << " degrees"
-                              << std::endl;
-                    break;
-                }
-                case sf::Keyboard::G:
-                {
-                    grid.toggleGrid();
-                    break;
-                }
-                case sf::Keyboard::O:
-                {
-                    grid.obstacleList.clear();
-                    grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
-                    // grid.addBorderObstacles();
-                    std::cout << "Added obstacles" << std::endl;
-                    break;
-                }
-                case sf::Keyboard::U:
-                {
-                    auton = !auton;
-                    if (auton)
-                        control.start_auto();
-                    else
-                        control.stop_auto();
-                    break;
-                }
-                case sf::Keyboard::N:
-                {
-                    grid.toggleClipping();
-                    break;
-                }
-                case sf::Keyboard::E:
-                {
-                    showGraph = !showGraph;
-                    break;
-                }
-                case sf::Keyboard::Num9:
-                {
-                    if (lazer)
-                        grid.drawPath();
-                    lazer = !lazer;
-                    break;
-                }
-                case sf::Keyboard::Num0:
-                {
-                    agent.togglePath();
-                    break;
-                }
-                default:
-                {
-                    // std::cout << "Command not recognized" << std::endl;
-                }
+                    case sf::Keyboard::H:
+                    {
+                        std::cout << "Help Menu: " << std::endl;
+                        std::cout
+                            << "P   -- Returns the internal position of the robot"
+                            << std::endl;
+                        std::cout << "G      -- Toggle grid" << std::endl;
+                        std::cout << "O      -- Import obstacles from obstacles.txt" << std::endl;
+                        std::cout << "U      -- Complete autonomous mode" << std::endl;
+                        std::cout << "N      -- Toggle clipping" << std::endl;
+                        std::cout << "E      -- Show pathing graph" << std::endl;
+                        std::cout << "0      -- Toggle robot path" << std::endl;
+                        std::cout << "1      -- Toggle fps counter" << std::endl;
+                        std::cout << "9      -- Draw algorithm path" << std::endl;
+                        std::cout << "Ctrl-= -- Resets the board" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::P:
+                    {
+                        std::cout << "Internal Position: (" << agent.getX() << ","
+                                  << agent.getY() << ") at "
+                                  << agent.getInternalRotation() << " degrees"
+                                  << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::G:
+                    {
+                        grid.toggleGrid();
+                        break;
+                    }
+                    case sf::Keyboard::O:
+                    {
+                        grid.obstacleList.clear();
+                        grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
+                        // grid.addBorderObstacles();
+                        std::cout << "Added obstacles" << std::endl;
+                        break;
+                    }
+                    case sf::Keyboard::U:
+                    {
+                        auton = !auton;
+                        if (auton)
+                            control.start_auto();
+                        else
+                            control.stop_auto();
+                        break;
+                    }
+                    case sf::Keyboard::N:
+                    {
+                        grid.toggleClipping();
+                        break;
+                    }
+                    case sf::Keyboard::E : {
+                        showGraph = !showGraph;
+                        break;
+                    }
+                    case sf::Keyboard::Num9 : {
+                        if (lazer)
+                            grid.drawPath();
+                        lazer = !lazer;
+                        break;
+                    }
+                    case sf::Keyboard::Num0 : {
+                        agent.togglePath();
+                        break;
+                    }
+                    case sf::Keyboard::Num1 : {
+                        gibFPS = !gibFPS;
+                        break;
+                    }
+                    default : {
+                        std::cout << "Command not recognized" << std::endl;
+                        break;
+                    }
                 }
             }
         }
@@ -275,6 +297,13 @@ int main(int, char const **)
             // turn right
             turn(1);
         }
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal) &&
+            (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+             sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))) {
+            // reset everything
+                std::cout << "beep boop reset not implemented" << std::endl;
+        }
 
         window.clear(bgColor);
         if (lazer)
@@ -285,7 +314,7 @@ int main(int, char const **)
         sim.update_agent();
 
         float change = 0.0;
-#ifndef NO_NETWORKING
+#ifndef LOCAL
         worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
 #endif
         goalDirection += change;
@@ -348,13 +377,28 @@ int main(int, char const **)
         window.draw(agent);
         const sf::Texture& texture = g_rendertexture.getTexture();
         sf::Sprite graph_sprite(texture);
-        window.draw(graph_sprite);
+        //window.draw(graph_sprite);
         for (auto obst : pather.mem_obstacles())
             window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR,
                                         gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
 
+        
+        if (frameCount == 12) {
+            int lastFrame = now;
+            now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+            
+            double avgFrameTime = (now - lastFrame) / 12.0;
+            
+            fpsCounter.setString(std::to_string((int) (1000.0 / avgFrameTime)) + " fps");
+            frameCount = 0;
+        }
+        frameCount++;
+        
+        if (gibFPS)
+            window.draw(fpsCounter);
+        
         window.display();
     }
     // ---------- End of 60 FPS Update Loop ---------- //

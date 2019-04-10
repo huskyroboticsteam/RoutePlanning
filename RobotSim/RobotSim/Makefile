@@ -2,7 +2,7 @@ CC := g++
 SDIR := .
 ODIR := obj
 COMMON_SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp 
-NET_SOURCES := Simulator.cpp
+NET_SOURCES := WorldCommunicator.cpp
 _COMMON_OBJECTS := $(COMMON_SOURCES:.cpp=.o)
 _NET_OBJECTS := $(NET_SOURCES:.cpp=.o)
 COMMON_OBJECTS := $(patsubst %,$(ODIR)/%,$(_COMMON_OBJECTS))
@@ -30,7 +30,7 @@ endif
 ifeq ($(LOCAL), 1)
 SOURCES := $(COMMON_SOURCES)
 OBJECTS := $(COMMON_OBJECTS)
-CFLAGS := $(CFLAGS) -DNO_NETWORKING
+CFLAGS := $(CFLAGS) -DLOCAL
 else
 SOURCES := $(COMMON_SOURCES) $(NET_SOURCES)
 OBJECTS := $(COMMON_OBJECTS) $(NET_OBJECTS)
