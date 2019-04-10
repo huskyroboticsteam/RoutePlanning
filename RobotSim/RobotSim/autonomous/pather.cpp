@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cmath>
 
-RP::Pather::Pather(point origin, point target, point max_point) : roughMapper(origin, target, memorizer.obstacles_ref),
+RP::Pather::Pather(point origin, point target, point max_point) :
            fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6),
            cur(origin), tar(target), max_pt(max_point)
 {
@@ -43,12 +43,12 @@ void RP::Pather::compute_path()
 
             for (const auto& pair : g.nodes[n].connection)
             {
-                float dist = g.nodes[n].dist_to + pair.second->len;
-                if (dist < g.nodes[pair.second->child].dist_to)
+                float dist = g.nodes[n].dist_to + pair.second.len;
+                if (dist < g.nodes[pair.second.child].dist_to)
                 {
-                    g.nodes[pair.second->child].prev = n;
-                    g.nodes[pair.second->child].dist_to = dist;
-                    q.push(pair.second->child);
+                    g.nodes[pair.second.child].prev = n;
+                    g.nodes[pair.second.child].dist_to = dist;
+                    q.push(pair.second.child);
                 }
             }
         }

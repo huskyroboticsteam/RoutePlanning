@@ -147,9 +147,10 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
                 if (nd->depth >= max_depth)
                 {
                     nd->is_blocked = true;
+                    const auto& conn = mygraph.nodes[nd->graph_id].connection;
                     if (nd->graph_id != -1)
-                        for (const auto &pair : mygraph.nodes[nd->graph_id].connection)
-                            mygraph.remove_edge(pair.second->parent, pair.second->child);
+                        for (auto it = conn.begin(); it != conn.end(); it++)
+                            mygraph.remove_edge(it->second.parent, it->second.child);
                 }
                 else
                 {
@@ -252,6 +253,7 @@ static inline bool equal(float a, float b)
 int RP::QuadMapper::qt2graph(pqtree qtn)
 {
     qtn->graph_id = mygraph.create_node(qtn->center_coord);
+    mygraph.nodes[qtn->graph_id].qt_id = qtn->qt_id;
     return qtn->graph_id;
 }
 
@@ -272,39 +274,56 @@ void RP::QuadMapper::compute_graph()
             // simply create method for getting children in a direction.
             // my god this is so simple jesus christ
             // but I can't do this anymore so I'll do it next time
-            for (const auto &pair : mygraph.nodes[rmd->graph_id].connection)
+            const auto& conn = mygraph.nodes[rmd->graph_id].connection;
+            for (auto it = conn.begin(); it != conn.end();)
             {
                 // re-connect old node's neighbors to new nodes
-                pqtree nb = qtnodes[pair.second->child];
+                int qtid = mygraph.nodes[it->second.child].qt_id;
+                if (qtid == -1)
+                {
+                    assert(it->second.child == 0 || it->second.child == 1);
+                    it++;
+                    continue;
+                }
+                pqtree nb = qtnodes[qtid];
                 if (nb->is_leaf && !nb->is_blocked)
                 {
                     Direction dir;
                     if (equal(nb->max_x, rmd->min_x))
-                        dir = LEFT;
-                    else if (equal(nb->min_x, rmd->max_x))
+                    {
                         dir = RIGHT;
+                    }
+                    else if (equal(nb->min_x, rmd->max_x))
+                    {
+                        dir = LEFT;
+                    }
                     else if (equal(nb->max_y, rmd->min_y))
-                        dir = DOWN;
-                    else
+                    {
                         dir = UP;
+                    }
+                    else
+                    {
+                        if(!equal(nb->min_y, rmd->max_y))
+                        {
+                            printf("%f, %f\n", nb->min_y, rmd->max_y);
+                            printf("oops\n");
+                        }
+                        dir = DOWN;
+                    }
                     pqtree newone = nb->get_neighbor_ge(dir);
                     // only add if new node is bigger than nb
                     if (newone && !newone->is_blocked && newone->depth < nb->depth)
                     {
-                        // assert(new_nodes.find(newone->qt_id) != new_nodes.end());
+                        assert(new_nodes.find(newone->qt_id) != new_nodes.end());
                         assert(newone->is_leaf);
                         nedges_added++;
                         assert(!newone->is_blocked);
                         mygraph.add_edge(newone->graph_id, nb->graph_id);
                         visited[nb->qt_id] = true;
                     }
-                    else
-                    {
-                        printf("can't add\n");
-                    }
                 }
                 // good night my sweet prince
-                mygraph.remove_edge(pair.second->parent, pair.second->child);
+                it = mygraph.remove_edge(it->second.parent, it->second.child);
             }
         }
 

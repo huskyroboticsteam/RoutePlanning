@@ -6,7 +6,6 @@
 #ifndef RP_PATHER_HPP
 #define RP_PATHER_HPP
 
-#include "splitMapper.hpp"
 #include "quadMapper.hpp"
 #include "memorizer.hpp"
 
@@ -31,7 +30,6 @@ class Pather
 
   private:
     Memorizer memorizer;
-    SplitMapper roughMapper;
     QuadMapper fineMapper;
     point cur;
     point tar;

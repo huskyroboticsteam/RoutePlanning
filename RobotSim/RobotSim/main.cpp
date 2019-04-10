@@ -302,6 +302,10 @@ int main(int, char const **)
             graph_updated = true;
         }
 
+        if (auton && control.just_updated) {
+            graph_updated = true;
+        }
+
         if (graph_updated)
         {
             g_rendertexture.clear();
@@ -322,12 +326,12 @@ int main(int, char const **)
                     visited[ind] = true;
                     for (const auto &pair : nd.connection)
                     {
-                        const RP::eptr &edge = pair.second;
-                        if (!visited[edge->child])
+                        const RP::edge &edge = pair.second;
+                        if (!visited[edge.child])
                         {
-                            q.push(edge->child);
+                            q.push(edge.child);
                             g_rendertexture.draw(get_vertex_line(
-                                nd.coord, dg.nodes[edge->child].coord,
+                                nd.coord, dg.nodes[edge.child].coord,
                                 GRAPH_EDGE_COLOR, gridScale, gridHeight));
                         }
                     }

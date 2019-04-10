@@ -1,7 +1,7 @@
 CC := g++
 SDIR := .
 ODIR := obj
-SOURCES := utils.cpp mapper.cpp timer.cpp memorizer.cpp splitMapper.cpp quadMapper.cpp pather.cpp
+SOURCES := utils.cpp mapper.cpp timer.cpp memorizer.cpp quadMapper.cpp pather.cpp
 _OBJECTS := $(SOURCES:.cpp=.o)
 OBJECTS := $(patsubst %,$(ODIR)/%,$(_OBJECTS))
 DEBUG := 1

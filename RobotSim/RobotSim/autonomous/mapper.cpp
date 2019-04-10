@@ -8,36 +8,33 @@ cur(origin), tar(target), tol(tolerance), all_obstacles(allobst)
 
 }
 
-RP::eptr RP::graph::add_edge(int parent, int child)
+void RP::graph::add_edge(int parent, int child)
 {
     assert(parent >= 0 && child >= 0);
     float dist = sqrt(dist_sq(nodes[parent].coord, nodes[child].coord));
 
     if (nodes[parent].connection.find(child) != nodes[parent].connection.end())
-        return eptr(nullptr);
-    eptr p_to_c = eptr(new edge{parent, child, dist});
-    nodes[parent].connection.insert({child, p_to_c});
+        return;
+    nodes[parent].connection.emplace(child, edge{parent, child, dist});
 
-    eptr c_to_p = eptr(new edge{child, parent, dist});
-    nodes[child].connection.insert({parent, c_to_p});
-
-    return p_to_c;
+    nodes[child].connection.emplace(parent, edge{child, parent, dist});
 }
 
-void RP::graph::remove_edge(int parent, int child)
+std::unordered_map<int, RP::edge>::iterator RP::graph::remove_edge(int parent, int child)
 {
     assert(parent >= 0 && child >= 0);
     auto &conn = nodes.at(parent).connection;
     auto it = conn.find(child);
     if (it == conn.end())
         printf("WARNING: edge not removed. Parent: %d, child %d\n", parent, child);
-    conn.erase(it);
+    auto ret = conn.erase(it);
 
     auto &conn2 = nodes.at(child).connection;
     it = conn2.find(parent);
     if (it == conn2.end())
         printf("WARNING: edge not removed (reverse). Parent: %d, child %d\n", parent, child);
     conn2.erase(it);
+    return ret;
 }
 
 int RP::graph::create_node(point coord)
@@ -46,6 +43,7 @@ int RP::graph::create_node(point coord)
     n.prev = -1;
     n.dist_to = INFINITY;
     n.coord = coord;
+    n.qt_id = -1;
     nodes.push_back(n);
     return (nodes.size() - 1);
 }

@@ -3,7 +3,7 @@
 
 #include "utils.hpp"
 #include <memory>
-#include <map>
+#include <unordered_map>
 
 namespace RP
 {
@@ -14,22 +14,21 @@ struct edge
   float len;
 };
 
-typedef std::shared_ptr<edge> eptr;
-
 struct node
 {
   int prev;
   float dist_to;
   point coord;
-  std::map<int, eptr> connection;
+  std::unordered_map<int, edge> connection;
+  int qt_id; // qtnode id
 };
 
 struct graph
 {
   std::vector<node> nodes;
 
-  RP::eptr add_edge(int parent, int child); //Adds an edge to the graph; returns parent=>child edge pointer
-  void remove_edge(int parent, int child);
+  void add_edge(int parent, int child); //Adds an edge to the graph; returns parent=>child edge pointer
+  std::unordered_map<int, RP::edge>::iterator remove_edge(int parent, int child);
   int create_node(point coord); //Creates a node. Returns index in nodes of the created node
   void clear();
 };

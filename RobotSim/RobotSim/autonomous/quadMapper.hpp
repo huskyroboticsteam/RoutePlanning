@@ -31,6 +31,7 @@ Things I haven't figured out:
 
 #include <memory>
 #include <set>
+#include <unordered_map>
 #include "mapper.hpp"
 #include "utils.hpp"
 
