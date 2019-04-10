@@ -13,6 +13,8 @@ RP::eptr RP::graph::add_edge(int parent, int child)
     assert(parent >= 0 && child >= 0);
     float dist = sqrt(dist_sq(nodes[parent].coord, nodes[child].coord));
 
+    if (nodes[parent].connection.find(child) != nodes[parent].connection.end())
+        return eptr(nullptr);
     eptr p_to_c = eptr(new edge{parent, child, dist});
     nodes[parent].connection.insert({child, p_to_c});
 

@@ -147,6 +147,7 @@ int main(int, char const **)
     {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     }
+    sf::RenderTexture g_rendertexture;
 
     // setting toggles
     bool lazer = false;
@@ -301,12 +302,11 @@ int main(int, char const **)
             graph_updated = true;
         }
 
-        if (auton && control.just_updated)
-            graph_updated = true;
-
-        // if (graph_updated)
-        // {
-            // TODO only traverse graph if updated
+        if (graph_updated)
+        {
+            g_rendertexture.clear();
+            g_rendertexture.create(window.getSize().x, window.getSize().y);
+            // use https://www.sfml-dev.org/tutorials/2.5/graphics-draw.php#off-screen-drawing
             const RP::graph &dg = pather.d_graph();
             // draw nodes
             if (showGraph && !dg.nodes.empty())
@@ -326,21 +326,25 @@ int main(int, char const **)
                         if (!visited[edge->child])
                         {
                             q.push(edge->child);
-                            window.draw(get_vertex_line(
+                            g_rendertexture.draw(get_vertex_line(
                                 nd.coord, dg.nodes[edge->child].coord,
                                 GRAPH_EDGE_COLOR, gridScale, gridHeight));
                         }
                     }
                     if (ind != 0)
-                        window.draw(getNode(nd, gridScale, gridHeight));
+                        g_rendertexture.draw(getNode(nd, gridScale, gridHeight));
                 }
+                g_rendertexture.display();
             }
-        // }
+        }
         const RP::QTreeNode &root = *pather.debug_qtree_root();
         draw_qtree(window, root, gridScale, gridHeight);
 
         window.draw(grid);
         window.draw(agent);
+        const sf::Texture& texture = g_rendertexture.getTexture();
+        sf::Sprite graph_sprite(texture);
+        window.draw(graph_sprite);
         for (auto obst : pather.mem_obstacles())
             window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR,
                                         gridScale, gridHeight));

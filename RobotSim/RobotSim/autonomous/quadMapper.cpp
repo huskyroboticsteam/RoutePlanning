@@ -276,33 +276,32 @@ void RP::QuadMapper::compute_graph()
             {
                 // re-connect old node's neighbors to new nodes
                 pqtree nb = qtnodes[pair.second->child];
-                Direction dir;
-                if (equal(nb->max_x, rmd->min_x))
+                if (nb->is_leaf && !nb->is_blocked)
                 {
-                    dir = LEFT;
-                }
-                else if (equal(nb->min_x, rmd->max_x))
-                {
-                    dir = RIGHT;
-                }
-                else if (equal(nb->max_y, rmd->min_y))
-                {
-                    dir = DOWN;
-                }
-                else
-                {
-                    dir = UP;
-                }
-                pqtree newone = nb->get_neighbor_ge(dir);
-                // only add if new node is bigger than nb
-                if (newone && newone->is_leaf && !newone->is_blocked && newone->depth > nb->depth)
-                {
-                    assert(new_nodes.find(newone->qt_id) != new_nodes.end());
-                    nedges_added++;
-                    assert(!nb->is_blocked);
-                    assert(!newone->is_blocked);
-                    mygraph.add_edge(newone->graph_id, nb->graph_id);
-                    visited[nb->qt_id] = true;
+                    Direction dir;
+                    if (equal(nb->max_x, rmd->min_x))
+                        dir = LEFT;
+                    else if (equal(nb->min_x, rmd->max_x))
+                        dir = RIGHT;
+                    else if (equal(nb->max_y, rmd->min_y))
+                        dir = DOWN;
+                    else
+                        dir = UP;
+                    pqtree newone = nb->get_neighbor_ge(dir);
+                    // only add if new node is bigger than nb
+                    if (newone && !newone->is_blocked && newone->depth < nb->depth)
+                    {
+                        // assert(new_nodes.find(newone->qt_id) != new_nodes.end());
+                        assert(newone->is_leaf);
+                        nedges_added++;
+                        assert(!newone->is_blocked);
+                        mygraph.add_edge(newone->graph_id, nb->graph_id);
+                        visited[nb->qt_id] = true;
+                    }
+                    else
+                    {
+                        printf("can't add\n");
+                    }
                 }
                 // good night my sweet prince
                 mygraph.remove_edge(pair.second->parent, pair.second->child);
