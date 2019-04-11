@@ -1,18 +1,5 @@
-
-//
-// Disclaimer:
-// ----------
-//
-// This code will work only if you selected window, graphics and audio.
-//
-// Note that the "Run Script" build phase will copy the required frameworks
-// or dylibs to your application bundle so you can execute it on any OS X
-// computer.
-//
-// Your resource files (images, sounds, fonts, ...) are also copied to your
-// application bundle. To get the path to these resources, use the helper
-// function `resourcePath()` from ResourcePath.hpp
-//
+// 4/10/19 - Tadeusz Pforte
+// This is a hot pile of garbage that somehow works sometimes
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -25,22 +12,21 @@
 #include <time.h>
 #include <chrono>
 
-// Imports resourcePath() for macos
-#include "ResourcePath.hpp"
+#include "ResourcePath.hpp" // Imports resourcePath() for macos
 #include "Simulator.hpp"
-#ifndef LOCAL
-#include "WorldCommunicator.hpp"
-#endif
 #include "grid.hpp"
 #include "simController.hpp"
 #include "ui.hpp"
+#include "interface.hpp"
+
+#ifndef LOCAL
+#include "WorldCommunicator.hpp"
+#endif
 
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
-#define WINDOW_SCALE .5f
 #elif __APPLE__
 const std::string RESOURCE_DIR = resourcePath();
-#define WINDOW_SCALE 1.f
 #endif
 
 // ---------------------------------------- //
@@ -55,80 +41,46 @@ static inline sf::CircleShape getNode(RP::node, float scale, float height);
 void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
                 float height);
 
-Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
-float gridScale = grid.retrieveScale();
-float gridWidth = grid.retrieveWidth();
-float gridHeight = grid.retrieveHeight();
-
-RP::point agentInitPos{2.5f, 2.5f};
-float agentInitRot = 45.f;
-
-Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);
-
 #ifndef LOCAL
 WorldCommunicator worldCommunicator;
 #endif
 static float goalDirection;
 static float toMove;
+
 // ---------------------------------------- //
 
 // ---------------------------------------- //
 // ---------- BeagleBone Methods ---------- //
 // ---------------------------------------- //
 
-// moves the robot forward or backward at a given speed
-// speed should be between 1 and -1, where negative is backwards
-void move(float speed) { grid.moveAgent(agent, agent.drive(speed)); }
+// Call methods using the Interface beaglebone
 
-// rotates the robot clockwise or counterclockwise at a given speed
-// speed should be between 1 and -1, where negative is counterclockwise
-void turn(float speed) { grid.rotateAgent(agent, agent.turn(speed)); }
-
-void turnTo(float goalDirection)
-{
-    // std::cout << "goal direction: " << goalDirection << std::endl;
-    // std::cout << "internal direction: " << agent.getInternalRotation() <<
-    // std::endl;
-    if (abs(goalDirection - agent.getInternalRotation()) > 1.0)
-    {
-        if (goalDirection > agent.getInternalRotation())
-        {
-            turn(-1);
-        }
-        else
-        {
-            turn(1);
-        }
-    }
-    else
-    {
-        turn(0);
-    }
-}
-// returns the current position of the robot, in meters, relative to the grid
-// origin x and y increase to the right and to the top respectively
-static RP::point currentPosition()
-{
-    return RP::point{agent.getX(), agent.getY()};
-}
-
-// returns the current rotation of the robot, in degrees increasing
-// counterclockwise value is between 0 and 360, where 0 is true right relative
-// to the grid
-static float currentRotation() { return agent.getInternalRotation(); }
-
-// returns all the obstacles currently visible to the robot
-// note that these may be partial obstacles
-// TODO may return an RP::obstacle depending on implementation
-static std::vector<RP::line> currentObstaclesInView()
-{
-    // TODO
-}
 // ---------------------------------------- //
 
 int main(int, char const **) {
+    
+    unsigned int screenWidth = sf::VideoMode::getDesktopMode().width;
+    unsigned int screenHeight = sf::VideoMode::getDesktopMode().height;
+    
+    float WINDOW_SCALE = .66f;
+    if (screenHeight < 1000) {
+        WINDOW_SCALE = .33f;
+    }
+    else if (screenHeight > 1500) {
+        WINDOW_SCALE = 1.f;
+    }
+    
+    std::cout << "screen detected: " << screenWidth << "x" << screenHeight << std::endl;
+    std::cout << "window scale set to " << WINDOW_SCALE << std::endl;
+    
     sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(60);
+    
+    sf::Image icon;
+    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
+    {
+        window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+    }
     
     sf::Font font;
     if (!font.loadFromFile(RESOURCE_DIR + "DejaVuSans.ttf"))
@@ -138,6 +90,19 @@ int main(int, char const **) {
     fpsCounter.setFillColor(sf::Color::Black);
     fpsCounter.move(2.f, 2.f);
 
+    
+    Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
+    float gridScale = grid.retrieveScale();
+    float gridWidth = grid.retrieveWidth();
+    float gridHeight = grid.retrieveHeight();
+    
+    RP::point agentInitPos{2.5f, 2.5f};
+    float agentInitRot = 45.f;
+    
+    Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);
+    
+    Interface beaglebone(grid, agent);
+    
     // ADDITIONAL SETUP FROM INIT
     agent.bot_width = 1.8f;
     grid.target = RP::point{35.f, 35.f};
@@ -151,11 +116,6 @@ int main(int, char const **) {
     bool showGraph = false;
     RP::Timer recompute_timer;
 
-    sf::Image icon;
-    if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
-    {
-        window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-    }
     sf::RenderTexture g_rendertexture;
 
     // setting toggles
@@ -178,10 +138,6 @@ int main(int, char const **) {
     int frameCount = 0;
     bool gibFPS = true;
     
-    unsigned int screenWidth = sf::VideoMode::getDesktopMode().width;
-    unsigned int screenHeight = sf::VideoMode::getDesktopMode().height;
-    
-    std::cout << "screen is " << screenWidth << "x" << screenHeight << std::endl;
 
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
@@ -280,22 +236,22 @@ int main(int, char const **) {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
             // move forwards
-            move(1);
+            beaglebone.move(1);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
             // move backwards
-            move(-1);
+            beaglebone.move(-1);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
             // turn left
-            turn(-1);
+            beaglebone.turn(-1);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         {
             // turn right
-            turn(1);
+            beaglebone.turn(1);
         }
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal) &&
@@ -315,7 +271,7 @@ int main(int, char const **) {
 
         float change = 0.0;
 #ifndef LOCAL
-        worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+        worldCommunicator.update(beaglebone.currentPosition(), beaglebone.currentRotation(), change, toMove);
 #endif
         goalDirection += change;
         goalDirection = (int)goalDirection % 360;

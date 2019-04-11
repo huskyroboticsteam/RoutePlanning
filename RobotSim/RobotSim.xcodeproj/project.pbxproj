@@ -16,11 +16,11 @@
 		93834EF922559E600071E119 /* WorldCommunicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93834EF422559E600071E119 /* WorldCommunicator.cpp */; };
 		93834EFA22559E600071E119 /* GPSSim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 93834EF522559E600071E119 /* GPSSim.cpp */; };
 		9386DF2F21BC41F1008C3C07 /* agent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9386DF2E21BC41F1008C3C07 /* agent.cpp */; };
+		938C0E62225EDCE600F4128E /* interface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938C0E60225EDCE600F4128E /* interface.cpp */; };
 		938FE9EE225455B3000897B7 /* quadMapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9EA225455B3000897B7 /* quadMapper.cpp */; };
 		938FE9EF225455B3000897B7 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9ED225455B3000897B7 /* utils.cpp */; };
 		938FE9F0225455B3000897B7 /* pather.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E4225455B2000897B7 /* pather.cpp */; };
 		938FE9F1225455B3000897B7 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E9225455B3000897B7 /* timer.cpp */; };
-		938FE9F2225455B3000897B7 /* splitMapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E1225455B2000897B7 /* splitMapper.cpp */; };
 		938FE9F3225455B3000897B7 /* memorizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9EC225455B3000897B7 /* memorizer.cpp */; };
 		938FE9F4225455B3000897B7 /* mapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 938FE9E7225455B3000897B7 /* mapper.cpp */; };
 		938FE9F72254561A000897B7 /* maze.txt in Resources */ = {isa = PBXBuildFile; fileRef = 938FE9F62254561A000897B7 /* maze.txt */; };
@@ -50,8 +50,8 @@
 		93834EF722559E600071E119 /* GPSSim.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GPSSim.hpp; path = RobotSim/GPSSim.hpp; sourceTree = SOURCE_ROOT; };
 		93834EF822559E600071E119 /* WorldCommunicator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WorldCommunicator.hpp; path = RobotSim/WorldCommunicator.hpp; sourceTree = SOURCE_ROOT; };
 		9386DF2E21BC41F1008C3C07 /* agent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = agent.cpp; sourceTree = "<group>"; };
-		938FE9E0225455B2000897B7 /* splitMapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = splitMapper.hpp; sourceTree = "<group>"; };
-		938FE9E1225455B2000897B7 /* splitMapper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = splitMapper.cpp; sourceTree = "<group>"; };
+		938C0E60225EDCE600F4128E /* interface.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = interface.cpp; sourceTree = "<group>"; };
+		938C0E61225EDCE600F4128E /* interface.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = interface.hpp; sourceTree = "<group>"; };
 		938FE9E2225455B2000897B7 /* memorizer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = memorizer.hpp; sourceTree = "<group>"; };
 		938FE9E3225455B2000897B7 /* timer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = timer.hpp; sourceTree = "<group>"; };
 		938FE9E4225455B2000897B7 /* pather.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pather.cpp; sourceTree = "<group>"; };
@@ -112,6 +112,8 @@
 				938FE9F5225455D7000897B7 /* autonomous */,
 				9393454521E5A9C8005CF43C /* agent.hpp */,
 				9386DF2E21BC41F1008C3C07 /* agent.cpp */,
+				938C0E61225EDCE600F4128E /* interface.hpp */,
+				938C0E60225EDCE600F4128E /* interface.cpp */,
 				9393454621E5A9D8005CF43C /* grid.hpp */,
 				933E520B21B76B8700CE6194 /* grid.cpp */,
 				932B4CA02254509F0017F5DA /* main.hpp */,
@@ -169,8 +171,6 @@
 				938FE9E5225455B2000897B7 /* pather.hpp */,
 				938FE9EA225455B3000897B7 /* quadMapper.cpp */,
 				938FE9E6225455B3000897B7 /* quadMapper.hpp */,
-				938FE9E1225455B2000897B7 /* splitMapper.cpp */,
-				938FE9E0225455B2000897B7 /* splitMapper.hpp */,
 				938FE9E9225455B3000897B7 /* timer.cpp */,
 				938FE9E3225455B2000897B7 /* timer.hpp */,
 				938FE9ED225455B3000897B7 /* utils.cpp */,
@@ -276,8 +276,8 @@
 				933E520E21B76D2800CE6194 /* obstacle.cpp in Sources */,
 				938FE9F0225455B3000897B7 /* pather.cpp in Sources */,
 				938FE9EF225455B3000897B7 /* utils.cpp in Sources */,
-				938FE9F2225455B3000897B7 /* splitMapper.cpp in Sources */,
 				9386DF2F21BC41F1008C3C07 /* agent.cpp in Sources */,
+				938C0E62225EDCE600F4128E /* interface.cpp in Sources */,
 				9393454B21E5A9D9005CF43C /* Simulator.cpp in Sources */,
 				938FE9EE225455B3000897B7 /* quadMapper.cpp in Sources */,
 				937650562197AA50000897B2 /* main.cpp in Sources */,
