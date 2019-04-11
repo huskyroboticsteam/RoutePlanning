@@ -2,6 +2,7 @@
 #include <deque>
 #include "Map.hpp"
 #include "Server.hpp"
+#include <thread>
 #include "RobotEKF.h"
 namespace RP
 {
@@ -29,5 +30,6 @@ namespace RP
             bool found_ball();
             RP::point convertToLatLng(float dist, float dir);
             RobotEKF filter;
+            std::thread watchdogThread;
     };
 }
