@@ -41,7 +41,9 @@ int main() {
     std::cin >> p.x;
     std::cin >> p.y;
     RP::Controller controller(p, targetSites);
+    std::cout << "Finished constructing" << std::endl;
     while (true) {
+        
         controller.update();
     }
 }
@@ -49,11 +51,13 @@ int main() {
 namespace RP {
 
 Controller::Controller(const point &cur_pos, std::deque<point> targetSites)
-    : map(cur_pos, targetSites[0], std::list<RP::line>()), server() {
+    : map(cur_pos, targetSites[0], std::list<RP::line>()), server(), watchdogThread(&RP::Server::send_watchdog, &server) {
     this->targetSites = targetSites;
     state = FOLLOW_PATH;
     curr_lat = cur_pos.x;
     curr_lng = cur_pos.y;
+
+    std::cout << "Tried to initialize kalman filter" << std::endl;
 
     Kalman::KMatrix<float, 1, true> P0(STATE_VEC_SIZE, STATE_VEC_SIZE);
     Kalman::KVector<float, 1, true> x(STATE_VEC_SIZE);
@@ -67,7 +71,12 @@ Controller::Controller(const point &cur_pos, std::deque<point> targetSites)
 
     filter.init(x, P0);
 
-    std::thread watchdogThread(&RP::Server::send_watchdog, &server);
+    std::cout << "Initialized kalman filter" << std::endl;
+
+    
+
+    std::cout << "Initialized watchdog thread" << std::endl;
+    
 }
 
 // using given packet data and server send a packet containing either a
@@ -85,23 +94,30 @@ bool Controller::setSpeed(float speed) {
 }
 
 void Controller::update() {
+    
+    std::cout << "Update loop started" << std::endl;
     // step 1: get obstacle data from camera
     while (!targetSites.empty()) {
+        std::cout << "target sites is non-empty " << targetSites.size() << std::endl;
         // TODO: actually get obstacle data from camera
         // std:vector<obstacleVector> obstacles = METHOD_GOES_HERE
         // Bogus obstacle data for testing
+         
         std::vector<obstacleVector> obstacles{
             obstacleVector{1, 2}, obstacleVector{3, 4}, obstacleVector{5, 6}};
 
         // step 2: wait for server to give current location
         // Note: If Scarlet changes size of Timestamp, be sure to update the
         // parsePacket paramaters below
-
+       
         // TODO: make this a vector or shared_ptr
+        std::cout <<  "Listening" << std::endl;
         unsigned char *firstPacket = server.go();
         parsePacket(firstPacket[4], &firstPacket[5]);
         unsigned char *secondPacket = server.go();
         parsePacket(secondPacket[4], &secondPacket[5]);
+
+        std::cout << "Started stepping kalman filter" << std::endl;
 
         Kalman::KVector<float, 1, true> z(4);
         Kalman::KVector<float, 1, true> u(2);

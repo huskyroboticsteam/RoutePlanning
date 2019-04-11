@@ -358,7 +358,7 @@ void RP::QuadMapper::compute_graph()
             mygraph.remove_edge(0, mygraph.nodes[0].connection.begin()->first);
         }
         pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
-        printf("cur node %f, %f\n", cur_node->center_coord.x, cur_node->center_coord.y);
+        //printf("cur node %f, %f\n", cur_node->center_coord.x, cur_node->center_coord.y);
         if (cur_node)
             mygraph.add_edge(0, cur_node->graph_id);
     }

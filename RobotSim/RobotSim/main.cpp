@@ -316,11 +316,12 @@ int main(int, char const **) {
         float change = 0.0;
 #ifndef LOCAL
         worldCommunicator.update(currentPosition(), currentRotation(), change, toMove);
+        turnTo(goalDirection);
+        move(toMove);
 #endif
         goalDirection += change;
         goalDirection = (int)goalDirection % 360;
-        //turnTo(goalDirection);
-        //move(toMove);
+        
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
         bool graph_updated = false;

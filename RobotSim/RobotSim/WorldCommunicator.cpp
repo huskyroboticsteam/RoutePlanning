@@ -17,7 +17,7 @@ WorldCommunicator::WorldCommunicator()  {
 	// Set up the address we should send to:
 	send_to.sin_family = AF_INET;
 	send_to.sin_port = htons(54000);
-	inet_aton("10.18.237.87", &(send_to.sin_addr));
+	inet_aton("10.19.216.238", &(send_to.sin_addr));
 	memset(&(send_to.sin_zero), '\0', 8);
 	listenThread = std::thread(&WorldCommunicator::listen, this);
 }

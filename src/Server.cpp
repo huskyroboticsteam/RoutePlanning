@@ -47,7 +47,7 @@ RP::Server::Server()
 	//Example of how to set up sendto address:
 	server.sin_family = AF_INET;
 	server.sin_port = htons(54001);
-	inet_aton("10.19.89.10", &(server.sin_addr));
+	inet_aton("10.19.216.238", &(server.sin_addr));
 	memset(&(server.sin_zero), '\0', 8);
 	
 	// Bind socket to ip address and port
@@ -110,7 +110,7 @@ unsigned char* RP::Server::go() {
 #endif
 	inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
 
-	//std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
+	std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
 		
 	return buf; 
 }
@@ -165,12 +165,14 @@ bool RP::Server::send_action(unsigned char dataBody, unsigned char id) // same d
 
 bool RP::Server::send_action(unsigned char id) // same id format as in Scarlet
 {
+	//std::cout << "started send_action" << std::endl;
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp
 	packet.push_back(id); // represents component to be controlled
 
+	//std::cout << "trying to send" << std::endl;
 	// packet.data() first four bytes are the time stamp, fifth is the id, and sixth is the data
 	int sendOk = sendto(out, (const char*)packet.data(), packet.size() + 1, 0, (sockaddr*) &server, sizeof(server));
-	
+	//std::cout << "sent" << std::endl;
 	if (sendOk == SOCKET_ERROR)
 	{
 #ifdef _WIN32
@@ -187,9 +189,12 @@ bool RP::Server::send_action(unsigned char id) // same id format as in Scarlet
 }
 
 void RP::Server::send_watchdog() {
+	//std::cout << "Entered watchdog thread" << std::endl;
 	bool hasSent;
 	while (true) {
+		//std::cout << "trying to send" << std::endl;
 		hasSent = RP::Server::send_action(WATCHDOG_ID);
+		//std::cout << "tried to send: " << hasSent << std::endl;
 		while (!hasSent) {
 			hasSent = RP::Server::send_action(WATCHDOG_ID);
 		}
@@ -199,6 +204,7 @@ void RP::Server::send_watchdog() {
 #else // Unix
 		usleep(100 * 1000); // in microseconds
 #endif
+//		std::cout << "Finished loop" << std::endl;
 	}
 }
 
