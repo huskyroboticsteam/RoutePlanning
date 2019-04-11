@@ -46,7 +46,7 @@ RP::Server::Server()
 
 	//Example of how to set up sendto address:
 	server.sin_family = AF_INET;
-	server.sin_port = htons(54001);
+	server.sin_port = htons(54100);
 	inet_aton("10.19.216.238", &(server.sin_addr));
 	memset(&(server.sin_zero), '\0', 8);
 	
@@ -55,7 +55,7 @@ RP::Server::Server()
 	serverHint.sin_addr.s_addr = INADDR_ANY;
 	//inet_pton(AF_INET, "10.19.161.242", &serverHint.sin_addr.s_addr);
 	serverHint.sin_family = AF_INET;
-	serverHint.sin_port = htons(54111);
+	serverHint.sin_port = htons(54050);
 	
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{

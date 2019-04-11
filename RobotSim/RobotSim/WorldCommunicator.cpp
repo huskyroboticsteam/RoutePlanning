@@ -7,7 +7,7 @@ WorldCommunicator::WorldCommunicator()  {
 	sockaddr_in serverHint;
 	serverHint.sin_addr.s_addr = INADDR_ANY;
 	serverHint.sin_family = AF_INET;
-	serverHint.sin_port = htons(54001);
+	serverHint.sin_port = htons(54050);
 	if (bind(in, (sockaddr*)&serverHint, sizeof(serverHint)) == SOCKET_ERROR)
 	{
 		std::cout << "Can't bind socket! " << strerror(errno) << std::endl;
@@ -16,7 +16,7 @@ WorldCommunicator::WorldCommunicator()  {
 	out = socket(AF_INET, SOCK_DGRAM, 0);
 	// Set up the address we should send to:
 	send_to.sin_family = AF_INET;
-	send_to.sin_port = htons(54000);
+	send_to.sin_port = htons(54100);
 	inet_aton("10.19.216.238", &(send_to.sin_addr));
 	memset(&(send_to.sin_zero), '\0', 8);
 	listenThread = std::thread(&WorldCommunicator::listen, this);
