@@ -257,8 +257,7 @@ int main(int, char const **) {
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
         bool graph_updated = false;
-        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
-        {
+        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN) {
             recompute_timer.reset();
             pather.compute_path();
             graph_updated = true;
@@ -268,9 +267,8 @@ int main(int, char const **) {
             graph_updated = true;
         }
 
-        if (graph_updated)
-        {
-            g_rendertexture.clear(sf::Color(0,0,0,0));
+        if (graph_updated) {
+            g_rendertexture.clear(sf::Color(0,0,0,0)); // transparent background
             g_rendertexture.create(window.getSize().x, window.getSize().y);
             // use https://www.sfml-dev.org/tutorials/2.5/graphics-draw.php#off-screen-drawing
             const RP::graph &dg = pather.d_graph();
@@ -312,8 +310,7 @@ int main(int, char const **) {
         sf::Sprite graph_sprite(texture);
         window.draw(graph_sprite);
         for (auto obst : pather.mem_obstacles())
-            window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR,
-                                        gridScale, gridHeight));
+            window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR, gridScale, gridHeight));
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
 
@@ -339,9 +336,7 @@ int main(int, char const **) {
     return EXIT_SUCCESS;
 }
 
-void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
-                float height)
-{
+void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale, float height) {
     sf::RectangleShape rect;
     rect.setSize(sf::Vector2f((node.max_x - node.min_x) * scale,
                               (node.max_y - node.min_y) * scale));
@@ -352,8 +347,7 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
         node.is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
     rect.setFillColor(fillColor);
     win.draw(rect);
-    if (!node.is_leaf)
-    {
+    if (!node.is_leaf) {
         draw_qtree(win, *node.topleft, scale, height);
         draw_qtree(win, *node.topright, scale, height);
         draw_qtree(win, *node.botleft, scale, height);
@@ -361,8 +355,7 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale,
     }
 }
 
-static inline sf::CircleShape getNode(RP::node nd, float scale, float height)
-{
+static inline sf::CircleShape getNode(RP::node nd, float scale, float height) {
     sf::CircleShape circle(5);
     circle.setOrigin(5, 5);
     circle.setFillColor(GRAPH_NODE_COLOR);
