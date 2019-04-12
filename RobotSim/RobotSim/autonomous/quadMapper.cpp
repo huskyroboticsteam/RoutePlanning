@@ -134,14 +134,17 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
     std::queue<pqtree> q;
     for (const line &o : obstacles)
     {
-        const line obs = add_length_to_line_segment(o.p, o.q, tol);
+        line obs = add_length_to_line_segment(o.p, o.q, tol);
+        line left = get_moved_line(obs, tol, true);
+        line right = get_moved_line(obs, tol, false);
+        line sides []{left, line{left.q, right.q}, right}, line{left.p, right.p};
         q.push(root);
         while (!q.empty())
         {
             pqtree nd = q.front();
             q.pop();
 
-            if (obs_in_node(obs, nd))
+            if (rect_intersects_rect(sides, nd->sides))
             {
                 // if depth limit reahed, don't split anymore
                 if (nd->depth >= max_depth)
@@ -239,12 +242,6 @@ RP::pqtree RP::QuadMapper::get_qtree_root() const
     return root;
 }
 
-bool RP::QuadMapper::obs_in_node(const line &obs, pqtree tnode)
-{
-    point placeholder;
-    return seg_intersects_rect(obs, tnode->sides, placeholder);
-}
-
 static inline bool equal(float a, float b)
 {
     return fabs(a - b) < 1e-5;
@@ -303,11 +300,7 @@ void RP::QuadMapper::compute_graph()
                     }
                     else
                     {
-                        if(!equal(nb->min_y, rmd->max_y))
-                        {
-                            printf("%f, %f\n", nb->min_y, rmd->max_y);
-                            printf("oops\n");
-                        }
+                        assert(equal(nb->min_y, rmd->max_y));
                         dir = DOWN;
                     }
                     pqtree newone = nb->get_neighbor_ge(dir);

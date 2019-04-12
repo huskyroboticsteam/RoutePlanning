@@ -74,7 +74,7 @@ struct QTreeNode
   pqtree parent;
   int qt_id;
   int graph_id;
-  line sides[4];
+  line sides[4]; // sides in counterclockwise order
   point center_coord;
 
   // get neighbor in the Direction d that is greater than or equal in size to *this

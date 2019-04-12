@@ -75,6 +75,9 @@ point get_ortho(const line &ln, bool countercw);
 
 float dot(const point &u, const point &v);
 
+// r1 and r2 have counterclockwise sides
+bool rect_intersects_rect(line r1[4], line r2[4]);
+
 // exactly the same as segments_intersect except line p1p2 now has width p_width.
 // see the definition for inters_out below
 bool seg_intersects_width(point p1, point p2, point q1, point q2, float p_width, point &inters_out);
