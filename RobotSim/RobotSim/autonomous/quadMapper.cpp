@@ -149,8 +149,9 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
                     nd->is_blocked = true;
                     const auto& conn = mygraph.nodes[nd->graph_id].connection;
                     if (nd->graph_id != -1)
-                        for (auto it = conn.begin(); it != conn.end(); it++)
-                            mygraph.remove_edge(it->second.parent, it->second.child);
+                        for (auto it = conn.begin(); it != conn.end(); it = mygraph.remove_edge(it->second.parent, it->second.child)) {
+                            // Gary, this is terrible
+                        }
                 }
                 else
                 {
@@ -270,10 +271,7 @@ void RP::QuadMapper::compute_graph()
         for (int rm : removed_nodes)
         {
             pqtree rmd = qtnodes[rm];
-            // TODO handle situation where neighbors aren't leaves anymore
-            // simply create method for getting children in a direction.
-            // my god this is so simple jesus christ
-            // but I can't do this anymore so I'll do it next time
+            
             const auto& conn = mygraph.nodes[rmd->graph_id].connection;
             for (auto it = conn.begin(); it != conn.end();)
             {

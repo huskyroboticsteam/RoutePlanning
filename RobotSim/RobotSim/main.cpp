@@ -63,12 +63,10 @@ int main(int, char const **) {
     unsigned int screenHeight = sf::VideoMode::getDesktopMode().height;
     
     float WINDOW_SCALE = .66f;
-    if (screenHeight < 1000) {
+    if (screenHeight < 1000)
         WINDOW_SCALE = .33f;
-    }
-    else if (screenHeight > 1500) {
+    else if (screenHeight > 1500)
         WINDOW_SCALE = 1.f;
-    }
     
     std::cout << "screen detected: " << screenWidth << "x" << screenHeight << std::endl;
     std::cout << "window scale set to " << WINDOW_SCALE << std::endl;
@@ -78,9 +76,7 @@ int main(int, char const **) {
     
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
-    {
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-    }
     
     sf::Font font;
     if (!font.loadFromFile(RESOURCE_DIR + "DejaVuSans.ttf"))
@@ -106,8 +102,7 @@ int main(int, char const **) {
     // ADDITIONAL SETUP FROM INIT
     agent.bot_width = 1.8f;
     grid.target = RP::point{35.f, 35.f};
-    RP::Simulator sim(grid.obstacleList, agent,
-                      RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
+    RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f});
     RP::SimController control(grid, agent, pather);
     // END ADDITIONAL SETUP
@@ -132,9 +127,8 @@ int main(int, char const **) {
     grid.target = RP::point{35.f, 35.f};
     // END INIT
     
-    // fps tracker
+    // fps tracker (time code stolen from SO)
     unsigned int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    std::cout << now << std::endl;
     int frameCount = 0;
     bool gibFPS = true;
     
@@ -142,21 +136,19 @@ int main(int, char const **) {
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
     // ---------------------------------------- //
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
+        
         sf::Event event;
-        while (window.pollEvent(event))
-        {
+        
+        while (window.pollEvent(event)) {
+            
             // Close window on X or Cmd+W
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            else if (event.type == sf::Event::KeyPressed)
-            {
-                switch (event.key.code)
-                {
-                    case sf::Keyboard::H:
-                    {
+            else if (event.type == sf::Event::KeyPressed) {
+                switch (event.key.code) {
+                    case sf::Keyboard::H : {
                         std::cout << "Help Menu: " << std::endl;
                         std::cout
                             << "P   -- Returns the internal position of the robot"
@@ -172,29 +164,25 @@ int main(int, char const **) {
                         std::cout << "Ctrl-= -- Resets the board" << std::endl;
                         break;
                     }
-                    case sf::Keyboard::P:
-                    {
+                    case sf::Keyboard::P : {
                         std::cout << "Internal Position: (" << agent.getX() << ","
                                   << agent.getY() << ") at "
                                   << agent.getInternalRotation() << " degrees"
                                   << std::endl;
                         break;
                     }
-                    case sf::Keyboard::G:
-                    {
+                    case sf::Keyboard::G : {
                         grid.toggleGrid();
                         break;
                     }
-                    case sf::Keyboard::O:
-                    {
+                    case sf::Keyboard::O : {
                         grid.obstacleList.clear();
                         grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
                         // grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
                     }
-                    case sf::Keyboard::U:
-                    {
+                    case sf::Keyboard::U : {
                         auton = !auton;
                         if (auton)
                             control.start_auto();
@@ -202,8 +190,7 @@ int main(int, char const **) {
                             control.stop_auto();
                         break;
                     }
-                    case sf::Keyboard::N:
-                    {
+                    case sf::Keyboard::N : {
                         grid.toggleClipping();
                         break;
                     }
@@ -226,33 +213,21 @@ int main(int, char const **) {
                         break;
                     }
                     default : {
-                        std::cout << "Command not recognized" << std::endl;
+                        //std::cout << "Command not recognized" << std::endl;
                         break;
                     }
                 }
             }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-        {
-            // move forwards
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) // move forwards
             beaglebone.move(1);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-        {
-            // move backwards
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) // move backwards
             beaglebone.move(-1);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        {
-            // turn left
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) // turn left
             beaglebone.turn(-1);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        {
-            // turn right
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // turn right
             beaglebone.turn(1);
-        }
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal) &&
             (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
@@ -295,7 +270,7 @@ int main(int, char const **) {
 
         if (graph_updated)
         {
-            g_rendertexture.clear();
+            g_rendertexture.clear(sf::Color(0,0,0,0));
             g_rendertexture.create(window.getSize().x, window.getSize().y);
             // use https://www.sfml-dev.org/tutorials/2.5/graphics-draw.php#off-screen-drawing
             const RP::graph &dg = pather.d_graph();
@@ -335,7 +310,7 @@ int main(int, char const **) {
         window.draw(agent);
         const sf::Texture& texture = g_rendertexture.getTexture();
         sf::Sprite graph_sprite(texture);
-        //window.draw(graph_sprite);
+        window.draw(graph_sprite);
         for (auto obst : pather.mem_obstacles())
             window.draw(get_vertex_line(obst.p, obst.q, SEEN_OBST_COLOR,
                                         gridScale, gridHeight));
