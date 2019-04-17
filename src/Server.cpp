@@ -110,7 +110,7 @@ unsigned char* RP::Server::go() {
 #endif
 	inet_ntop(AF_INET, &client.sin_addr, clientIp, 256);
 
-	std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
+	//std::cout << "Message received from " << clientIp << " : " << buf << std::endl;
 		
 	return buf; 
 }
