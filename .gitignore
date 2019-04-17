@@ -1,7 +1,6 @@
 build
 .idea
 cmake-build-debug
-CMakeLists.txt
 .vs
 .Debug
 RoutePlanning.xcworkspace
