@@ -7,6 +7,7 @@
 #include <iostream>
 #include <math.h>
 #include <thread>
+#include "Tennisball/src/detector.hpp"
 
 #define DATA_GPS 10
 #define DATA_MAG 11
