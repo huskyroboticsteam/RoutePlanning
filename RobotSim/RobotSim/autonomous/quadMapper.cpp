@@ -89,9 +89,7 @@ RP::QuadMapper::QuadMapper(const point &cur_pos, const point &target, const std:
                                                                                       max_depth(max_d), field_width(fwidth), field_height(fheight),
                                                                                       cur_changed(true), tar_changed(true)
 {
-    init_graph();
-    root = create_qtnode(0, 0, field_width, field_height, 1);
-    qt2graph(root);
+    reset();
 }
 
 void RP::QuadMapper::set_pos(point c)

@@ -28,7 +28,7 @@ class Pather
 
     pqtree debug_qtree_root() const { return fineMapper.get_qtree_root(); }
     
-    void reset() { memorizer.reset(); }
+    void reset() { memorizer.reset(); fineMapper.reset(); }
 
   private:
     Memorizer memorizer;

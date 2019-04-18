@@ -95,14 +95,14 @@ int main(int, char const **) {
     // --------- Initial Configuration -------- //
     float gridWidth = 40.f;
     float gridHeight = 40.f;
-    float gridScale = 40.f;
+    float gridScale = 36 * WINDOW_SCALE;
     
     RP::point agentInitPos{2.5f, 2.5f};
     float agentInitRot = 45.f;
     // ---------------------------------------- //
     
     
-    Grid grid(gridWidth, gridHeight, 36 * WINDOW_SCALE);
+    Grid grid(gridWidth, gridHeight, gridScale);
     grid.target = RP::point{35.f, 35.f}; // sets the autonomous target
     
     Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);

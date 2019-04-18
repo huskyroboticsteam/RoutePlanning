@@ -100,6 +100,13 @@ public:
   pqtree get_enclosing_node(point coord) const;
   void set_max_depth(float md);
   pqtree get_qtree_root() const;
+    
+    void reset() {
+        qtnodes.clear();
+        init_graph();
+        root = create_qtnode(0, 0, field_width, field_height, 1);
+        qt2graph(root);
+    }
 
 private:
   int max_depth;
