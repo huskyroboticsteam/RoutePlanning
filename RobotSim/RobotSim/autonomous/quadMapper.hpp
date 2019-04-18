@@ -123,6 +123,7 @@ private:
   pqtree create_qtnode(float minx, float miny, float maxx, float maxy, int depth);
   // returns true if obstacle is inside node (i.e. intersects with the square area)
   bool obs_in_node(const line &obs, pqtree tnode);
+  int create_nd_helper(point coord);
   int qt2graph(pqtree qtn);
 };
 } // namespace RP

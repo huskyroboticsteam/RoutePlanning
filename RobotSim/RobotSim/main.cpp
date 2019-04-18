@@ -92,7 +92,7 @@ int main(int, char const **) {
     
 
     // --------- Initial Configuration -------- //
-    const std::string OBSTACLES_FILE = RESOURCE_DIR + "temp_obstacles.txt";
+    const std::string OBSTACLES_FILE = RESOURCE_DIR + "obstacles.txt";
     
     float gridWidth = 40.f;
     float gridHeight = 40.f;

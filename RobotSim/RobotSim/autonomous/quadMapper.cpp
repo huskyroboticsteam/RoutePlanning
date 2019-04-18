@@ -119,12 +119,17 @@ void RP::QuadMapper::set_tol(float t)
     }
 }
 
+int RP::QuadMapper::create_nd_helper(point coord)
+{
+    return mygraph.create_node(coord, dist_sq(coord, tar));
+}
+
 void RP::QuadMapper::init_graph()
 {
     mygraph.clear();
-    mygraph.create_node(cur);
-    mygraph.nodes[0].dist_to = 0.f;
-    mygraph.create_node(tar);
+    create_nd_helper(cur);
+    mygraph.nodes[0].dist2cur = 0.f;
+    create_nd_helper(tar);
 }
 
 void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
@@ -248,7 +253,7 @@ static inline bool equal(float a, float b)
 
 int RP::QuadMapper::qt2graph(pqtree qtn)
 {
-    qtn->graph_id = mygraph.create_node(qtn->center_coord);
+    qtn->graph_id = create_nd_helper(qtn->center_coord);
     mygraph.nodes[qtn->graph_id].qt_id = qtn->qt_id;
     return qtn->graph_id;
 }

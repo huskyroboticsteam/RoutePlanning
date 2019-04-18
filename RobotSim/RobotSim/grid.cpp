@@ -67,7 +67,7 @@ Grid::Grid(float w, float h, unsigned int s)
             gridlines[gridlines.getVertexCount() - 1].color = GRID_COLOR;
         }
     }
-    
+
     currentPath.setPrimitiveType(sf::Lines);
 }
 
@@ -89,55 +89,53 @@ void Grid::toggleClipping()
     noclip = !noclip;
 }
 
-bool Grid::drawPath() {
+bool Grid::drawPath()
+{
     currentPath.clear();
     return true;
 }
 
-bool Grid::drawPath(std::vector<RP::point> path, Agent &agent) {
+bool Grid::drawPath(std::vector<RP::point> path, Agent &agent)
+{
     if (path.size() < 1)
         return false;
-    
+
     currentPath.clear();
     path.insert(path.begin(), RP::point{agent.getX(), agent.getY()});
-    
-    for (unsigned int i = 0; i < path.size() - 1; i++) {
 
-        RP::line line{path.at(i), path.at(i+1)};
-        RP::line sides[]{RP::get_moved_line(line, agent.bot_width / 2, true),
-            RP::get_moved_line(line, agent.bot_width / 2, false)};
-        
-        for (RP::line& side : sides)
-        {            
-            // float x1 = path.at(i).x + 1;
-            // float y1 = height - path.at(i).y;
-            // float x2 = path.at(i + 1).x + 1;
-            // float y2 = height - path.at(i + 1).y;
-            
-            // std::cout << x1 << "," << y1 << std::endl;
-            // std::cout << x2 << "," << y2 << std::endl;
-            
-            // x1 *= scale;
-            // y1 *= scale;
-            // x2 *= scale;
-            // y2 *= scale;
+    for (unsigned int i = 0; i < path.size() - 1; i++)
+    {
 
-            side.p.x = (side.p.x + 1) * scale;
-            side.q.x = (side.q.x + 1) * scale;
-            side.p.y = (height - side.p.y) * scale;
-            side.q.y = (height - side.q.y) * scale;
-            
-            sf::Vertex start(sf::Vector2f(side.p.x, side.p.y));
-            sf::Vertex end(sf::Vector2f(side.q.x, side.q.y));
-            
-            start.color = sf::Color::Blue;
-            end.color = sf::Color::Blue;
-            
-            currentPath.append(start);
-            currentPath.append(end);
-        }
+        RP::line line{path.at(i), path.at(i + 1)};
+
+        // float x1 = path.at(i).x + 1;
+        // float y1 = height - path.at(i).y;
+        // float x2 = path.at(i + 1).x + 1;
+        // float y2 = height - path.at(i + 1).y;
+
+        // std::cout << x1 << "," << y1 << std::endl;
+        // std::cout << x2 << "," << y2 << std::endl;
+
+        // x1 *= scale;
+        // y1 *= scale;
+        // x2 *= scale;
+        // y2 *= scale;
+
+        line.p.x = (line.p.x + 1) * scale;
+        line.q.x = (line.q.x + 1) * scale;
+        line.p.y = (height - line.p.y) * scale;
+        line.q.y = (height - line.q.y) * scale;
+
+        sf::Vertex start(sf::Vector2f(line.p.x, line.p.y));
+        sf::Vertex end(sf::Vector2f(line.q.x, line.q.y));
+
+        start.color = sf::Color::Blue;
+        end.color = sf::Color::Blue;
+
+        currentPath.append(start);
+        currentPath.append(end);
     }
-    
+
     return true;
 }
 
@@ -255,7 +253,7 @@ bool Grid::boxCollision(std::array<RP::line, 4> box, RP::line line)
 // returns false if there will be no collisions
 // is not very sophisticated (simply checks target location instead of path), TODO make better
 // currently only checks the map borders
-bool Grid::willCollide(Agent& agent, float dx, float dy, float dr)
+bool Grid::willCollide(Agent &agent, float dx, float dy, float dr)
 {
     if (noclip)
         return false;
@@ -337,15 +335,17 @@ void Grid::draw(sf::RenderTarget &renderTarget, sf::RenderStates states) const
         renderTarget.draw(o, states);
         // target.draw(border, states);
     }
-    
+
     renderTarget.draw(currentPath, states);
-    
-     #define TARGET_SZ 1.f
-     sf::Color targetColor = THEME ? sf::Color::Red : sf::Color::Magenta;
+
+#define TARGET_SZ 1.f
+    sf::Color targetColor = THEME ? sf::Color::Red : sf::Color::Magenta;
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y - TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y + TARGET_SZ},
-                                      targetColor, scale, height), states);
+                                      targetColor, scale, height),
+                      states);
     renderTarget.draw(get_vertex_line(RP::point{target.x - TARGET_SZ, target.y + TARGET_SZ}, RP::point{target.x + TARGET_SZ, target.y - TARGET_SZ},
-                                      targetColor, scale, height), states);
+                                      targetColor, scale, height),
+                      states);
 #undef TARGET_SZ
 }
 
