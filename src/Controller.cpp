@@ -7,7 +7,7 @@
 #include <iostream>
 #include <math.h>
 #include <thread>
-#include "Tennisball/src/detector.hpp"
+
 
 #define DATA_GPS 10
 #define DATA_MAG 11
@@ -52,7 +52,8 @@ int main() {
 namespace RP {
 
 Controller::Controller(const point &cur_pos, std::deque<point> targetSites)
-    : map(cur_pos, targetSites[0], std::list<RP::line>()), server(), watchdogThread(&RP::Server::send_watchdog, &server) {
+    : map(cur_pos, targetSites[0], std::list<RP::line>()), server(), watchdogThread(&RP::Server::send_watchdog, &server)
+    , detector("", "") {
     this->targetSites = targetSites;
     state = FOLLOW_PATH;
     curr_lat = cur_pos.x;

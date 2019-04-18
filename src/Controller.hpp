@@ -4,6 +4,7 @@
 #include "Server.hpp"
 #include <thread>
 #include "RobotEKF.hpp"
+#include "Tennisball/src/detector.hpp"
 namespace RP
 {
     class Controller
@@ -31,5 +32,6 @@ namespace RP
             RP::point convertToLatLng(float dist, float dir);
             RobotEKF filter;
             std::thread watchdogThread;
+            tb::Detector detector;
     };
 }
