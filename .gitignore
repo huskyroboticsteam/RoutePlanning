@@ -34,8 +34,9 @@ RobotSim/RobotSim/callgrind.out.347
 RobotSim/RobotSim/callgrind.out.403
 RobotSim/RobotSim/callgrind.out.460
 src/sct
+src/Tennisball/Makefile
 src/Tennisball/src/test.cpp
-src/Tennisball/CMakeLists.txt
+src/Tennisball/CmakeFiles
 src/Tennisball/CMakeFiles/still.dir/depend.make
 src/Tennisball/CMakeFiles/still.dir/depend.internal
 src/Tennisball/CMakeFiles/still.dir/CXX.includecache
