@@ -135,9 +135,9 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
     for (const line &o : obstacles)
     {
         line obs = add_length_to_line_segment(o.p, o.q, tol);
-        line left = get_moved_line(obs, tol, true);
-        line right = get_moved_line(obs, tol, false);
-        line sides []{left, line{left.q, right.q}, right}, line{left.p, right.p};
+        line left = get_moved_line(obs, tol, false);
+        line right = get_moved_line(obs, tol, true);
+        line sides []{left, line{left.q, right.q}, right, line{left.p, right.p}};
         q.push(root);
         while (!q.empty())
         {

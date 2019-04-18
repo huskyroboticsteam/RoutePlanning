@@ -1,6 +1,5 @@
 // 4/10/19 - Tadeusz Pforte
 // This is a hot pile of garbage that somehow works sometimes
-
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 

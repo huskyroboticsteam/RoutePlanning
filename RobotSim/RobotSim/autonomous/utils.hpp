@@ -24,6 +24,7 @@ struct point
     bool operator!=(const point &p) const;
     // point &operator=(const point &other);
     // point &operator=(const point&& other);
+    float dot(const point& other) const { return x * other.x + y * other.y; }
 };
 struct line
 {
