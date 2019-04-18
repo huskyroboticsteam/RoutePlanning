@@ -10,10 +10,13 @@ namespace RP
 {
 class Memorizer
 {
-    public:
+public:
     void add_obstacles(const std::vector<line>& new_obstacles);
     const std::vector<line>& obstacles_ref = obstacles;
-    private:
+    
+    // wipes this memorizer (TODO make sure it doesn't break ref)
+    void reset() { obstacles.clear(); }
+private:
     std::vector<line> obstacles;
     line merge(const line&o, const line& p, bool& can_merge); 
 };
