@@ -53,7 +53,7 @@ namespace RP {
 
 Controller::Controller(const point &cur_pos, std::deque<point> targetSites)
     : map(cur_pos, targetSites[0], std::list<RP::line>()), server(), watchdogThread(&RP::Server::send_watchdog, &server)
-    , detector("", "") {
+    , detector("Tennisball/data/final_models/frozen_inference_graph.pb", "Tennisball/data/final_models/graph.pbtxt") {
     this->targetSites = targetSites;
     state = FOLLOW_PATH;
     curr_lat = cur_pos.x;

@@ -14,7 +14,7 @@ $(ODIR)/%.o: $(SDIR)/%.cpp
 
 
 $(OUT): $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS)  Tennisball/CMakeFiles/still.dir/src/detector.cpp.o -L/usr/local/lib -I/usr/include `pkg-config --libs opencv` -lopencv_dnn -o $(OUT) -lpthread
+	$(CC) $(CFLAGS) $(OBJECTS)  Tennisball/CMakeFiles/still.dir/src/detector.cpp.o -L/usr/local/lib -I/usr/include  -lopencv_core -lopencv_dnn -o $(OUT) -lpthread
 
 .PHONY: clean
 clean:
