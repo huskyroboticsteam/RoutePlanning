@@ -1,7 +1,7 @@
 CC := g++
 SDIR := .
 ODIR := obj
-COMMON_SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp interface.cpp 
+COMMON_SOURCES := main.cpp agent.cpp grid.cpp obstacle.cpp simController.cpp Simulator.cpp ui.cpp interface.cpp
 NET_SOURCES := WorldCommunicator.cpp
 _COMMON_OBJECTS := $(COMMON_SOURCES:.cpp=.o)
 _NET_OBJECTS := $(NET_SOURCES:.cpp=.o)

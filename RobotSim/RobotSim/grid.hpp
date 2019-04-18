@@ -10,66 +10,69 @@
 
 #include <stdio.h>
 #include <SFML/Graphics.hpp>
+#include "autonomous/utils.hpp"
 #include "agent.hpp"
 #include "obstacle.hpp"
 
 class Grid : public sf::Drawable, public sf::Transformable
 {
-  public:
-    Grid(float w, float h, unsigned int s);
+public:
+  Grid(float w, float h, unsigned int s);
 
-    void toggleGrid();
-    void toggleClipping();
+  void toggleGrid();
+  void toggleClipping();
 
-    void readObstaclesFromFile(std::string filename);
-    void addBorderObstacles();
-    void placeObstacle(float x1, float y1, float x2, float y2);
+  void readObstaclesFromFile(std::string filename);
+  void addBorderObstacles();
+  void placeObstacle(float x1, float y1, float x2, float y2);
 
-    sf::Vertex moveAgent(Agent &agent, float ds);
-    float rotateAgent(Agent &agent, float dr);
+  sf::Vertex moveAgent(Agent &agent, float ds);
+  float rotateAgent(Agent &agent, float dr);
 
-    unsigned int retrieveScale() { return scale; }
-    float retrieveWidth() { return width; }
-    float retrieveHeight() { return height; }
+  unsigned int retrieveScale() { return scale; }
+  float retrieveWidth() { return width; }
+  float retrieveHeight() { return height; }
 
-    bool linesCollide(RP::line line1, RP::line line2);
-    bool boxCollision(std::array<RP::line, 4> box, RP::line line);
-    bool willCollide(Agent &agent, float dx, float dy, float dr);
+  bool linesCollide(RP::line line1, RP::line line2);
+  bool boxCollision(std::array<RP::line, 4> box, RP::line line);
+  bool willCollide(Agent &agent, float dx, float dy, float dr);
 
-    bool drawPath();
-    bool drawPath(std::vector<RP::point> path, Agent &agent);
-    
+  bool drawPath();
+  bool drawPath(std::vector<RP::point> path, Agent &agent);
+
 #if THEME == 0
-    sf::Color BORDER_COLOR = sf::Color::Black;
-    sf::Color GRID_COLOR = sf::Color(128, 128, 128);
+  sf::Color BORDER_COLOR = sf::Color::Black;
+  sf::Color GRID_COLOR = sf::Color(128, 128, 128);
 #else
-    sf::Color BORDER_COLOR = sf::Color(0, 255, 0);
-    sf::Color GRID_COLOR = sf::Color(0, 255, 0);
+  sf::Color BORDER_COLOR = sf::Color(0, 255, 0);
+  sf::Color GRID_COLOR = sf::Color(0, 255, 0);
 #endif
 
-    std::vector<Obstacle> obstacleList;
-    RP::point target;
-  private:
-    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+  std::vector<Obstacle> obstacleList;
+  RP::point target;
 
-    sf::VertexArray border;
-    sf::VertexArray gridlines;
-    
-    sf::VertexArray currentPath;
+private:
+  virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
-    bool showGrid;
-    bool noclip;
+  sf::VertexArray border;
+  sf::VertexArray gridlines;
 
-    RP::line TOP_BORDER;
-    RP::line RIGHT_BORDER;
-    RP::line BOTTOM_BORDER;
-    RP::line LEFT_BORDER;
+  sf::VertexArray currentPath;
 
-    float width;        // in meters
-    float height;       // in meters
-    unsigned int scale; // pixels per meter
+  bool showGrid;
+  bool noclip;
 
-    void debugMsg(std::string msg);
+  RP::line TOP_BORDER;
+  RP::line RIGHT_BORDER;
+  RP::line BOTTOM_BORDER;
+  RP::line LEFT_BORDER;
+
+  float width;        // in meters
+  float height;       // in meters
+  unsigned int scale; // pixels per meter
+
+  void debugMsg(std::string msg);
+
 };
 
 #endif

@@ -1,6 +1,5 @@
 // 4/10/19 - Tadeusz Pforte
 // This is a hot pile of garbage that somehow works sometimes
-
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
@@ -93,6 +92,8 @@ int main(int, char const **) {
     
 
     // --------- Initial Configuration -------- //
+    const std::string OBSTACLES_FILE = RESOURCE_DIR + "temp_obstacles.txt";
+    
     float gridWidth = 40.f;
     float gridHeight = 40.f;
     float gridScale = 36 * WINDOW_SCALE;
@@ -192,7 +193,7 @@ int main(int, char const **) {
                     }
                     case sf::Keyboard::O : {
                         grid.obstacleList.clear();
-                        grid.readObstaclesFromFile(RESOURCE_DIR + "hellyeah.txt");
+                        grid.readObstaclesFromFile(OBSTACLES_FILE);
                         // grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
@@ -262,7 +263,6 @@ int main(int, char const **) {
             beaglebone.turn(-1);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // turn right
             beaglebone.turn(1);
-        
 
         window.clear(bgColor);
         if (lazer)
@@ -291,7 +291,8 @@ int main(int, char const **) {
             graph_updated = true;
         }
 
-        if (auton && control.just_updated) {
+        if (auton && control.just_updated)
+        {
             graph_updated = true;
         }
 
@@ -334,7 +335,7 @@ int main(int, char const **) {
 
         window.draw(grid);
         window.draw(agent);
-        const sf::Texture& texture = g_rendertexture.getTexture();
+        const sf::Texture &texture = g_rendertexture.getTexture();
         sf::Sprite graph_sprite(texture);
         window.draw(graph_sprite);
         for (auto obst : pather.mem_obstacles())
@@ -342,21 +343,21 @@ int main(int, char const **) {
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
 
-        
-        if (frameCount == 12) {
+        if (frameCount == 12)
+        {
             int lastFrame = now;
             now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-            
+
             double avgFrameTime = (now - lastFrame) / 12.0;
-            
-            fpsCounter.setString(std::to_string((int) (1000.0 / avgFrameTime)) + " fps");
+
+            fpsCounter.setString(std::to_string((int)(1000.0 / avgFrameTime)) + " fps");
             frameCount = 0;
         }
         frameCount++;
-        
+
         if (gibFPS)
             window.draw(fpsCounter);
-        
+
         window.display();
     }
     // ---------- End of 60 FPS Update Loop ---------- //

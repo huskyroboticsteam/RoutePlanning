@@ -261,6 +261,32 @@ bool RP::seg_intersects_rect(line seg, line sides[4], point &inters_out)
     return false;
 }
 
+inline bool rect_int_rect_internal(RP::line r1[4], RP::line r2[4])
+{
+    //iterate over sides
+    for (unsigned int i = 0; i < 4; i++)
+    {
+        // get normal pointing outwards
+        RP::point normal = get_ortho(r1[i], false);
+        float maxd = -1e7;
+        //iterate over vertices
+        for (unsigned int j = 0; j < 4; j++)
+        {
+            // take dot
+            float d = (normal.x * (r2[j].p.x - r1[i].p.x) + normal.y * (r2[j].p.y - r1[i].p.y));
+            if (d > 0)
+                return false;
+        }
+    }
+    // no sep axis found
+    return true;
+}
+
+bool RP::rect_intersects_rect(line r1[4], line r2[4])
+{
+    return rect_int_rect_internal(r1, r2) || rect_int_rect_internal(r2, r1);
+}
+
 float RP::dot(const point &u, const point &v)
 {
     return u.x * v.x + u.y * v.y;
