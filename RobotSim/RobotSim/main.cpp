@@ -362,7 +362,7 @@ int main(int, char const **) {
         disp.setFillColor(sf::Color(211,211,211));
         disp.move(2.f, WINDOW_SCALE * 1526.f);
         
-        if (WINDOW_SCALE < 1.f)
+        if (WINDOW_SCALE == 1.f)
             window.draw(disp);
 
         window.display();
