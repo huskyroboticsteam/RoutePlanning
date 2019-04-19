@@ -357,6 +357,13 @@ int main(int, char const **) {
 
         if (gibFPS)
             window.draw(fpsCounter);
+        
+        sf::Text disp("Fun fact: Harry Potter is called Gary Potter in Russian", font, 16);
+        disp.setFillColor(sf::Color(211,211,211));
+        disp.move(2.f, WINDOW_SCALE * 1526.f);
+        
+        if (WINDOW_SCALE < 1.f)
+            window.draw(disp);
 
         window.display();
     }
