@@ -254,7 +254,19 @@ int main(int, char const **) {
         goalDirection += change;
         goalDirection = (int)goalDirection % 360;
         
-        pather.set_pos(sim.getpos());
+        RP::point errored = sim.getpos();
+        errored.x = errored.x + ((float)rand()/RAND_MAX-0.5)*1.8*2;
+        errored.y = errored.y + ((float)rand()/RAND_MAX-0.5)*1.8*2;
+
+        std::cout << "errored x: " << errored.x << " y: " << errored.y << std::endl;
+
+        sf::CircleShape errored_circle(10);
+        errored_circle.setOrigin(5, 5);
+        errored_circle.setFillColor(GRAPH_NODE_COLOR);
+        errored_circle.setPosition((errored.x + 1) * gridScale, (gridHeight - errored.y) * gridScale);
+        window.draw(errored_circle);
+        pather.set_pos(errored);
+
         pather.add_obstacles(sim.visible_obstacles());
         bool graph_updated = false;
         if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN) {
