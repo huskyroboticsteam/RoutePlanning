@@ -22,6 +22,8 @@
 #define SPIRAL 1
 #define FOUND_BALL 2
 
+cv::Mat image;
+
 int main() {
     std::deque<RP::point> targetSites(0);
     std::cout << "Enter coordinates: " << std::endl;
@@ -132,6 +134,9 @@ void Controller::update() {
         std::cout << "Kalman says: lat: " << curr_lat << " lng: " << curr_lng << std::endl;
         // std::cout << "Controller got a packet" << std::endl;
         point nextPoint{0.0, 0.0};
+        
+        
+
         if (state == FOLLOW_PATH) {
             if (in_spiral_radius()) {
                 state = SPIRAL;
@@ -181,7 +186,7 @@ void Controller::update() {
 
 bool Controller::in_spiral_radius() { return true; }
 
-bool Controller::found_ball() { return true; }
+bool Controller::found_ball() { return detector.performDetection(image).size() == 1; }
 
 void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
     // GPS has latitude and lng
@@ -209,7 +214,9 @@ void Controller::addObstacle(float dist1, float dir1, float dist2, float dir2) {
     map.add_obstacle(latlng1, latlng2);
 }
 
-void Controller::foundTennisBall(float dist, float dir) {}
+void Controller::foundTennisBall(float dist, float dir) {
+    
+}
 
 // angle must be in radians, dist in meters
 RP::point Controller::convertToLatLng(float dist, float angle) {
