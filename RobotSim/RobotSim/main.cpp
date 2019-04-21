@@ -246,7 +246,7 @@ int main(int, char const **) {
 
         float change = 0.0;
 #ifndef LOCAL
-        worldCommunicator.update(beaglebone.currentPosition(), beaglebone.currentRotation(), change, toMove);
+        worldCommunicator.update(beaglebone.currentPosition(), beaglebone.currentRotation(), change, toMove, sim.visible_obstacles());
 
         beaglebone.turnTo(goalDirection);
         beaglebone.move(toMove);

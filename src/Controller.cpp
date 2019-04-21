@@ -54,8 +54,10 @@ int main() {
 namespace RP {
 
 Controller::Controller(const point &cur_pos, std::deque<point> targetSites)
-    : map(cur_pos, targetSites[0], std::list<RP::line>()), server(), watchdogThread(&RP::Server::send_watchdog, &server)
-    , detector("Tennisball/data/final_models/frozen_inference_graph.pb", "Tennisball/data/final_models/graph.pbtxt") {
+    :server(), watchdogThread(&RP::Server::send_watchdog, &server), 
+     detector("Tennisball/data/final_models/frozen_inference_graph.pb", "Tennisball/data/final_models/graph.pbtxt"),
+     pather(cur_pos, targetSites[0], RP::point{40, 40})
+     {
     this->targetSites = targetSites;
     state = FOLLOW_PATH;
     curr_lat = cur_pos.x;
@@ -132,6 +134,7 @@ void Controller::update() {
         curr_lat = filter.getX()(1);
         curr_lng = filter.getX()(2);
         std::cout << "Kalman says: lat: " << curr_lat << " lng: " << curr_lng << std::endl;
+        pather.set_pos(RP::point{curr_lat, curr_lng});
         // std::cout << "Controller got a packet" << std::endl;
         point nextPoint{0.0, 0.0};
         
@@ -142,10 +145,9 @@ void Controller::update() {
                 state = SPIRAL;
                 spiralPts = RP::generate_spiral(0.1, 100, curr_lng, curr_lat);
             } else if (found_ball()) {
-                dst = targetSites.front();
-                targetSites.pop_front();
+                state = FOUND_BALL;
             } else {
-                nextPoint = map.shortest_path_to()[0];
+                nextPoint = pather.get_cur_next_point();
             }
         } else if (state == SPIRAL) {
             if (found_ball()) {
@@ -154,12 +156,14 @@ void Controller::update() {
                 // get and remove first element of spiralPts
                 dst = spiralPts.front();
                 spiralPts.pop_front();
-                nextPoint = map.shortest_path_to()[0];
+                nextPoint = pather.get_cur_next_point();
             }
         } else { // if state is FOUND_BALL
             if (targetSites.size() > 0) {
                 // get and remove first element of targetSites
-                dst = targetSites[0];
+                dst = targetSites.front();
+                targetSites.pop_front();
+                pather.set_tar(dst);
             }
         }
 
@@ -171,7 +175,10 @@ void Controller::update() {
             obstacleVector right = obstacles.at(i);
             point b{(curr_lng + cos(right.angle) * right.distance),
                     (curr_lat + sin(right.angle) * right.distance)};
-            map.add_obstacle(a, b);
+            RP::line obstacleLine{a, b};
+            std::vector<line> obstacles;
+            obstacles.push_back(obstacleLine);
+            pather.add_obstacles(obstacles);
         }
 
         // step 5: use next point to send packets specifying new direction and
@@ -209,9 +216,10 @@ void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
 }
 
 void Controller::addObstacle(float dist1, float dir1, float dist2, float dir2) {
-    RP::point latlng1 = convertToLatLng(dist1, dir1);
-    RP::point latlng2 = convertToLatLng(dist2, dir2);
-    map.add_obstacle(latlng1, latlng2);
+    // Need to update this for use
+    // RP::point latlng1 = convertToLatLng(dist1, dir1);
+    // RP::point latlng2 = convertToLatLng(dist2, dir2);
+    // map.add_obstacle(latlng1, latlng2);
 }
 
 void Controller::foundTennisBall(float dist, float dir) {

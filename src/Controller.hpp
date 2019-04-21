@@ -5,12 +5,12 @@
 #include <thread>
 #include "RobotEKF.hpp"
 #include "Tennisball/src/detector.hpp"
+#include "autonomous/pather.hpp"
 namespace RP
 {
     class Controller
     {
         public:
-			RP::Map map;
 			RP::Server server;
 			Controller(const point& cur_pos, std::deque<point> targetSites);
 			bool setDirection(float heading);
@@ -33,5 +33,6 @@ namespace RP
             RobotEKF filter;
             std::thread watchdogThread;
             tb::Detector detector;
+            RP::Pather pather;
     };
 }
