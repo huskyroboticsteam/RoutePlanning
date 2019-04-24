@@ -37,12 +37,10 @@ std::unordered_map<int, RP::edge>::iterator RP::graph::remove_edge(int parent, i
     return ret;
 }
 
-int RP::graph::create_node(point coord, float fscore)
+int RP::graph::create_node(point coord)
 {
     node n;
     n.prev = -1;
-    n.dist2cur = INFINITY;
-    n.fscore = fscore;
     n.coord = coord;
     n.qt_id = -1;
     nodes.push_back(n);

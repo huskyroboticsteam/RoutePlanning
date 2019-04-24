@@ -3,12 +3,18 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include <unordered_set>
+#include <cassert>
 #include "timer.hpp"
 
-RP::Pather::Pather(point origin, point target, point max_point) :
-           fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6),
-           cur(origin), tar(target), max_pt(max_point)
+RP::Pather::Pather(point origin, point target, point max_point) : fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6),
+                                                                  cur(origin), tar(target), max_pt(max_point)
 {
+}
+
+float RP::Pather::heuristic_cost(const point &p, const point &tar)
+{
+    return dist_sq(p, tar);
 }
 
 //TODO(sasha): Find heuristics and upgrade to A*
@@ -37,25 +43,61 @@ void RP::Pather::compute_path()
     }
 #endif
         Timer tim;
-        auto cmp = [g](int l, int r) { return g.nodes[l].fscore < g.nodes[r].fscore; };
+        // A star source https://en.wikipedia.org/wiki/A*_search_algorithm
+        std::unordered_map<int, float> fscore;
+        std::unordered_map<int, float> gscore;
+        auto cmp = [fscore](int l, int r) {
+            auto lit = fscore.find(l);
+            auto rit = fscore.find(r);
+            float lfscore = lit == fscore.end() ? INFINITY : lit->second;
+            float rfscore = rit == fscore.end() ? INFINITY : rit->second;
+            return lfscore < rfscore;
+        };
         std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
+        fscore[0] = heuristic_cost(g.nodes[0].coord, g.nodes[1].coord);
+        gscore[0] = 0;
+        std::unordered_set<int> closed;
+        std::unordered_set<int> open;
         q.push(0);
+        open.insert(0);
+        int count = 0;
         while (!q.empty())
         {
+            count++;
             int n = q.top();
+            if (n == 1)
+                break;
             q.pop();
 
-            for (const auto& pair : g.nodes[n].connection)
+            open.erase(open.find(n));
+            closed.insert(n);
+
+            for (const auto &pair : g.nodes[n].connection)
             {
-                float dist = g.nodes[n].dist2cur + pair.second.len;
-                if (dist < g.nodes[pair.second.child].dist2cur)
+                if (closed.find(pair.first) != closed.end())
+                    continue;
+                assert(gscore.find(n) != gscore.end());
+                float dist = gscore[n] + pair.second.len;
+
+                if (open.find(pair.first) == open.end())
                 {
-                    g.nodes[pair.second.child].prev = n;
-                    g.nodes[pair.second.child].dist2cur = dist;
-                    q.push(pair.second.child);
+                    q.push(pair.first);
+                    open.insert(pair.first);
                 }
+                else if (gscore.find(pair.first) != gscore.end() && dist >= gscore[pair.first])
+                {
+                    continue;
+                }
+
+                // first is the same as second.child
+                g.nodes[pair.first].prev = n;
+                gscore[pair.first] = dist;
+                fscore[pair.first] = gscore[pair.first] +
+                                     heuristic_cost(g.nodes[pair.first].coord, g.nodes[1].coord);
             }
         }
+        assert(q.size() == open.size());
+        printf("visited %d nodes\n", count);
         std::vector<int> pathIndices;
         int i = 1;
         bool pathFound = true;
@@ -63,7 +105,6 @@ void RP::Pather::compute_path()
         {
             if (i == -1)
             {
-                // printf("No path to target found. Resorting to node closest to target\n");
                 pathFound = false;
                 break;
             }
@@ -73,44 +114,46 @@ void RP::Pather::compute_path()
             i = n.prev;
         }
         // path not found. resort to node closest to target
+        // if (!pathFound)
+        // {
+        //     printf("WARNING: target not found\n");
+        //     const node &tar = g.nodes[1];
+        //     std::vector<size_t> indices(g.nodes.size());
+        //     iota(indices.begin(), indices.end(), 0);
+        //     // sort by closest to tar
+        //     std::sort(indices.begin() + 2, indices.end(),
+        //               [g, tar](size_t i, size_t j) {
+        //                   return dist_sq(g.nodes[i].coord, tar.coord) < dist_sq(g.nodes[j].coord, tar.coord);
+        //               });
+
+        //     // assertGraph(nodes);
+        //     int i = -1;
+        //     for (auto it = indices.begin() + 2; it != indices.end(); it++)
+        //     {
+        //         // if (*it == 3)
+        //         //     printf("biatch");
+        //         pathIndices.clear();
+        //         i = *it;
+        //         while (i != 0)
+        //         {
+        //             if (i < 0)
+        //                 break;
+        //             node &n = g.nodes[i];
+        //             // printf("node: %f, %f\n", n.coord.x, n.coord.y);
+        //             pathIndices.push_back(i);
+        //             i = n.prev;
+        //         }
+        //         if (i >= 0)
+        //             break;
+        //     }
+
+        //if (i < 0)
+        //{
+        //   continue;
+        // }
+        // }
         if (!pathFound)
-        {
-            printf("WARNING: target not found\n");
-            const node &tar = g.nodes[1];
-            std::vector<size_t> indices(g.nodes.size());
-            iota(indices.begin(), indices.end(), 0);
-            // sort by closest to tar
-            std::sort(indices.begin() + 2, indices.end(),
-                      [g, tar](size_t i, size_t j) {
-                          return dist_sq(g.nodes[i].coord, tar.coord) < dist_sq(g.nodes[j].coord, tar.coord);
-                      });
-
-            // assertGraph(nodes);
-            int i = -1;
-            for (auto it = indices.begin() + 2; it != indices.end(); it++)
-            {
-                // if (*it == 3)
-                //     printf("biatch");
-                pathIndices.clear();
-                i = *it;
-                while (i != 0)
-                {
-                    if (i < 0)
-                        break;
-                    node &n = g.nodes[i];
-                    // printf("node: %f, %f\n", n.coord.x, n.coord.y);
-                    pathIndices.push_back(i);
-                    i = n.prev;
-                }
-                if (i >= 0)
-                    break;
-            }
-
-            if (i < 0)
-            {
-                continue;
-            }
-        }
+            printf("ERR: path not found\n");
         printf("pathfinding took %f seconds\n", tim.elapsed());
         std::reverse(pathIndices.begin(), pathIndices.end());
         prune_path(pathIndices, tol + 1.f);
@@ -132,7 +175,6 @@ RP::point RP::Pather::get_cur_next_point()
     return cur_path.front();
 }
 
-/* TODO: re-implement this */
 // remove unnecessary nodes from the path (i.e. if removing it does
 // not introduce intersections) to increase stability and speed
 void RP::Pather::prune_path(std::vector<int> &path, float tol)

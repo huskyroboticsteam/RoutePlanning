@@ -119,17 +119,11 @@ void RP::QuadMapper::set_tol(float t)
     }
 }
 
-int RP::QuadMapper::create_nd_helper(point coord)
-{
-    return mygraph.create_node(coord, dist_sq(coord, tar));
-}
-
 void RP::QuadMapper::init_graph()
 {
     mygraph.clear();
-    create_nd_helper(cur);
-    mygraph.nodes[0].dist2cur = 0.f;
-    create_nd_helper(tar);
+    mygraph.create_node(cur);
+    mygraph.create_node(tar);
 }
 
 void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
@@ -253,7 +247,7 @@ static inline bool equal(float a, float b)
 
 int RP::QuadMapper::qt2graph(pqtree qtn)
 {
-    qtn->graph_id = create_nd_helper(qtn->center_coord);
+    qtn->graph_id = mygraph.create_node(qtn->center_coord);
     mygraph.nodes[qtn->graph_id].qt_id = qtn->qt_id;
     return qtn->graph_id;
 }
@@ -371,6 +365,7 @@ void RP::QuadMapper::compute_graph()
     }
 }
 
+// TODO add some tolerance to this in case robot runs into a blocked node
 bool RP::QuadMapper::path_good(int node1, int node2, float tol) const
 {
     line path_seg{mygraph.nodes[node1].coord, mygraph.nodes[node2].coord};
