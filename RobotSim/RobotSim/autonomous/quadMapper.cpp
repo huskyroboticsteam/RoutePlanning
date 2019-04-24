@@ -89,9 +89,7 @@ RP::QuadMapper::QuadMapper(const point &cur_pos, const point &target, const std:
                                                                                       max_depth(max_d), field_width(fwidth), field_height(fheight),
                                                                                       cur_changed(true), tar_changed(true)
 {
-    init_graph();
-    root = create_qtnode(0, 0, field_width, field_height, 1);
-    qt2graph(root);
+    reset();
 }
 
 void RP::QuadMapper::set_pos(point c)
@@ -121,12 +119,17 @@ void RP::QuadMapper::set_tol(float t)
     }
 }
 
+int RP::QuadMapper::create_nd_helper(point coord)
+{
+    return mygraph.create_node(coord, dist_sq(coord, tar));
+}
+
 void RP::QuadMapper::init_graph()
 {
     mygraph.clear();
-    mygraph.create_node(cur);
-    mygraph.nodes[0].dist_to = 0.f;
-    mygraph.create_node(tar);
+    create_nd_helper(cur);
+    mygraph.nodes[0].dist2cur = 0.f;
+    create_nd_helper(tar);
 }
 
 void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
@@ -134,14 +137,17 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
     std::queue<pqtree> q;
     for (const line &o : obstacles)
     {
-        const line obs = add_length_to_line_segment(o.p, o.q, tol);
+        line obs = add_length_to_line_segment(o.p, o.q, tol);
+        line left = get_moved_line(obs, tol, false);
+        line right = get_moved_line(obs, tol, true);
+        line sides []{left, line{left.q, right.q}, line{right.q, right.p}, line{right.p, left.p}};
         q.push(root);
         while (!q.empty())
         {
             pqtree nd = q.front();
             q.pop();
 
-            if (obs_in_node(obs, nd))
+            if (rect_intersects_rect(sides, nd->sides))
             {
                 // if depth limit reahed, don't split anymore
                 if (nd->depth >= max_depth)
@@ -240,12 +246,6 @@ RP::pqtree RP::QuadMapper::get_qtree_root() const
     return root;
 }
 
-bool RP::QuadMapper::obs_in_node(const line &obs, pqtree tnode)
-{
-    point placeholder;
-    return seg_intersects_rect(obs, tnode->sides, placeholder);
-}
-
 static inline bool equal(float a, float b)
 {
     return fabs(a - b) < 1e-5;
@@ -253,7 +253,7 @@ static inline bool equal(float a, float b)
 
 int RP::QuadMapper::qt2graph(pqtree qtn)
 {
-    qtn->graph_id = mygraph.create_node(qtn->center_coord);
+    qtn->graph_id = create_nd_helper(qtn->center_coord);
     mygraph.nodes[qtn->graph_id].qt_id = qtn->qt_id;
     return qtn->graph_id;
 }
@@ -301,11 +301,7 @@ void RP::QuadMapper::compute_graph()
                     }
                     else
                     {
-                        if(!equal(nb->min_y, rmd->max_y))
-                        {
-                            printf("%f, %f\n", nb->min_y, rmd->max_y);
-                            printf("oops\n");
-                        }
+                        assert(equal(nb->min_y, rmd->max_y));
                         dir = DOWN;
                     }
                     pqtree newone = nb->get_neighbor_ge(dir);

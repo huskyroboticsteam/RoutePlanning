@@ -3,6 +3,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include "timer.hpp"
 
 RP::Pather::Pather(point origin, point target, point max_point) :
            fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6),
@@ -14,14 +15,16 @@ RP::Pather::Pather(point origin, point target, point max_point) :
 // *low priority
 void RP::Pather::compute_path()
 {
-    float tolerances[]{0.5f, 0.25f, 0.125f, 0.f};
+    float tolerances[]{0.5f, 0.5f, 0.25f, 0.125f};
     // size_t tol_len = arrlen(tolerances);
     for (int tol_ind = 0; tol_ind < 4; tol_ind++)
     {
         float tol = tolerances[tol_ind];
         // printf("%f\n", tol);
         fineMapper.set_tol(tol);
+        Timer comptim;
         fineMapper.compute_graph();
+        printf("compute graph took %f seconds\n", comptim.elapsed());
         graph g = fineMapper.get_graph();
 
 #if 0
@@ -33,7 +36,8 @@ void RP::Pather::compute_path()
 	std::cout << std::endl;
     }
 #endif
-        auto cmp = [g](int l, int r) { return g.nodes[l].dist_to < g.nodes[r].dist_to; };
+        Timer tim;
+        auto cmp = [g](int l, int r) { return g.nodes[l].fscore < g.nodes[r].fscore; };
         std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
         q.push(0);
         while (!q.empty())
@@ -43,11 +47,11 @@ void RP::Pather::compute_path()
 
             for (const auto& pair : g.nodes[n].connection)
             {
-                float dist = g.nodes[n].dist_to + pair.second.len;
-                if (dist < g.nodes[pair.second.child].dist_to)
+                float dist = g.nodes[n].dist2cur + pair.second.len;
+                if (dist < g.nodes[pair.second.child].dist2cur)
                 {
                     g.nodes[pair.second.child].prev = n;
-                    g.nodes[pair.second.child].dist_to = dist;
+                    g.nodes[pair.second.child].dist2cur = dist;
                     q.push(pair.second.child);
                 }
             }
@@ -71,6 +75,7 @@ void RP::Pather::compute_path()
         // path not found. resort to node closest to target
         if (!pathFound)
         {
+            printf("WARNING: target not found\n");
             const node &tar = g.nodes[1];
             std::vector<size_t> indices(g.nodes.size());
             iota(indices.begin(), indices.end(), 0);
@@ -106,6 +111,7 @@ void RP::Pather::compute_path()
                 continue;
             }
         }
+        printf("pathfinding took %f seconds\n", tim.elapsed());
         std::reverse(pathIndices.begin(), pathIndices.end());
         prune_path(pathIndices, tol + 1.f);
         std::vector<point> result;

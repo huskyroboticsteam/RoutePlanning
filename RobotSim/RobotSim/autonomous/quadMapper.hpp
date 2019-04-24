@@ -74,7 +74,7 @@ struct QTreeNode
   pqtree parent;
   int qt_id;
   int graph_id;
-  line sides[4];
+  line sides[4]; // sides in counterclockwise order
   point center_coord;
 
   // get neighbor in the Direction d that is greater than or equal in size to *this
@@ -100,6 +100,13 @@ public:
   pqtree get_enclosing_node(point coord) const;
   void set_max_depth(float md);
   pqtree get_qtree_root() const;
+    
+    void reset() {
+        qtnodes.clear();
+        init_graph();
+        root = create_qtnode(0, 0, field_width, field_height, 1);
+        qt2graph(root);
+    }
 
 private:
   int max_depth;
@@ -116,6 +123,7 @@ private:
   pqtree create_qtnode(float minx, float miny, float maxx, float maxy, int depth);
   // returns true if obstacle is inside node (i.e. intersects with the square area)
   bool obs_in_node(const line &obs, pqtree tnode);
+  int create_nd_helper(point coord);
   int qt2graph(pqtree qtn);
 };
 } // namespace RP

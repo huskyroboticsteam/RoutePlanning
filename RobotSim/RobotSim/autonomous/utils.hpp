@@ -24,6 +24,7 @@ struct point
     bool operator!=(const point &p) const;
     // point &operator=(const point &other);
     // point &operator=(const point&& other);
+    float dot(const point& other) const { return x * other.x + y * other.y; }
 };
 struct line
 {
@@ -74,6 +75,9 @@ point segments_intersection(point a, point b, point c, point d);
 point get_ortho(const line &ln, bool countercw);
 
 float dot(const point &u, const point &v);
+
+// r1 and r2 have counterclockwise sides
+bool rect_intersects_rect(line r1[4], line r2[4]);
 
 // exactly the same as segments_intersect except line p1p2 now has width p_width.
 // see the definition for inters_out below

@@ -1,6 +1,5 @@
 // 4/10/19 - Tadeusz Pforte
 // This is a hot pile of garbage that somehow works sometimes
-
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
@@ -59,12 +58,15 @@ static float toMove;
 
 int main(int, char const **) {
     
+    // ---------------------------------------- //
+    // ----------- SFML Window Setup ---------- //
+    // ---------------------------------------- //
     unsigned int screenWidth = sf::VideoMode::getDesktopMode().width;
     unsigned int screenHeight = sf::VideoMode::getDesktopMode().height;
     
-    float WINDOW_SCALE = .66f;
+    float WINDOW_SCALE = .67f;
     if (screenHeight < 1000)
-        WINDOW_SCALE = .33f;
+        WINDOW_SCALE = .34f;
     else if (screenHeight > 1500)
         WINDOW_SCALE = 1.f;
     
@@ -74,63 +76,77 @@ int main(int, char const **) {
     sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(60);
     
+    // application icon
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     
+    // used to render text
     sf::Font font;
     if (!font.loadFromFile(RESOURCE_DIR + "DejaVuSans.ttf"))
         std::cout << "Failed to load font" << std::endl;
     
-    sf::Text fpsCounter(" 0 fps", font, 24);
-    fpsCounter.setFillColor(sf::Color::Black);
-    fpsCounter.move(2.f, 2.f);
-
+    // used to render sprites
+    sf::RenderTexture g_rendertexture;
+    // ---------------------------------------- //
     
-    Grid grid(40.f, 40.f, 36 * WINDOW_SCALE);
-    float gridScale = grid.retrieveScale();
-    float gridWidth = grid.retrieveWidth();
-    float gridHeight = grid.retrieveHeight();
+
+    // --------- Initial Configuration -------- //
+    const std::string OBSTACLES_FILE = RESOURCE_DIR + "obstacles.txt";
+    
+    float gridWidth = 40.f;
+    float gridHeight = 40.f;
+    float gridScale = 36 * WINDOW_SCALE;
     
     RP::point agentInitPos{2.5f, 2.5f};
     float agentInitRot = 45.f;
+    // ---------------------------------------- //
+    
+    
+    Grid grid(gridWidth, gridHeight, gridScale);
+    grid.target = RP::point{35.f, 35.f}; // sets the autonomous target
     
     Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);
+    agent.bot_width = 1.8f;
+    // agent.scaleSpeed(2.f);
     
+    // Use to send commands to the agent and get world information
+    // move(speed), turn(speed), turnTo(targetDir)
+    // currentPosition(), currentRotation(), currentObstaclesInView()
     Interface beaglebone(grid, agent);
     
-    // ADDITIONAL SETUP FROM INIT
-    agent.bot_width = 1.8f;
-    grid.target = RP::point{35.f, 35.f};
+    
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f});
     RP::SimController control(grid, agent, pather);
-    // END ADDITIONAL SETUP
-
-    // states
-    bool showGraph = false;
+    
+    // used to control how often the simulator recomputes the graph
     RP::Timer recompute_timer;
 
-    sf::RenderTexture g_rendertexture;
-
-    // setting toggles
-    bool lazer = false;
-    bool breadcrumb = false;
-
-    // autonomous
-    bool auton = false;
-    bool auto_turning = false;
-    float auto_orig_angle; // angle of robot before it entered turning phase
-
-    // OPTIONAL FURTHER INIT
-    // agent.scaleSpeed(2.f);
-    grid.target = RP::point{35.f, 35.f};
-    // END INIT
     
-    // fps tracker (time code stolen from SO)
+    // ---------- Application Toggles --------- //
+    
+    // if true, display calculated path to target
+    bool lazer = false;
+    
+    // if true, display the trimmed pathing graph
+    bool showGraph = false;
+    
+    // if true, autonomously navigate to target
+    bool auton = false;
+    // ---------------------------------------- //
+
+    
+    // -------------- FPS Display ------------- //
+    //fps tracker (time code stolen from SO)
+    sf::Text fpsCounter(" 0 fps", font, 24);
+    fpsCounter.setFillColor(sf::Color::Black);
+    fpsCounter.move(2.f, 2.f);
+    
     unsigned int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     int frameCount = 0;
     bool gibFPS = true;
+    // ---------------------------------------- //
     
 
     // ---------------------------------------- //
@@ -161,7 +177,7 @@ int main(int, char const **) {
                         std::cout << "0      -- Toggle robot path" << std::endl;
                         std::cout << "1      -- Toggle fps counter" << std::endl;
                         std::cout << "9      -- Draw algorithm path" << std::endl;
-                        std::cout << "Ctrl-= -- Resets the board" << std::endl;
+                        std::cout << "Ctrl = -- Resets the board" << std::endl;
                         break;
                     }
                     case sf::Keyboard::P : {
@@ -177,7 +193,7 @@ int main(int, char const **) {
                     }
                     case sf::Keyboard::O : {
                         grid.obstacleList.clear();
-                        grid.readObstaclesFromFile(RESOURCE_DIR + "obstacles.txt");
+                        grid.readObstaclesFromFile(OBSTACLES_FILE);
                         // grid.addBorderObstacles();
                         std::cout << "Added obstacles" << std::endl;
                         break;
@@ -212,6 +228,25 @@ int main(int, char const **) {
                         gibFPS = !gibFPS;
                         break;
                     }
+                    case sf::Keyboard::Equal : {
+                        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) {
+                            // reset everything
+                            std::cout << "Resetting everything to initial configuration" << std::endl;
+                            
+                            agent.resetTo(agentInitPos, agentInitRot);
+                            grid.obstacleList.clear();
+                            grid.drawPath();
+                            
+                            pather.reset();
+                            
+                            lazer = false;
+                            showGraph = false;
+                            
+                            if (auton)
+                                control.stop_auto();
+                            auton = false;
+                        }
+                    }
                     default : {
                         //std::cout << "Command not recognized" << std::endl;
                         break;
@@ -228,13 +263,6 @@ int main(int, char const **) {
             beaglebone.turn(-1);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // turn right
             beaglebone.turn(1);
-        
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal) &&
-            (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-             sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))) {
-            // reset everything
-                std::cout << "beep boop reset not implemented" << std::endl;
-        }
 
         window.clear(bgColor);
         if (lazer)
@@ -275,7 +303,8 @@ int main(int, char const **) {
             graph_updated = true;
         }
 
-        if (auton && control.just_updated) {
+        if (auton && control.just_updated)
+        {
             graph_updated = true;
         }
 
@@ -318,7 +347,7 @@ int main(int, char const **) {
 
         window.draw(grid);
         window.draw(agent);
-        const sf::Texture& texture = g_rendertexture.getTexture();
+        const sf::Texture &texture = g_rendertexture.getTexture();
         sf::Sprite graph_sprite(texture);
         window.draw(graph_sprite);
         for (auto obst : pather.mem_obstacles())
@@ -326,21 +355,28 @@ int main(int, char const **) {
         window.draw(sim);
         // printf("%f, %f\n", next.x, next.y);
 
-        
-        if (frameCount == 12) {
+        if (frameCount == 12)
+        {
             int lastFrame = now;
             now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-            
+
             double avgFrameTime = (now - lastFrame) / 12.0;
-            
-            fpsCounter.setString(std::to_string((int) (1000.0 / avgFrameTime)) + " fps");
+
+            fpsCounter.setString(std::to_string((int)(1000.0 / avgFrameTime)) + " fps");
             frameCount = 0;
         }
         frameCount++;
-        
+
         if (gibFPS)
             window.draw(fpsCounter);
         
+        sf::Text disp("Fun fact: Harry Potter is called Gary Potter in Russian", font, 16);
+        disp.setFillColor(sf::Color(211,211,211));
+        disp.move(2.f, WINDOW_SCALE * 1526.f);
+        
+        if (WINDOW_SCALE == 1.f)
+            window.draw(disp);
+
         window.display();
     }
     // ---------- End of 60 FPS Update Loop ---------- //

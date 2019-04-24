@@ -54,7 +54,8 @@ void Agent::resetTo(RP::point newPos, float newRotation) {
     float xDiff = newPos.x - this->getX();
     float yDiff = newPos.y - this->getY();
     
-    
+    move(xDiff, yDiff);
+    rotate(newRotation - rotation);
 }
 
 // simply translates the agent by a certain x and y, regardless of orientation
