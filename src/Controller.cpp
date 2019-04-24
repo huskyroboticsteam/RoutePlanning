@@ -1,5 +1,4 @@
 #include "Controller.hpp"
-#include "Map.hpp"
 #include "RobotEKF.hpp"
 #include "Server.hpp"
 #include "kalman/ekfilter.hpp"
@@ -7,7 +6,7 @@
 #include <iostream>
 #include <math.h>
 #include <thread>
-
+#include "autonomous/utils.hpp"
 
 #define DATA_GPS 10
 #define DATA_MAG 11
@@ -143,7 +142,7 @@ void Controller::update() {
         if (state == FOLLOW_PATH) {
             if (in_spiral_radius()) {
                 state = SPIRAL;
-                spiralPts = RP::generate_spiral(0.1, 100, curr_lng, curr_lat);
+                //spiralPts = RP::generate_spiral(0.1, 100, curr_lng, curr_lat);
             } else if (found_ball()) {
                 state = FOUND_BALL;
             } else {

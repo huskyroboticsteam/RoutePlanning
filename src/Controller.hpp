@@ -1,6 +1,5 @@
 #include <iostream>
 #include <deque>
-#include "Map.hpp"
 #include "Server.hpp"
 #include <thread>
 #include "RobotEKF.hpp"
