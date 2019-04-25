@@ -9,6 +9,10 @@
 // since we don't need too much precision
 #define FLOAT_TOL 1e-4 
 
+#define CONV_FACTOR_LNG 8.627
+#define DEGREES_METER_LNG 0.0001
+#define CONV_FACTOR_LAT 111319.9
+
 // RP::point::point() : x(0), y(0) {}
 
 // RP::point::point(float x, float y) : x(x), y(y)
@@ -477,4 +481,17 @@ bool RP::closeEnough(float a, float b, float tol)
 bool RP::angleCloseEnough(float deg1, float deg2, float degtol)
 {
     return closeEnough(normalize_angle_deg(deg1), normalize_angle_deg(deg2), degtol);
+}
+
+RP::point RP::convertToLatLng(float lat, float lng, float dir, float dist, float angle) {
+		float delta_x = dist * cos(angle + dir + M_PI/2);
+		float delta_y = dist * sin(angle + dir + M_PI/2);
+		//std::cout << "delta_x: " << delta_x << " delta_y: " << delta_y << "\n";
+		float delta_lng = delta_x / CONV_FACTOR_LNG * DEGREES_METER_LNG;
+		float delta_lat = delta_y / CONV_FACTOR_LAT;
+		//std::cout << "delta_lat: " << delta_lat << " delta_lng: " << delta_lng << "\n";
+		point p;
+		p.x = delta_lat + lat;
+		p.y = delta_lng + lng;
+		return p;
 }

@@ -132,6 +132,12 @@ inline size_t arrlen(T *arr)
         return 0;
     return sizeof(arr) / sizeof(*arr);
 }
+
+struct obstacleVector {
+    float distance;
+    float angle;
+};
+point convertToLatLng(float lat, float lng, float dir, float dist, float angle);
 } // namespace RP
 
 #endif

@@ -22,7 +22,7 @@ class WorldCommunicator {
 	public:
 		// Sends and receives packets
 		// To be called in the main update loop
-		void update(const RP::point& position, const float& rotation, float& move, float& turn, std::vector<line>& obstacles);
+		void update(const RP::point& position, const float& rotation, float& move, float& turn, const std::vector<RP::line>& obstacles);
 		WorldCommunicator();
 	private:
 		int timer;

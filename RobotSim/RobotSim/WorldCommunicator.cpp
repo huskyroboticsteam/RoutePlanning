@@ -1,5 +1,7 @@
 #include "WorldCommunicator.hpp"
 
+
+
 WorldCommunicator::WorldCommunicator(): gpsSim()  {
 	in = socket(AF_INET, SOCK_DGRAM, 0);
 	// Bind in socket (copied from Server.cpp)
@@ -21,13 +23,13 @@ WorldCommunicator::WorldCommunicator(): gpsSim()  {
 	listenThread = std::thread(&WorldCommunicator::listen, this);
 }
 
-void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn, const std::vector<line>& obstacles) {
+void WorldCommunicator::update(const RP::point& position, const float& rotation, float& move, float& turn, const std::vector<RP::line>& obstacles) {
 	
 	timer++;
 	
 	if(timer % framesPerGPS == 0) {
 		std::vector<unsigned char> data(2*sizeof(float));
-		errpos = gpsSim.generate_pt(1.8, position.x, position.y);
+		RP::point errpos = gpsSim.generate_pt(1.8, position.x, position.y);
 		memcpy(&data[0], &errpos.x, sizeof(float));
 		memcpy(&data[sizeof(float)], &errpos.y, sizeof(float));
 		if(send_action(data, gpsId)) {
