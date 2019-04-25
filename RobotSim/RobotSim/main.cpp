@@ -56,201 +56,213 @@ static float toMove;
 
 // ---------------------------------------- //
 
-int main(int, char const **) {
-    
+int main(int, char const **)
+{
+
     // ---------------------------------------- //
     // ----------- SFML Window Setup ---------- //
     // ---------------------------------------- //
     unsigned int screenWidth = sf::VideoMode::getDesktopMode().width;
     unsigned int screenHeight = sf::VideoMode::getDesktopMode().height;
-    
+
     float WINDOW_SCALE = .67f;
     if (screenHeight < 1000)
         WINDOW_SCALE = .34f;
     else if (screenHeight > 1500)
         WINDOW_SCALE = 1.f;
-    
+
     std::cout << "screen detected: " << screenWidth << "x" << screenHeight << std::endl;
     std::cout << "window scale set to " << WINDOW_SCALE << std::endl;
-    
+
     sf::RenderWindow window(sf::VideoMode(1476 * WINDOW_SCALE, 1576 * WINDOW_SCALE), "Robot Simulator");
     window.setFramerateLimit(60);
-    
+
     // application icon
     sf::Image icon;
     if (icon.loadFromFile(RESOURCE_DIR + "HuskyRoboticsLogo.png"))
         window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-    
+
     // used to render text
     sf::Font font;
     if (!font.loadFromFile(RESOURCE_DIR + "DejaVuSans.ttf"))
         std::cout << "Failed to load font" << std::endl;
-    
+
     // used to render sprites
     sf::RenderTexture g_rendertexture;
     // ---------------------------------------- //
-    
 
     // --------- Initial Configuration -------- //
     const std::string OBSTACLES_FILE = RESOURCE_DIR + "obstacles.txt";
-    
+
     float gridWidth = 40.f;
     float gridHeight = 40.f;
     float gridScale = 36 * WINDOW_SCALE;
-    
+
     RP::point agentInitPos{2.5f, 2.5f};
     float agentInitRot = 45.f;
     // ---------------------------------------- //
-    
-    
+
     Grid grid(gridWidth, gridHeight, gridScale);
     grid.target = RP::point{35.f, 35.f}; // sets the autonomous target
-    
+
     Agent agent(gridScale, gridWidth, gridHeight, agentInitPos, agentInitRot);
     agent.bot_width = 1.8f;
     // agent.scaleSpeed(2.f);
-    
+
     // Use to send commands to the agent and get world information
     // move(speed), turn(speed), turnTo(targetDir)
     // currentPosition(), currentRotation(), currentObstaclesInView()
     Interface beaglebone(grid, agent);
-    
-    
+
     RP::Simulator sim(grid.obstacleList, agent, RP::simulator_config{70.f, 10.f}, gridScale, gridHeight);
     RP::Pather pather(sim.getpos(), grid.target, RP::point{39.f, 39.f});
     RP::SimController control(grid, agent, pather);
-    
+
     // used to control how often the simulator recomputes the graph
     RP::Timer recompute_timer;
 
-    
     // ---------- Application Toggles --------- //
-    
+
     // if true, display calculated path to target
     bool lazer = false;
-    
+
     // if true, display the trimmed pathing graph
     bool showGraph = false;
-    
+
     // if true, autonomously navigate to target
     bool auton = false;
     // ---------------------------------------- //
 
-    
     // -------------- FPS Display ------------- //
     //fps tracker (time code stolen from SO)
     sf::Text fpsCounter(" 0 fps", font, 24);
     fpsCounter.setFillColor(sf::Color::Black);
     fpsCounter.move(2.f, 2.f);
-    
+
     unsigned int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     int frameCount = 0;
     bool gibFPS = true;
     // ---------------------------------------- //
-    
 
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
     // ---------------------------------------- //
-    while (window.isOpen()) {
-        
+    while (window.isOpen())
+    {
+
         sf::Event event;
-        
-        while (window.pollEvent(event)) {
-            
+
+        while (window.pollEvent(event))
+        {
+
             // Close window on X or Cmd+W
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            else if (event.type == sf::Event::KeyPressed) {
-                switch (event.key.code) {
-                    case sf::Keyboard::H : {
-                        std::cout << "Help Menu: " << std::endl;
-                        std::cout
-                            << "P   -- Returns the internal position of the robot"
-                            << std::endl;
-                        std::cout << "G      -- Toggle grid" << std::endl;
-                        std::cout << "O      -- Import obstacles from obstacles.txt" << std::endl;
-                        std::cout << "U      -- Complete autonomous mode" << std::endl;
-                        std::cout << "N      -- Toggle clipping" << std::endl;
-                        std::cout << "E      -- Show pathing graph" << std::endl;
-                        std::cout << "0      -- Toggle robot path" << std::endl;
-                        std::cout << "1      -- Toggle fps counter" << std::endl;
-                        std::cout << "9      -- Draw algorithm path" << std::endl;
-                        std::cout << "Ctrl = -- Resets the board" << std::endl;
-                        break;
-                    }
-                    case sf::Keyboard::P : {
-                        std::cout << "Internal Position: (" << agent.getX() << ","
-                                  << agent.getY() << ") at "
-                                  << agent.getInternalRotation() << " degrees"
-                                  << std::endl;
-                        break;
-                    }
-                    case sf::Keyboard::G : {
-                        grid.toggleGrid();
-                        break;
-                    }
-                    case sf::Keyboard::O : {
+            else if (event.type == sf::Event::KeyPressed)
+            {
+                switch (event.key.code)
+                {
+                case sf::Keyboard::H:
+                {
+                    std::cout << "Help Menu: " << std::endl;
+                    std::cout
+                        << "P   -- Returns the internal position of the robot"
+                        << std::endl;
+                    std::cout << "G      -- Toggle grid" << std::endl;
+                    std::cout << "O      -- Import obstacles from obstacles.txt" << std::endl;
+                    std::cout << "U      -- Complete autonomous mode" << std::endl;
+                    std::cout << "N      -- Toggle clipping" << std::endl;
+                    std::cout << "E      -- Show pathing graph" << std::endl;
+                    std::cout << "0      -- Toggle robot path" << std::endl;
+                    std::cout << "1      -- Toggle fps counter" << std::endl;
+                    std::cout << "9      -- Draw algorithm path" << std::endl;
+                    std::cout << "Ctrl = -- Resets the board" << std::endl;
+                    break;
+                }
+                case sf::Keyboard::P:
+                {
+                    std::cout << "Internal Position: (" << agent.getX() << ","
+                              << agent.getY() << ") at "
+                              << agent.getInternalRotation() << " degrees"
+                              << std::endl;
+                    break;
+                }
+                case sf::Keyboard::G:
+                {
+                    grid.toggleGrid();
+                    break;
+                }
+                case sf::Keyboard::O:
+                {
+                    grid.obstacleList.clear();
+                    grid.readObstaclesFromFile(OBSTACLES_FILE);
+                    // grid.addBorderObstacles();
+                    std::cout << "Added obstacles" << std::endl;
+                    break;
+                }
+                case sf::Keyboard::U:
+                {
+                    auton = !auton;
+                    if (auton)
+                        control.start_auto();
+                    else
+                        control.stop_auto();
+                    break;
+                }
+                case sf::Keyboard::N:
+                {
+                    grid.toggleClipping();
+                    break;
+                }
+                case sf::Keyboard::E:
+                {
+                    showGraph = !showGraph;
+                    break;
+                }
+                case sf::Keyboard::Num9:
+                {
+                    if (lazer)
+                        grid.drawPath();
+                    lazer = !lazer;
+                    break;
+                }
+                case sf::Keyboard::Num0:
+                {
+                    agent.togglePath();
+                    break;
+                }
+                case sf::Keyboard::Num1:
+                {
+                    gibFPS = !gibFPS;
+                    break;
+                }
+                case sf::Keyboard::Equal:
+                {
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                    {
+                        // reset everything
+                        std::cout << "Resetting everything to initial configuration" << std::endl;
+
+                        agent.resetTo(agentInitPos, agentInitRot);
                         grid.obstacleList.clear();
-                        grid.readObstaclesFromFile(OBSTACLES_FILE);
-                        // grid.addBorderObstacles();
-                        std::cout << "Added obstacles" << std::endl;
-                        break;
-                    }
-                    case sf::Keyboard::U : {
-                        auton = !auton;
+                        grid.drawPath();
+
+                        pather.reset();
+
+                        lazer = false;
+                        showGraph = false;
+
                         if (auton)
-                            control.start_auto();
-                        else
                             control.stop_auto();
-                        break;
+                        auton = false;
                     }
-                    case sf::Keyboard::N : {
-                        grid.toggleClipping();
-                        break;
-                    }
-                    case sf::Keyboard::E : {
-                        showGraph = !showGraph;
-                        break;
-                    }
-                    case sf::Keyboard::Num9 : {
-                        if (lazer)
-                            grid.drawPath();
-                        lazer = !lazer;
-                        break;
-                    }
-                    case sf::Keyboard::Num0 : {
-                        agent.togglePath();
-                        break;
-                    }
-                    case sf::Keyboard::Num1 : {
-                        gibFPS = !gibFPS;
-                        break;
-                    }
-                    case sf::Keyboard::Equal : {
-                        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) {
-                            // reset everything
-                            std::cout << "Resetting everything to initial configuration" << std::endl;
-                            
-                            agent.resetTo(agentInitPos, agentInitRot);
-                            grid.obstacleList.clear();
-                            grid.drawPath();
-                            
-                            pather.reset();
-                            
-                            lazer = false;
-                            showGraph = false;
-                            
-                            if (auton)
-                                control.stop_auto();
-                            auton = false;
-                        }
-                    }
-                    default : {
-                        //std::cout << "Command not recognized" << std::endl;
-                        break;
-                    }
+                }
+                default:
+                {
+                    //std::cout << "Command not recognized" << std::endl;
+                    break;
+                }
                 }
             }
         }
@@ -265,8 +277,7 @@ int main(int, char const **) {
             beaglebone.turn(1);
 
         window.clear(bgColor);
-        if (lazer)
-            grid.drawPath(pather.get_cur_path(), agent);
+
         if (auton)
             control.tic();
 
@@ -281,11 +292,12 @@ int main(int, char const **) {
 #endif
         goalDirection += change;
         goalDirection = (int)goalDirection % 360;
-        
+
         pather.set_pos(sim.getpos());
         pather.add_obstacles(sim.visible_obstacles());
         bool graph_updated = false;
-        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN) {
+        if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
+        {
             recompute_timer.reset();
             pather.compute_path();
             graph_updated = true;
@@ -296,8 +308,9 @@ int main(int, char const **) {
             graph_updated = true;
         }
 
-        if (graph_updated) {
-            g_rendertexture.clear(sf::Color(0,0,0,0)); // transparent background
+        if (graph_updated)
+        {
+            g_rendertexture.clear(sf::Color(0, 0, 0, 0)); // transparent background
             g_rendertexture.create(window.getSize().x, window.getSize().y);
             // use https://www.sfml-dev.org/tutorials/2.5/graphics-draw.php#off-screen-drawing
             const RP::graph &dg = pather.d_graph();
@@ -332,6 +345,8 @@ int main(int, char const **) {
         }
         const RP::QTreeNode &root = *pather.debug_qtree_root();
         draw_qtree(window, root, gridScale, gridHeight);
+        if (lazer)
+            grid.drawPath(pather.get_cur_path(), agent);
 
         window.draw(grid);
         window.draw(agent);
@@ -357,11 +372,11 @@ int main(int, char const **) {
 
         if (gibFPS)
             window.draw(fpsCounter);
-        
+
         sf::Text disp("Fun fact: Harry Potter is called Gary Potter in Russian", font, 16);
-        disp.setFillColor(sf::Color(211,211,211));
+        disp.setFillColor(sf::Color(211, 211, 211));
         disp.move(2.f, WINDOW_SCALE * 1526.f);
-        
+
         if (WINDOW_SCALE == 1.f)
             window.draw(disp);
 
@@ -372,7 +387,8 @@ int main(int, char const **) {
     return EXIT_SUCCESS;
 }
 
-void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale, float height) {
+void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale, float height)
+{
     sf::RectangleShape rect;
     rect.setSize(sf::Vector2f((node.max_x - node.min_x) * scale,
                               (node.max_y - node.min_y) * scale));
@@ -383,7 +399,8 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale, f
         node.is_blocked ? sf::Color(0, 255, 255, 64) : sf::Color(0, 0, 0, 0);
     rect.setFillColor(fillColor);
     win.draw(rect);
-    if (!node.is_leaf) {
+    if (!node.is_leaf)
+    {
         draw_qtree(win, *node.topleft, scale, height);
         draw_qtree(win, *node.topright, scale, height);
         draw_qtree(win, *node.botleft, scale, height);
@@ -391,7 +408,8 @@ void draw_qtree(sf::RenderWindow &win, const RP::QTreeNode &node, float scale, f
     }
 }
 
-static inline sf::CircleShape getNode(RP::node nd, float scale, float height) {
+static inline sf::CircleShape getNode(RP::node nd, float scale, float height)
+{
     sf::CircleShape circle(5);
     circle.setOrigin(5, 5);
     circle.setFillColor(GRAPH_NODE_COLOR);

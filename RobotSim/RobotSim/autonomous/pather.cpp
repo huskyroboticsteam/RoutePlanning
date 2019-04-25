@@ -7,7 +7,8 @@
 #include <cassert>
 #include "timer.hpp"
 
-RP::Pather::Pather(point origin, point target, point max_point) : fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 6),
+// change level here (this is a landmark for search)
+RP::Pather::Pather(point origin, point target, point max_point) : fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 7),
                                                                   cur(origin), tar(target), max_pt(max_point)
 {
 }
@@ -46,45 +47,56 @@ void RP::Pather::compute_path()
         // A star source https://en.wikipedia.org/wiki/A*_search_algorithm
         std::unordered_map<int, float> fscore;
         std::unordered_map<int, float> gscore;
-        auto cmp = [fscore](int l, int r) {
-            auto lit = fscore.find(l);
-            auto rit = fscore.find(r);
-            float lfscore = lit == fscore.end() ? INFINITY : lit->second;
-            float rfscore = rit == fscore.end() ? INFINITY : rit->second;
-            return lfscore < rfscore;
+        // auto cmp = [fscore](int l, int r) {
+        //     auto lit = fscore.find(l);
+        //     auto rit = fscore.find(r);
+        //     float lfscore = lit == fscore.end() ? INFINITY : lit->second;
+        //     float rfscore = rit == fscore.end() ? INFINITY : rit->second;
+        //     return lfscore < rfscore;
+        // };
+        auto cmp = [&gscore](int l, int r) {
+            assert(gscore.find(l) != gscore.end());
+            assert(gscore.find(r) != gscore.end());
+            return *gscore.find(l) > *gscore.find(r);
         };
         std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
-        fscore[0] = heuristic_cost(g.nodes[0].coord, g.nodes[1].coord);
+        // fscore[0] = heuristic_cost(g.nodes[0].coord, g.nodes[1].coord);
+        // std::unordered_set<int> closed;
+        // std::unordered_set<int> open;
+        // q.push(0);
+        // open.insert(0);
         gscore[0] = 0;
-        std::unordered_set<int> closed;
-        std::unordered_set<int> open;
         q.push(0);
-        open.insert(0);
+        for (int i = 1; i < g.nodes.size(); i++)
+        {
+            gscore.emplace(i, INFINITY);
+            // q.push(i);
+        }
         int count = 0;
         while (!q.empty())
         {
             count++;
             int n = q.top();
-            if (n == 1)
-                break;
+            // if (n == 1)
+            //     break;
             q.pop();
+            assert(gscore[n] != INFINITY);
 
-            open.erase(open.find(n));
-            closed.insert(n);
+            // open.erase(open.find(n));
+            // closed.insert(n);
 
             for (const auto &pair : g.nodes[n].connection)
             {
-                if (closed.find(pair.first) != closed.end())
-                    continue;
-                assert(gscore.find(n) != gscore.end());
+                // if (closed.find(pair.first) != closed.end())
+                //     continue;
+                // assert(gscore.find(n) != gscore.end());
                 float dist = gscore[n] + pair.second.len;
 
-                if (open.find(pair.first) == open.end())
-                {
-                    q.push(pair.first);
-                    open.insert(pair.first);
-                }
-                else if (gscore.find(pair.first) != gscore.end() && dist >= gscore[pair.first])
+                // if (open.find(pair.first) == open.end())
+                // {
+                    // open.insert(pair.first);
+                // } else 
+                if (dist >= gscore[pair.first])
                 {
                     continue;
                 }
@@ -92,12 +104,13 @@ void RP::Pather::compute_path()
                 // first is the same as second.child
                 g.nodes[pair.first].prev = n;
                 gscore[pair.first] = dist;
-                fscore[pair.first] = gscore[pair.first] +
-                                     heuristic_cost(g.nodes[pair.first].coord, g.nodes[1].coord);
+                q.push(pair.first);
+                // fscore[pair.first] = gscore[pair.first] +
+                //                      heuristic_cost(g.nodes[pair.first].coord, g.nodes[1].coord);
             }
         }
-        assert(q.size() == open.size());
-        printf("visited %d nodes\n", count);
+        // assert(q.size() == open.size());
+        // printf("visited %d nodes\n", count);
         std::vector<int> pathIndices;
         int i = 1;
         bool pathFound = true;

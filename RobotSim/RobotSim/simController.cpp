@@ -34,7 +34,7 @@ void RP::SimController::init_turn()
 
 void RP::SimController::turn_and_go()
 {
-    pather.compute_path();
+    // pather.compute_path();
     _just_updated = true;
     auto path = pather.get_cur_path();
     float dist = sqrt(dist_sq(path.front(), point{agent.getX(), agent.getY()}));
@@ -64,6 +64,7 @@ void RP::SimController::tic()
         case TOWARD_TARGET:
             if (angleCloseEnough(agent.getInternalRotation(), tar_angle, 1.))
             {
+                pather.compute_path();
                 auto path = pather.get_cur_path();
                 if (path.size() == 0)
                     break;
