@@ -8,7 +8,7 @@
 #include "timer.hpp"
 
 // change level here (this is a landmark for search)
-RP::Pather::Pather(point origin, point target, point max_point) : fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 7),
+RP::Pather::Pather(point origin, point target, point max_point) : fineMapper(origin, target, memorizer.obstacles_ref, max_point.x, max_point.y, 8),
                                                                   cur(origin), tar(target), max_pt(max_point)
 {
 }
@@ -22,7 +22,7 @@ float RP::Pather::heuristic_cost(const point &p, const point &tar)
 // *low priority
 void RP::Pather::compute_path()
 {
-    float tolerances[]{0.5f, 0.5f, 0.25f, 0.125f};
+    float tolerances[]{1.f, 0.5f, 0.25f, 0.125f};
     // size_t tol_len = arrlen(tolerances);
     for (int tol_ind = 0; tol_ind < 4; tol_ind++)
     {
@@ -57,7 +57,7 @@ void RP::Pather::compute_path()
         auto cmp = [&gscore](int l, int r) {
             assert(gscore.find(l) != gscore.end());
             assert(gscore.find(r) != gscore.end());
-            return *gscore.find(l) > *gscore.find(r);
+            return gscore[l] > gscore[r];
         };
         std::priority_queue<int, std::vector<int>, decltype(cmp)> q(cmp);
         // fscore[0] = heuristic_cost(g.nodes[0].coord, g.nodes[1].coord);
@@ -160,10 +160,10 @@ void RP::Pather::compute_path()
         //             break;
         //     }
 
-        //if (i < 0)
-        //{
-        //   continue;
-        // }
+        if (i < 0)
+        {
+          continue;
+        }
         // }
         if (!pathFound)
             printf("ERR: path not found\n");
