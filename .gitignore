@@ -85,5 +85,5 @@ src/Tennisball/CMakeFiles/still.dir/CXX.includecache
 src/Tennisball/CMakeFiles/still.dir/depend.internal
 src/Tennisball/CMakeFiles/still.dir/depend.make
 src/Tennisball/src/test.cpp
-RobotSim/RobotSim/CMakeFiles/*
-RobotSim/RobotSim/CMakeCache.txt
+RobotSim/RobotSim/Tennisball/CMakeFiles/*
+RobotSim/RobotSim/Tennisball/CMakeCache.txt
