@@ -25,7 +25,7 @@
 #if defined(_WIN32) || defined(__linux__) || defined(__unix__)
 const std::string RESOURCE_DIR = "./Resources/";
 #elif __APPLE__
-const std::string RESOURCE_DIR = resourcePath();
+const std::string RESOURCE_DIR = "./Resources/";
 #endif
 
 // ---------------------------------------- //
@@ -124,13 +124,13 @@ int main(int, char const **)
     // ---------- Application Toggles --------- //
 
     // if true, display calculated path to target
-    bool lazer = false;
+    bool lazer = true;
 
     // if true, display the trimmed pathing graph
-    bool showGraph = false;
+    bool showGraph = true;
 
     // if true, autonomously navigate to target
-    bool auton = false;
+    bool auton = true;
     // ---------------------------------------- //
 
     // -------------- FPS Display ------------- //
@@ -142,6 +142,14 @@ int main(int, char const **)
     unsigned int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     int frameCount = 0;
     bool gibFPS = true;
+
+    grid.obstacleList.clear();
+    grid.readObstaclesFromFile(OBSTACLES_FILE);
+    // grid.addBorderObstacles();
+    std::cout << "Added obstacles" << std::endl;
+    grid.toggleGrid();
+    grid.drawPath();
+    control.start_auto();
     // ---------------------------------------- //
 
     // ---------------------------------------- //

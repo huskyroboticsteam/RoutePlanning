@@ -17,8 +17,8 @@ _AUTO_OBJECTS := $(notdir $(AUTO_SOURCES:.cpp=.o))
 AUTO_OBJECTS := $(patsubst %,$(AUTO_ODIR)/%,$(_AUTO_OBJECTS))
 
 SFML := C:/SFML-2.5.1/
-INC := -I$(SFML)include
-LINK := -L$(SFML)lib -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lpthread
+INC := 
+LINK := -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lpthread
 
 ifeq ($(DEBUG), 1)
 CFLAGS := -std=c++11 -Wall -g
@@ -34,7 +34,7 @@ else
 SOURCES := $(COMMON_SOURCES) $(NET_SOURCES)
 OBJECTS := $(COMMON_OBJECTS) $(NET_OBJECTS)
 endif
-OUT := build/simulator.exe
+OUT := build/simulator
 
 all: make-auto $(OUT)
 

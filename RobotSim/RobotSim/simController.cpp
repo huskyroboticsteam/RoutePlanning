@@ -1,5 +1,7 @@
 #include "simController.hpp"
 #include "autonomous/utils.hpp"
+#include <unistd.h>
+#include <errno.h>
 
 #define SURVEY 0 // whether to look around before moving
 constexpr float TARGET_TOL = 4.f; // tolerance distance for testing if we've reached target
@@ -74,7 +76,10 @@ void RP::SimController::tic()
                 {
                     printf("Target reached.\n");
                     turnstate = FIND_BALL;
-                    break;
+                    char a[] = "/Users/sasha/RoutePlanning/RobotSim/RobotSim/build/simulator";
+                    char *const l[] = { a , 0 };
+                    execv("/Users/sasha/RoutePlanning/RobotSim/RobotSim/build/simulator", l);
+                    printf("exec failed: %s\n", strerror(errno));
                 }
                 tar_angle = get_target_angle();
                 if (angleCloseEnough(agent.getInternalRotation(), tar_angle, 5.))
