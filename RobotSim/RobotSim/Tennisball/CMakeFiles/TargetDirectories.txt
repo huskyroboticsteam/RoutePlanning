@@ -1,4 +1,0 @@
-/mnt/c/Users/atb88/Documents/Husky Robotics/Route Planning/src/Tennisball/CMakeFiles/edit_cache.dir
-/mnt/c/Users/atb88/Documents/Husky Robotics/Route Planning/src/Tennisball/CMakeFiles/still.dir
-/mnt/c/Users/atb88/Documents/Husky Robotics/Route Planning/src/Tennisball/CMakeFiles/rebuild_cache.dir
-/mnt/c/Users/atb88/Documents/Husky Robotics/Route Planning/src/Tennisball/CMakeFiles/live.dir
