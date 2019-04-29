@@ -318,6 +318,7 @@ int main(int, char const **)
             if (showGraph && !dg.nodes.empty())
             {
                 std::vector<bool> visited(dg.nodes.size(), false);
+                std::vector<bool> visiting(dg.nodes.size(), false);
                 std::queue<int> q;
                 q.push(0);
                 int iters = 0;
@@ -333,13 +334,17 @@ int main(int, char const **)
                         const RP::edge &edge = pair.second;
                         if (!visited[edge.child])
                         {
-                            visited[edge.child] = true;
-                            q.push(edge.child);
+                            if (!visiting[edge.child])
+                            {
+                                visiting[edge.child] = true;
+                                q.push(edge.child);
+                            }
                             g_rendertexture.draw(get_vertex_line(
                                 nd.coord, dg.nodes[edge.child].coord,
                                 GRAPH_EDGE_COLOR, gridScale, gridHeight));
                         }
                     }
+                    visited[ind] = true;
                     if (ind != 0)
                         g_rendertexture.draw(getNode(nd, gridScale, gridHeight));
                 }
