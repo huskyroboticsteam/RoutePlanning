@@ -10,6 +10,7 @@
 #include <string>
 #include <time.h>
 #include <chrono>
+#include <random>
 
 #include "ResourcePath.hpp" // Imports resourcePath() for macos
 #include "Simulator.hpp"
@@ -17,6 +18,10 @@
 #include "simController.hpp"
 #include "ui.hpp"
 #include "interface.hpp"
+#include "RobotEKF.hpp"
+
+std::default_random_engine generator;
+std::normal_distribution<double> distribution(0.0,3.0);
 
 #ifndef LOCAL
 #include "WorldCommunicator.hpp"
@@ -45,6 +50,8 @@ WorldCommunicator worldCommunicator;
 #endif
 static float goalDirection;
 static float toMove;
+
+RobotEKF filter;
 
 // ---------------------------------------- //
 
@@ -152,6 +159,17 @@ int main(int, char const **) {
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
     // ---------------------------------------- //
+    Kalman::KMatrix<float, 1, true> P0(STATE_VEC_SIZE, STATE_VEC_SIZE);
+    Kalman::KVector<float, 1, true> x(STATE_VEC_SIZE);
+
+    filter.setP0(P0);
+
+    x(1) = agent.getPosition().x;
+    x(2) = agent.getPosition().y;
+    x(3) = 0;
+    x(4) = 0;
+
+    filter.init(x, P0);
     while (window.isOpen()) {
         
         sf::Event event;
@@ -282,18 +300,40 @@ int main(int, char const **) {
         goalDirection += change;
         goalDirection = (int)goalDirection % 360;
         
+        
+
         RP::point errored = sim.getpos();
-        errored.x = errored.x + ((float)rand()/RAND_MAX-0.5)*1.8*2;
-        errored.y = errored.y + ((float)rand()/RAND_MAX-0.5)*1.8*2;
+        errored.x = errored.x + distribution(generator);//((float)rand()/RAND_MAX-0.5)*1.8*4;
+        errored.y = errored.y + distribution(generator);//((float)rand()/RAND_MAX-0.5)*1.8*4;
 
         std::cout << "errored x: " << errored.x << " y: " << errored.y << std::endl;
 
+       
         sf::CircleShape errored_circle(10);
-        errored_circle.setOrigin(5, 5);
+        errored_circle.setOrigin(10, 10);
         errored_circle.setFillColor(GRAPH_NODE_COLOR);
         errored_circle.setPosition((errored.x + 1) * gridScale, (gridHeight - errored.y) * gridScale);
-        window.draw(errored_circle);
-        pather.set_pos(errored);
+        window.draw(errored_circle);   
+
+        
+
+        RP::point filterOutput;
+        Kalman::KVector<float, 1, true> z(4);
+        Kalman::KVector<float, 1, true> u(2);
+        z(1) = errored.x;
+        z(2) = errored.y;
+        // std::cout << "Success: Initialized the things" << std::endl;
+        filter.step(u, z);
+        filterOutput.x = filter.getX()(1);
+        filterOutput.y = filter.getX()(2);
+        std::cout << "Kalman says: lat: " << filterOutput.x << " lng: " << filterOutput.y << std::endl;
+        sf::CircleShape filter_circle(10);
+        filter_circle.setOrigin(10, 10);
+        filter_circle.setFillColor(OBST_COLOR);
+        filter_circle.setPosition((filterOutput.x + 1) * gridScale, (gridHeight - filterOutput.y) * gridScale);
+        window.draw(filter_circle); 
+        
+        pather.set_pos(filterOutput);
 
         pather.add_obstacles(sim.visible_obstacles());
         bool graph_updated = false;
