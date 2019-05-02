@@ -17,8 +17,6 @@ struct edge
 struct node
 {
   int prev;
-  float dist2cur;
-  float fscore; // used as heuristic for A*
   point coord;
   std::unordered_map<int, edge> connection;
   int qt_id; // qtnode id
@@ -27,10 +25,11 @@ struct node
 struct graph
 {
   std::vector<node> nodes;
-
-  void add_edge(int parent, int child); //Adds an edge to the graph; returns parent=>child edge pointer
+  //Adds an edge to the graph; returns parent=>child edge pointer
+  void add_edge(int parent, int child); 
   std::unordered_map<int, RP::edge>::iterator remove_edge(int parent, int child);
-  int create_node(point coord, float fscore); //Creates a node. Returns index in nodes of the created node
+  //Creates a node. Returns index in nodes of the created node
+  int create_node(point coord);
   void clear();
 };
 

@@ -13,33 +13,38 @@ namespace RP
 {
 class Pather
 {
-  public:
-    Pather(point origin, point target, point max_point);
-    const point& cur_point = cur;
-    const point& tar_point = tar;
-    void compute_path();
-    const std::vector<line>& mem_obstacles() const;
-    point get_cur_next_point();
-    const std::vector<point>& get_cur_path() const;
-    void add_obstacles(const std::vector<line> &obstacles);
-    const graph& d_graph() const;
-    void set_pos(const point& pos);
-    void set_tar(const point& tar);
+public:
+  Pather(point origin, point target, point max_point);
+  const point &cur_point = cur;
+  const point &tar_point = tar;
+  void compute_path();
+  const std::vector<line> &mem_obstacles() const;
+  point get_cur_next_point();
+  const std::vector<point> &get_cur_path() const;
+  void add_obstacles(const std::vector<line> &obstacles);
+  const graph &d_graph() const;
+  void set_pos(const point &pos);
+  void set_tar(const point &tar);
 
-    pqtree debug_qtree_root() const { return fineMapper.get_qtree_root(); }
-    
-    void reset() { memorizer.reset(); fineMapper.reset(); }
+  pqtree debug_qtree_root() const { return fineMapper.get_qtree_root(); }
 
-  private:
-    Memorizer memorizer;
-    QuadMapper fineMapper;
-    point cur;
-    point tar;
-    float tol;
-    point max_pt;
-    std::vector<point> cur_path;
+  void reset()
+  {
+    memorizer.reset();
+    fineMapper.reset();
+  }
 
-    void prune_path(std::vector<int> &path, float tol);
+private:
+  Memorizer memorizer;
+  QuadMapper fineMapper;
+  point cur;
+  point tar;
+  float tol;
+  point max_pt;
+  std::vector<point> cur_path;
+
+  void prune_path(std::vector<int> &path, float tol);
+  float heuristic_cost(const point &p, const point &tar);
 };
 } // namespace RP
 

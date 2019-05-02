@@ -13,7 +13,6 @@ LOCAL ?= 1
 AUTO_DIR := autonomous/
 AUTO_ODIR := $(AUTO_DIR)obj
 AUTO_SOURCES := $(wildcard $(AUTO_DIR)*.cpp)
-AUTO_HEADERS := $(AUTO_SOURCES:.cpp=.hpp)
 _AUTO_OBJECTS := $(notdir $(AUTO_SOURCES:.cpp=.o))
 AUTO_OBJECTS := $(patsubst %,$(AUTO_ODIR)/%,$(_AUTO_OBJECTS))
 
@@ -37,10 +36,11 @@ OBJECTS := $(COMMON_OBJECTS) $(NET_OBJECTS)
 endif
 OUT := build/simulator.exe
 
-all: $(AUTO_DIR) $(OUT)
+all: make-auto $(OUT)
 
-$(AUTO_DIR): $(AUTO_SOURCES) $(AUTO_HEADERS)
-	$(MAKE) -C $@ DEBUG=$(DEBUG)
+make-auto:
+	$(MAKE) -C $(AUTO_DIR) DEBUG=$(DEBUG)
+	
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(SDIR)/%.hpp
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS) 
@@ -50,7 +50,7 @@ $(OUT): $(OBJECTS) $(AUTO_OBJECTS)
 
 print-%  : ; @echo $* = $($*)
 
-.PHONY: clean
+.PHONY: clean make-auto
 clean:
 	rm -f $(OUT)
 	rm -f obj/*
