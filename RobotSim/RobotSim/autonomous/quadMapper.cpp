@@ -111,12 +111,7 @@ void RP::QuadMapper::set_tol(float t)
     if (t != tol)
     {
         tol = t;
-        qtnodes.clear();
-        removed_nodes.clear();
-        new_nodes.clear();
-        init_graph();
-        root = create_qtnode(0, 0, field_width, field_height, 1);
-        qt2graph(root);
+        reset();
         new_obstacles(all_obstacles);
     }
 }
@@ -274,10 +269,6 @@ void RP::QuadMapper::compute_graph()
         {
             pqtree rmd = qtnodes[rm];
             
-            if (rmd->graph_id <= 1) 
-            {
-                printf("gotcha\n");
-            }
             assert(rmd->graph_id > 1);
             const auto& conn = mygraph.nodes[rmd->graph_id].connection;
             // TODO make this code cleaner by removing neighbors AFTER
