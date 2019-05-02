@@ -154,7 +154,6 @@ int main(int, char const **)
     // ---------------------------------------- //
     // ---------- 60 FPS Update Loop ---------- //
     // ---------------------------------------- //
-<<<<<<< HEAD
     Kalman::KMatrix<float, 1, true> P0(STATE_VEC_SIZE, STATE_VEC_SIZE);
     Kalman::KVector<float, 1, true> x(STATE_VEC_SIZE);
 
@@ -168,11 +167,6 @@ int main(int, char const **)
     filter.init(x, P0);
     while (window.isOpen()) {
         
-=======
-    while (window.isOpen())
-    {
-
->>>>>>> world
         sf::Event event;
 
         while (window.pollEvent(event))
@@ -315,7 +309,6 @@ int main(int, char const **)
 #endif
         goalDirection += change;
         goalDirection = (int)goalDirection % 360;
-<<<<<<< HEAD
         
         
 
@@ -352,10 +345,6 @@ int main(int, char const **)
         
         pather.set_pos(filterOutput);
 
-=======
-
-        pather.set_pos(sim.getpos());
->>>>>>> world
         pather.add_obstacles(sim.visible_obstacles());
         bool graph_updated = false;
         if (!auton && recompute_timer.elapsed() > RECOMPUTE_COOLDOWN)
