@@ -369,7 +369,16 @@ int main(int, char const **)
             frameCount = 0;
         }
         frameCount++;
-
+        
+        /*
+        int lastFrame = now;
+        now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        int frameTime = now - lastFrame;
+        fpsCounter.setString(std::to_string((int)(1000.0 / frameTime)) + " fps");
+        
+        agent.updateFrameTime(frameTime); // TODO implement
+        */
+        
         if (gibFPS)
             window.draw(fpsCounter);
 
