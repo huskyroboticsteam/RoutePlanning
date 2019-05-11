@@ -25,8 +25,10 @@ std::unordered_map<int, RP::edge>::iterator RP::graph::remove_edge(int parent, i
     assert(parent >= 0 && child >= 0);
     auto &conn = nodes.at(parent).connection;
     auto it = conn.find(child);
-    if (it == conn.end())
+    if (it == conn.end()) {
         printf("WARNING: edge not removed. Parent: %d, child %d\n", parent, child);
+        
+    }
     auto ret = conn.erase(it);
 
     auto &conn2 = nodes.at(child).connection;

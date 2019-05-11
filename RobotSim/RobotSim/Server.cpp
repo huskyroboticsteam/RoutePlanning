@@ -115,6 +115,23 @@ unsigned char* RP::Server::go() {
 	return buf; 
 }
 
+bool RP::Server::send_action(std::vector<unsigned char> data) {
+	int sendOk = sendto(out, (const char*)data.data(), data.size() + 1, 0, (sockaddr*)&server, sizeof(server));
+	if (sendOk == SOCKET_ERROR)
+	{
+#ifdef _WIN32
+		std::cout << "That didn't work! " << WSAGetLastError();
+		return false;
+#else
+		std::cout << "That didn't work! " << strerror(errno);
+		return false;
+#endif
+	}
+	else {
+		return true;
+	}
+}
+
 bool RP::Server::send_action(std::vector<unsigned char> dataBody, unsigned char id) // same data and id format as in Scarlet
 {
 	std::vector<unsigned char> packet = current_time(); // start packet with time stamp

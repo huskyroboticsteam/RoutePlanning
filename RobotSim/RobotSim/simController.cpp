@@ -7,8 +7,8 @@ constexpr float TARGET_TOL_SQ = TARGET_TOL * TARGET_TOL;
 
 void RP::SimController::start_auto()
 {
-    printf("autonomous started\n");
-    // timer.reset();
+    printf("autonomous started\n"); 
+    // timer.reset(); 
     pather.compute_path();
     _just_updated = true;
     point target = pather.get_cur_next_point();
