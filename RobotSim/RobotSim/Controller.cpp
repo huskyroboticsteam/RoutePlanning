@@ -231,8 +231,7 @@ void Controller::update() {
                         sendPacket(0, tar_angle);
                         break;
                     case FIND_BALL:
-                        printf("WARNING: find tennis ball not implemented.\n");
-                        turnstate = FINISHED;
+                        state = SPIRAL;
                         break;
                     case FINISHED:
                         // TODO send back whatever instructions needed
@@ -276,6 +275,7 @@ void Controller::update() {
                 targetSites.pop_front();
                 pather.set_tar(dst);
             }
+            
         }
 
         // step 3: use current location and obstacle data to update map
