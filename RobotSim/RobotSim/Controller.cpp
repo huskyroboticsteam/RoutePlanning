@@ -126,17 +126,25 @@ void Controller::update() {
 
         // TODO: make this a vector or shared_ptr
         std::cout << "Listening" << std::endl;
-        unsigned char *firstPacket = server.go();
-        parsePacket(firstPacket[4], &firstPacket[5]);
-        unsigned char *secondPacket = server.go();
-        parsePacket(secondPacket[4], &secondPacket[5]);
 
+        unsigned char *secondPacket = server.go();
+        
+        float received_lat;
+        float received_lng;
+        float received_dir;
+
+        memcpy(&received_lat, secondPacket, 4);
+        memcpy(&received_lng, secondPacket+4, 4);
+        memcpy(&received_dir, secondPacket+8, 4);
+
+        curr_dir = received_dir;
+        
         std::cout << "Started stepping kalman filter" << std::endl;
 
         Kalman::KVector<float, 1, true> z(4);
         Kalman::KVector<float, 1, true> u(2);
-        z(1) = this->curr_lat;
-        z(2) = this->curr_lng;
+        z(1) = received_lat;
+        z(2) = received_lng;
         // std::cout << "Success: Initialized the things" << std::endl;
         filter.step(u, z);
         curr_lat = filter.getX()(1);
@@ -355,24 +363,6 @@ bool Controller::sendDestinationPacket() {
     return server.send_action(data);
 }
 
-void Controller::parsePacket(unsigned char packetID, unsigned char data[]) {
-    if (packetID == DATA_GPS) {
-        float lat = 0.0;
-        std::memcpy(&lat, data, sizeof(float));
-        float lng = 0.0;
-        std::memcpy(&lng, &data[sizeof(float)], sizeof(float));
-        curr_lat = lat;
-        curr_lng = lng;
-        std::cout << "lat: " << lat << " long: " << lng << std::endl;
-        // Magnometer has x, y, z values
-    } else if (packetID == DATA_MAG) {
-        float x = 0.0, y = 0.0, z = 0.0;
-        std::memcpy(&x, data, sizeof(float));
-        // std::memcpy(&y, &data[sizeof(float)], sizeof(float));
-        // std::memcpy(&z, &data[2 * sizeof(float)], sizeof(float));
-        std::cout << "direction: " << x << std::endl;
-    }
-}
 
 void Controller::addObstacle(float dist1, float dir1, float dist2, float dir2) {
     // Need to update this for use
