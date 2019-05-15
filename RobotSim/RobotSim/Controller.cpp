@@ -67,6 +67,7 @@ Controller::Controller(const point &cur_pos, std::deque<point> targetSites)
     : server(), watchdogThread(&RP::Server::send_watchdog, &server),
       detector("Tennisball/data/final_models/frozen_inference_graph.pb",
                "Tennisball/data/final_models/graph.pbtxt"),
+      receiverThread(&RP::Server::dataReceiverLoop, &server),
       pather(cur_pos, targetSites[0], RP::point{40, 40}) {
     this->targetSites = targetSites;
     state = FOLLOW_PATH;

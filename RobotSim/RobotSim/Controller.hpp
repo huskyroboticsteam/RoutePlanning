@@ -42,6 +42,7 @@ class Controller {
     RP::point convertToLatLng(float dist, float dir);
     RobotEKF filter;
     std::thread watchdogThread;
+    std::thread receiverThread;
     tb::Detector detector;
     RP::Pather pather;
     bool turning;
