@@ -111,10 +111,7 @@ void RP::QuadMapper::set_tol(float t)
     if (t != tol)
     {
         tol = t;
-        qtnodes.clear();
-        init_graph();
-        root = create_qtnode(0, 0, field_width, field_height, 1);
-        qt2graph(root);
+        reset();
         new_obstacles(all_obstacles);
     }
 }
@@ -177,7 +174,13 @@ void RP::QuadMapper::new_obstacles(const std::vector<line> &obstacles)
 
                         // already in graph
                         if (nd->graph_id != -1)
+                        {
+                            if (nd->qt_id == 10)
+                            {
+                                printf("boom\n");
+                            }
                             removed_nodes.insert(nd->qt_id);
+                        }
                         else
                         {
                             auto it = new_nodes.find(nd->qt_id);
@@ -266,7 +269,10 @@ void RP::QuadMapper::compute_graph()
         {
             pqtree rmd = qtnodes[rm];
             
+            assert(rmd->graph_id > 1);
             const auto& conn = mygraph.nodes[rmd->graph_id].connection;
+            // TODO make this code cleaner by removing neighbors AFTER
+            // all edges are processed
             for (auto it = conn.begin(); it != conn.end();)
             {
                 // re-connect old node's neighbors to new nodes
@@ -340,15 +346,22 @@ void RP::QuadMapper::compute_graph()
     if (cur_changed || update)
     {
         cur_changed = false;
+        int removed = -1;
         if (!mygraph.nodes[0].connection.empty())
         {
             assert(mygraph.nodes[0].connection.size() == 1);
+            removed = mygraph.nodes[0].connection.begin()->first;
             mygraph.remove_edge(0, mygraph.nodes[0].connection.begin()->first);
         }
         pqtree cur_node = get_enclosing_node(mygraph.nodes[0].coord);
         //printf("cur node %f, %f\n", cur_node->center_coord.x, cur_node->center_coord.y);
         if (cur_node)
             mygraph.add_edge(0, cur_node->graph_id);
+        else
+        {
+            printf("%d\n", removed);
+        }
+        
     }
 
     if (tar_changed || update)

@@ -103,6 +103,8 @@ public:
     
     void reset() {
         qtnodes.clear();
+        removed_nodes.clear();
+        new_nodes.clear();
         init_graph();
         root = create_qtnode(0, 0, field_width, field_height, 1);
         qt2graph(root);

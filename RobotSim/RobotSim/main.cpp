@@ -318,28 +318,37 @@ int main(int, char const **)
             if (showGraph && !dg.nodes.empty())
             {
                 std::vector<bool> visited(dg.nodes.size(), false);
+                std::vector<bool> visiting(dg.nodes.size(), false);
                 std::queue<int> q;
                 q.push(0);
+                int iters = 0;
+                visited[0] = true;
                 while (!q.empty())
                 {
+                    iters++;
                     int ind = q.front();
                     const auto &nd = dg.nodes[ind];
                     q.pop();
-                    visited[ind] = true;
                     for (const auto &pair : nd.connection)
                     {
                         const RP::edge &edge = pair.second;
                         if (!visited[edge.child])
                         {
-                            q.push(edge.child);
+                            if (!visiting[edge.child])
+                            {
+                                visiting[edge.child] = true;
+                                q.push(edge.child);
+                            }
                             g_rendertexture.draw(get_vertex_line(
                                 nd.coord, dg.nodes[edge.child].coord,
                                 GRAPH_EDGE_COLOR, gridScale, gridHeight));
                         }
                     }
+                    visited[ind] = true;
                     if (ind != 0)
                         g_rendertexture.draw(getNode(nd, gridScale, gridHeight));
                 }
+                printf("traversal iters: %d\n", iters);
                 g_rendertexture.display();
             }
         }
