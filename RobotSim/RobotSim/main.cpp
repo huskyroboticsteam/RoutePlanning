@@ -46,6 +46,10 @@ WorldCommunicator worldCommunicator;
 static float goalDirection;
 static float toMove;
 
+#define AUTONOMOUS_STR 1
+#define TELEOP_STR 2
+#define IDLE_STR 3
+
 // ---------------------------------------- //
 
 // ---------------------------------------- //
@@ -58,7 +62,13 @@ static float toMove;
 
 int main(int, char const **)
 {
-
+    std::string port = "/dev/cu.usbmodem14301";
+    FILE *serial;
+    serial = fopen(port.c_str(), "w");
+    if(serial == NULL){
+      std::cerr << "Error " << errno << " opening serial port " << port << std::endl;
+      exit(2);
+    }
     // ---------------------------------------- //
     // ----------- SFML Window Setup ---------- //
     // ---------------------------------------- //
@@ -204,10 +214,15 @@ int main(int, char const **)
                 case sf::Keyboard::U:
                 {
                     auton = !auton;
-                    if (auton)
+                    if (auton) {
                         control.start_auto();
-                    else
+                        printf("AUTONOMOUS\n");
+                        fprintf(serial, "%c\n", AUTONOMOUS_STR);
+                    } else {
                         control.stop_auto();
+                        printf("TELEOP\n");
+                        fprintf(serial, "%c\n", TELEOP_STR);
+                    }
                     break;
                 }
                 case sf::Keyboard::N:
